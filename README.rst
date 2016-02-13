@@ -7,6 +7,22 @@ to sumarize the results, the eps files are converted to pdf for easier viewing.
 To make this work the user will also need the texlive-epstopdf or the verison 
 for your OS to allow the epstopdf command from the cmd.
 
+Following install either by downloading from this repository or pip, make 
+sure the directory to ExoSOFT/exosoft/ is added to your path.  Then, to run:
+
+$ExoSOFT.py full/path/to/*settings.py
+
+If ExoSOFT.py is not executable, then you would need to proceed with 
+'python ExoSOFT.py...'.
+
+A set of example settings and data files are in ExoSOFT/examples.  This can be 
+ran with:
+
+$ExoSOFT.py 
+
+as it will just assume that without a provided path, you want to play with the 
+example.
+
 ExoSOFT
 =======
 
