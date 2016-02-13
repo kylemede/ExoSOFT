@@ -20,9 +20,9 @@ automated set of post-processing and plotting routines to summarize the results
 .  Verifications were performed by fitting noisy synthetic data produced with 
 an independent Keplerian model for a variety of systems ranging the entire 
 parameter space.  Examples of its use on real data include 
-`Helminiak & Kuzuhara & Mede et. al. (2016) <????????>'_.  
+`Helminiak & Kuzuhara & Mede et. al. (2016) <????????>`_.  
 , for the V450And system, and the tau AB binary in 
-`Mede & Brandt (2014) <http://adsabs.harvard.edu/abs/2014IAUS..299...52M>'_.  
+`Mede & Brandt (2014) <http://adsabs.harvard.edu/abs/2014IAUS..299...52M>`_.  
 ExoSOFT would be a suitable choice for performing orbital analysis during 
 surveys with new RV and direct imaging instruments.
 
