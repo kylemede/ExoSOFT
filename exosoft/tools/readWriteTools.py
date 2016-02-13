@@ -193,9 +193,9 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
           exosoft/tools/temp/simpleSettings.py   &   advancedSettings.py 
     
     filenameRoot would be the absolute path plus the prepend to the settings files.
-    ex. '/run/..../exosoft/settings_and_inputData/FakeData_'
+    ex. '/run/..../exosoft/settings_and_data/FakeData_'
     """
-    ## A BIT HACKY FOR NOW, NEED TO FIND A CLEANER WAY TO DO THIS!?!?! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    ## A BIT HACKY FOR NOW, NEED TO FIND A CLEANER WAY TO DO THIS!?!?! $$$$$$$$
     ## at same time, maybe consider entirely new way to handle the settings and funcs.  
     ## Looked at YAML, but it is just convoluted python code with no advantages.
     ## considered default files for the priors and ranges that could be overriden by those in the advanced dict, but gave up.  Also seems too convoluted.
@@ -204,21 +204,27 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     ## If just root, assume it is in standard settings dir.
     ## copy it to the temp dir with the constants file, import and then delete temp versions.
     ##
+    ## load up temp directory with settings and priors files.
     cwd = os.getenv('PWD')
-
+    toolsdir = os.path.join(ExoSOFTdir,'tools/')
+    settingsdir = os.path.dirname(os.path.abspath(settFilePath))
     try:
         os.remove(os.path.join(ExoSOFTdir,'tools/temp/settings.py'))
         os.remove(os.path.join(ExoSOFTdir,'tools/temp/constants.py'))
         os.remove(os.path.join(ExoSOFTdir,'tools/temp/priors.py'))
     except:
         pass
-    shutil.copy(settFilePath,os.path.join(ExoSOFTdir,'tools/temp/settings.py'))
-    shutil.copy(os.path.join(os.path.dirname(settFilePath),'priors.py'),os.path.join(ExoSOFTdir,'tools/temp/priors.py'))
-    shutil.copy(os.path.join(ExoSOFTdir,'tools/constants.py'),os.path.join(ExoSOFTdir,'tools/temp/constants.py'))
-    os.chdir(ExoSOFTdir)
-    from tools.temp.settings import settingsDict
-    ## load in functions for priors
-    #from tools.temp.priors import ePriorRatio,pPriorRatio,incPriorRatio,mass1PriorRatio,mass2PriorRatio,paraPriorRatio,chabrierPrior
+    if os.path.exists(os.path.join(settingsdir,'priors.py')):
+        shutil.copy(os.path.join(settingsdir,'priors.py'),\
+                    os.path.join(toolsdir,'/temp/priors.py'))
+    else:
+        shutil.copy(os.path.join(toolsdir,'priors.py'),\
+                    os.path.join(toolsdir,'/temp/priors.py'))
+    shutil.copy(settFilePath,os.path.join(toolsdir,'/temp/settings.py'))
+    shutil.copy(os.path.join(toolsdir,'/constants.py'),\
+                os.path.join(ExoSOFTdir,'/temp/constants.py'))
+    os.chdir(toolsdir)
+    from temp.settings import settingsDict
     try:
         os.remove(os.path.join(ExoSOFTdir,'tools/temp/settings.py'))
         os.remove(os.path.join(ExoSOFTdir,'tools/temp/constants.py'))
@@ -226,6 +232,7 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     except:
         pass
     os.chdir(cwd)
+    ##################### End of hacky part ########################
     
     #######################################################
     ## determine argPeriOffsetRV and argPeriOffsetDI values

@@ -46,9 +46,9 @@ directoriesDict = {
 'outRoot' : "TEST-ArtificialJupiter-5percentError",
 #*************************************************************************************************************************               
 # full path to input astrometry data file. [string]
-'DIdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/SMODT/exosoft/settings_and_inputData/DIdata.dat',                
+'DIdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',                
 # full path to input radial velocity data file. [string]
-'RVdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/SMODT/exosoft/settings_and_inputData/RVdata.dat',
+'RVdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
 }
 
 advancedSettingsDict = {

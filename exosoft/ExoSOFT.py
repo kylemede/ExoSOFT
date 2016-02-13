@@ -1,3 +1,4 @@
+#!/usr/bin/python python
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 #import numpy as np
 import tools
