@@ -8,12 +8,15 @@ To make this work the user will also need the texlive-epstopdf or the verison
 for your OS to allow the epstopdf command from the cmd.
 
 Following install either by downloading from this repository or pip, make 
-sure the directory to ExoSOFT/exosoft/ is added to your path.  Then, to run:
+sure the directory to ExoSOFT/exosoft/ is added to your PATH in your .bashrc or
+ .bash_profile.  
+ 
+ Then, to run:
 
-$ExoSOFT.py full/path/to/*settings.py
+$python ExoSOFT.py /full/path/to/*settings.py
 
-If ExoSOFT.py is not executable, then you would need to proceed with 
-'python ExoSOFT.py...'.
+If ExoSOFT.py is not executable after install, you can use $chmod +x ExoSOFT.py
+to make it so and avoid typing 'python' when starting it.
 
 A set of example settings and data files are in ExoSOFT/examples.  This can be 
 ran with:
