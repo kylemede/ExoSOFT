@@ -4,13 +4,13 @@ Installation Notes
 The package uses SWIG to interface the C++ code with Python.  To compile the 
 user will also need the gcc-c++ compiler.  Aditionally, after making the plots
 to sumarize the results, the eps files are converted to pdf for easier viewing.
- To make this work the user will also need the texlive-epstopdf or the verison 
- for your OS to allow the epstopdf command from the cmd.
+To make this work the user will also need the texlive-epstopdf or the verison 
+for your OS to allow the epstopdf command from the cmd.
 
 ExoSOFT
 =======
 
-**the Exoplanet Simple Orbit Fitting Toolbox**
+**The Exoplanet Simple Orbit Fitting Toolbox**
 
 ExoSOFT is a toolbox for the orbital analysis of exoplanets and binary star 
 systems.  It is free to compile, open source, fits any combination of 
