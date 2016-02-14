@@ -208,27 +208,33 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     cwd = os.getenv('PWD')
     toolsdir = os.path.join(ExoSOFTdir,'tools/')
     settingsdir = os.path.dirname(os.path.abspath(settFilePath))
+    prepend = os.path.basename(settFilePath).split('settings.py')[0]
     try:
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/settings.py'))
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/constants.py'))
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/priors.py'))
+        os.remove(os.path.join(toolsdir,'temp/settings.py'))
+        os.remove(os.path.join(toolsdir,'temp/constants.py'))
+        os.remove(os.path.join(toolsdir,'temp/priors.py'))
     except:
         pass
-    if os.path.exists(os.path.join(settingsdir,'priors.py')):
+    # Check if specialized *_priors.py exists in same dir, else normal in same 
+    # same dir, else default one.
+    if os.path.exists(os.path.join(settingsdir,prepend+'priors.py')):
+        shutil.copy(os.path.join(settingsdir,prepend+'priors.py'),\
+                    os.path.join(toolsdir,'temp/priors.py'))
+    elif os.path.exists(os.path.join(settingsdir,'priors.py')):
         shutil.copy(os.path.join(settingsdir,'priors.py'),\
-                    os.path.join(toolsdir,'/temp/priors.py'))
+                    os.path.join(toolsdir,'temp/priors.py'))
     else:
         shutil.copy(os.path.join(toolsdir,'priors.py'),\
-                    os.path.join(toolsdir,'/temp/priors.py'))
-    shutil.copy(settFilePath,os.path.join(toolsdir,'/temp/settings.py'))
-    shutil.copy(os.path.join(toolsdir,'/constants.py'),\
-                os.path.join(ExoSOFTdir,'/temp/constants.py'))
+                    os.path.join(toolsdir,'temp/priors.py'))
+    shutil.copy(settFilePath,os.path.join(toolsdir,'temp/settings.py'))
+    shutil.copy(os.path.join(toolsdir,'constants.py'),\
+                os.path.join(toolsdir,'temp/constants.py'))
     os.chdir(toolsdir)
     from temp.settings import settingsDict
     try:
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/settings.py'))
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/constants.py'))
-        os.remove(os.path.join(ExoSOFTdir,'tools/temp/priors.py'))
+        os.remove(os.path.join(toolsdir,'temp/settings.py'))
+        os.remove(os.path.join(toolsdir,'temp/constants.py'))
+        os.remove(os.path.join(toolsdir,'temp/priors.py'))
     except:
         pass
     os.chdir(cwd)
