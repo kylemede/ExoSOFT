@@ -218,14 +218,40 @@ def timeStrMaker(deltaT):
     if deltaT>60:
         if deltaT>(60*60):
             hr = int(deltaT//(60*60))
-            min = int((deltaT-hr*60*60)/60.0)
-            timeStr = str(hr)+" hours and "+str(min)+" minutes"
+            minutes = int((deltaT-hr*60*60)/60.0)
+            timeStr = str(hr)+" hours and "+str(minutes)+" minutes"
         else:
-            min = int(deltaT//(60))
-            timeStr = str(min)+" minutes and "+str(int(deltaT-min*60))+" seconds"
+            minutes = int(deltaT//(60))
+            timeStr = str(minutes)+" minutes and "+str(int(deltaT-minutes*60))+" seconds"
     else:
         timeStr = str(int(deltaT))+' seconds'
     return timeStr
+
+def dateStrMaker(now,numberSecondsLater,militaryTime=False):
+    """
+    Returns now+numberSecondsLater in a nice string.
+    
+    param now: datetime.datetime object
+    """
+    extra = datetime.timedelta(seconds=numberSecondsLater)
+    laterDate = now+extra
+    s =""
+    if laterDate.day!=now.day:
+        d = {1:'st',2:"nd",3:"rd",21:'st',22:"nd",23:'rd',31:'st'}
+        for i in range(1,30):
+            if i not in d:
+                d[i]='th'
+        s+=" on the "+str(laterDate.day)+d[laterDate.day]+","
+    if militaryTime:
+        s+=" at about "+str(laterDate.hour)+":"+str(laterDate.minute)
+    else:
+        ampm = 'AM'
+        hr = laterDate.hour
+        if laterDate.hour>12:
+            ampm='PM'
+            hr = laterDate.hour-12
+        s+=" at about "+str(hr)+":"+str(laterDate.minute)+" "+ampm
+    return s
 
 def getParStrs(head,latex=True,getALLpars=False):
     """

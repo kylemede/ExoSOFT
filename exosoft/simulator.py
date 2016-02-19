@@ -7,6 +7,7 @@ import sys
 #from scipy.constants.codata import precision
 import tools
 import timeit
+import datetime
 from tools import constants as const
 
 class Simulator(object):
@@ -487,8 +488,11 @@ class Simulator(object):
                 lastTic = timeit.default_timer()
             if (self.dictVal('logLevel')<30)and(sample%(self.dictVal(self.stgNsampDict[stage])//100)==0):
                 timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.dictVal(self.stgNsampDict[stage])))
-                timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
-                bar.render(sample*100//self.dictVal(self.stgNsampDict[stage]), stage+str(chainNum)+' Completed,'+timeStr)
+                #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
+                endDatetime = " done "+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
+                perc = int(sample*100//self.dictVal(self.stgNsampDict[stage]))
+                print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
+                #bar.render(sample*100//self.dictVal(self.stgNsampDict[stage]), stage+str(chainNum)+' Completed,'+endDatetime)#timeStr)
         if self.dictVal('logLevel')<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
