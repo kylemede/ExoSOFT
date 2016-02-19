@@ -7,6 +7,7 @@ import copy
 import os
 import shutil
 import timeit
+import datetime
 import glob
 import numpy as np
 import sys
@@ -204,7 +205,7 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1):
                     log.critical("an error occured while performing stage 2 of GR calc for param "+paramStrs[j])
             grStr+='\nWorst R&T values were:\n'+rHighStr+tLowStr+'\n'
         else:
-            log.critical("Gelman-Rubin stat can NOT be calculated as file does not exist!!:\n"+chainDataFileList[0])
+            log.critical("Gelman-Rubin stat can NOT be calculated as file does not exist!!:\n"+mcmcFileList[0])
     except:
         log.critical("Gelman-Rubin stat FAILED to be calculated for some reason")
     return (GRs,Ts,grStr)
@@ -415,7 +416,7 @@ def keplersThird(p=0,atot=0,mtot=0):
     Find the missing value provided you know 2 of them.
     """
     if (atot==0)and(mtot!=0)and(p!=0):
-        atot = (((P**2)*(const.secPerYear**2)*const.Grav*const.KGperMsun*mtot)/(4.0*const.pi**2))**(1.0/3.0)
+        atot = (((p**2)*(const.secPerYear**2)*const.Grav*const.KGperMsun*mtot)/(4.0*const.pi**2))**(1.0/3.0)
         atot = atot/const.MperAU
     elif (atot!=0)and(mtot==0)and(p!=0):
         mtot = ((((atot*const.MperAU)**3)*4.0*const.pi**2)/((p**2)*(const.secPerYear**2)*const.Grav*const.KGperMsun))
@@ -443,7 +444,7 @@ def recheckFit3D(orbParams,settingsDict,finalFits='',nus=[]):
         nuRV = 1.0
         
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=genTools.getSimpleDictVal(settingsDict,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=getSimpleDictVal(settingsDict,'dataMode'))
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
@@ -467,7 +468,7 @@ def recheckFit3D(orbParams,settingsDict,finalFits='',nus=[]):
 def predictLocation(orbParams,settingsDict,epochs=[]):
     
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=genTools.getSimpleDictVal(settingsDict,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=getSimpleDictVal(settingsDict,'dataMode'))
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
