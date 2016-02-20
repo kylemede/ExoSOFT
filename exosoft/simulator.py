@@ -419,7 +419,7 @@ class Simulator(object):
         self.log.debug("Trying "+str(self.dictVal(self.stgNsampDict[stage]))+" samples for chain #"+str(chainNum)+" in "+stage+" mode.")
         self.chainNum = chainNum
         self.resetTracked(stage)
-        bar = tools.ProgressBar('green',width=10,block='=',empty='-',lastblock='>')
+        bar = tools.ProgressBar('green',width=1,block=' ',empty='-',lastblock='')
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         self.settingsDict['curStg']=(stage,'Current stage either [SA,ST,MCMC or MC]')
@@ -489,10 +489,10 @@ class Simulator(object):
             if (self.dictVal('logLevel')<30)and(sample%(self.dictVal(self.stgNsampDict[stage])//100)==0):
                 timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.dictVal(self.stgNsampDict[stage])))
                 #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
-                endDatetime = " done "+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
+                endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
                 perc = int(sample*100//self.dictVal(self.stgNsampDict[stage]))
-                print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
-                #bar.render(sample*100//self.dictVal(self.stgNsampDict[stage]), stage+str(chainNum)+' Completed,'+endDatetime)#timeStr)
+                #print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
+                bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
         if self.dictVal('logLevel')<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))

@@ -242,6 +242,8 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
             if i not in d:
                 d[i]='th'
         s+=" on the "+str(laterDate.day)+d[laterDate.day]+","
+    else:
+        s+=" today,"
     if militaryTime:
         s+=" at about "+str(laterDate.hour)+":"+str(laterDate.minute)
     else:
