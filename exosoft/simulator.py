@@ -264,7 +264,7 @@ class Simulator(object):
         else:
             ## For SA after first sample, MCMC, and ST
             try:
-                likelihoodRatio = np.e**((self.paramsLast[11] - raw3D)/(2.0*temp))
+                likelihoodRatio = np.exp((self.paramsLast[11] - raw3D)/(2.0*temp))
                 priorsRatio = self.combinedPriors(paramsOut,self.paramsLast)
                 if np.random.uniform(0.0, 1.0)<=(priorsRatio*likelihoodRatio):
                     accept = True
