@@ -40,7 +40,11 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         settFilePath = inArg
     else:
         examplesDir = os.path.join(ExoSOFTdir.split('exosoft')[0],'examples/')
-        settFilePath = os.path.join(examplesDir,inArg+"settings.py")
+        if "settings.py" in inArg:
+            settFileNm = inArg
+        else:
+            settFileNm = inArg+"settings.py"
+        settFilePath = os.path.join(examplesDir,settFileNm)
 
     if os.path.exists(settFilePath)==False:
         log.critical('Critical error occured while trying to load in the settings.  Quiting exosoft!!')
