@@ -430,7 +430,7 @@ class Simulator(object):
         self.log.debug("Trying "+str(self.dictVal(self.stgNsampDict[stage]))+" samples for chain #"+str(chainNum)+" in "+stage+" mode.")
         self.chainNum = chainNum
         self.resetTracked(stage)
-        bar = tools.ProgressBar('green',width=1,block=' ',empty='-',lastblock='')
+        bar = tools.ProgressBar('green',width=1,block=' ',empty=' ',lastblock='')
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         self.settingsDict['curStg']=(stage,'Current stage either [SA,ST,MCMC or MC]')
