@@ -203,10 +203,19 @@ class Simulator(object):
     
     def rangeCheck(self,pars,sample,stage=''):
         """
-        Check if values inside allowed range
+        Check if values inside allowed ranges.  For those that are periodic, 
+        wrap them into the allowed ranges ([0,360] for Omega and omega).
         """
         inRange=True
         paramsOut = copy.deepcopy(pars)
+        ##wrap periodic params into allowed ranges
+        wrappedParsInts = [3,9]
+        for par in wrappedParsInts:
+            if par in self.paramInts:
+                if (self.rangeMins[par]>paramsOut[par]):
+                    paramsOut[par]+=360.0
+                elif (paramsOut[par]>self.rangeMaxs[par]):
+                    paramsOut[par]-=360.0
         ## convert from Raw form if in lowEcc mode
         self.Orbit.convertParsFromRaw(paramsOut)
         for i in range(0,len(pars)):
