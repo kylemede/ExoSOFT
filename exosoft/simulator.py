@@ -208,16 +208,18 @@ class Simulator(object):
         """
         inRange=True
         paramsOut = copy.deepcopy(pars)
+        ## convert from Raw form if in lowEcc mode
+        self.Orbit.convertParsFromRaw(paramsOut)
         ##wrap periodic params into allowed ranges
         wrappedParsInts = [3,9]
         for par in wrappedParsInts:
             if par in self.paramInts:
                 if (self.rangeMins[par]>paramsOut[par]):
+                    #print 'par was '+str(paramsOut[par])
                     paramsOut[par]+=360.0
+                    #print 'now '+str(paramsOut[par])
                 elif (paramsOut[par]>self.rangeMaxs[par]):
                     paramsOut[par]-=360.0
-        ## convert from Raw form if in lowEcc mode
-        self.Orbit.convertParsFromRaw(paramsOut)
         for i in range(0,len(pars)):
             if i in self.paramInts:
                 if (i==6)and(self.dictVal('TcStep')):

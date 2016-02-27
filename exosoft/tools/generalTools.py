@@ -235,6 +235,11 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     """
     extra = datetime.timedelta(seconds=numberSecondsLater)
     laterDate = now+extra
+    minute = ''
+    if minute<10:
+        minute = '0'+str(laterDate.minute)
+    else:
+        minute = str(laterDate.minute)
     s =""
     if laterDate.day!=now.day:
         d = {1:'st',2:"nd",3:"rd",21:'st',22:"nd",23:'rd',31:'st'}
@@ -245,14 +250,14 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     else:
         s+=" today,"
     if militaryTime:
-        s+=" at about "+str(laterDate.hour)+":"+str(laterDate.minute)
+        s+=" at about "+str(laterDate.hour)+":"+minute
     else:
         ampm = 'AM'
         hr = laterDate.hour
         if laterDate.hour>12:
             ampm='PM'
             hr = laterDate.hour-12
-        s+=" at about "+str(hr)+":"+str(laterDate.minute)+" "+ampm
+        s+=" at about "+str(hr)+":"+minute+" "+ampm
     return s
 
 def getParStrs(head,latex=True,getALLpars=False):
