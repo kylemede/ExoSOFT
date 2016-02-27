@@ -444,7 +444,7 @@ class Simulator(object):
         if (type(startParams)==list)or(type(startParams)==np.ndarray):
             if len(startParams)>0:
                 paramsLast = copy.deepcopy(startParams)
-                self.log.info('initial/latest pars have reduced chi sqr of '+str(paramsLast[11]/self.nu))
+                self.log.debug('initial/latest pars have reduced chi sqr of '+str(paramsLast[11]/self.nu))
             else: 
                 paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
         else: 

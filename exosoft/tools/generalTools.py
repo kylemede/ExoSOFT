@@ -236,7 +236,7 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     extra = datetime.timedelta(seconds=numberSecondsLater)
     laterDate = now+extra
     minute = ''
-    if minute<10:
+    if laterDate.minute<10:
         minute = '0'+str(laterDate.minute)
     else:
         minute = str(laterDate.minute)
