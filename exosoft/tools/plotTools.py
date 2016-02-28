@@ -2,16 +2,18 @@
 import numpy as np
 import os
 import pylab
+from pylab import matplotlib, Polygon
+gridspec =  matplotlib.gridspec
+plt = matplotlib.pyplot
+patches = matplotlib.patches
+MultLoc = matplotlib.ticker.MultipleLocator
+matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 import copy
 import glob
 import shutil
 import timeit
 import scipy.optimize as so
 from scipy import ndimage
-gridspec =  pylab.matplotlib.gridspec
-plt = pylab.matplotlib.pyplot
-patches = pylab.matplotlib.patches
-MultLoc = pylab.matplotlib.ticker.MultipleLocator
 import constants as const
 import generalTools as genTools
 import readWriteTools as rwTools
@@ -19,9 +21,6 @@ import cppTools
 import exoSOFTlogger
 import warnings
 warnings.simplefilter("error")
-pylab.matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
-
-
 log = exoSOFTlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
 colorsList =['Red','Orange','Purple','Fuchsia','Crimson','Green','Aqua','DarkGreen','Gold','DarkCyan','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown','Blue']
 
@@ -659,7 +658,6 @@ def star(R, x0, y0, color='w', N=5, thin = 0.5):
     Returns an N-pointed star of size R at (x0, y0) (matplotlib patch).
     NOTE: code base taken from star_patch.py in 'Beginning-Python-Visualization'
     """
-    from pylab import Polygon
     polystar = np.zeros((2*N, 2))
     for i in range(2*N):
         angle = i*const.pi/N
@@ -1013,7 +1011,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             
             ## add real data to plots
             residualsPlot = addRVdataToPlot(residualsPlot,phasesReal,residualData[:,5]*kmConversion,residualData[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.1,color='k',plotErrorBars=True)
-            fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,color='k',plotErrorBars=False)
+            fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,color='k',plotErrorBars=True)
             ##plot fit epochsORphases,RVs,RVerrs
             fitPlot.plot(phasesFit,fitDataRV[:,2]*kmConversion,c='Blue',linewidth=1.0,alpha=1.0)
             
