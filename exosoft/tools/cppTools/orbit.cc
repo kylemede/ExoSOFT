@@ -10,7 +10,7 @@ double testFunc(double t){
 void Orbit::anomalyCalc(double ecc, double T, double Tc,double P, double epoch){
 	//------------------
 	//Calculate TA and E
-	//Remember that in RV, there is a phase shift due to the Tc!=T, that doesn't exist in DI.
+	//Remember that in RV, there is occasionally a phase shift due to the Tc!=T, that doesn't exist in DI.
 	//------------------
 	//std::cout<<"\necc = "<<ecc<<", T = "<<T<<", Tc = "<<Tc<<", P = "<<P<<", epoch = "<<epoch<<std::endl;
 	M = (2.0*pi*(epoch-2.0*T+Tc))/(P*daysPerYear);
@@ -194,14 +194,16 @@ void Orbit::calculate(double *yy, int yy_nx, int yy_ny, double *p, int p_n){
 	//Get the model version of each omega and shift into [0,360]
 	omegaDI = params[9]+omegaOffsetDI;
 	omegaRV = params[9]+omegaOffsetRV;
-	if (omegaDI>360.0)
-		omegaDI-=360.0;
-	if (omegaDI<0.0)
-		omegaDI+=360;
-	if (omegaRV>360.0)
-		omegaRV-=360.0;
-	if (omegaRV<0)
-		omegaRV+=360.0;
+	if (false){
+		if (omegaDI>360.0)
+			omegaDI-=360.0;
+		if (omegaDI<0.0)
+			omegaDI+=360;
+		if (omegaRV>360.0)
+			omegaRV-=360.0;
+		if (omegaRV<0)
+			omegaRV+=360.0;
+	}
 	//Calculate Tc <-> T if needed
 	if (params[5]!=params[6]){
 		//if T=Tc already, do nothing.

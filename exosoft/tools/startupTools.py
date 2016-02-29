@@ -10,7 +10,6 @@ import constants as const
 import warnings
 warnings.simplefilter("error")
 
-
 log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False) 
 
 def startup(argv,ExoSOFTdir,rePlot=False):

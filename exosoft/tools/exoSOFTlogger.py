@@ -55,6 +55,16 @@ class ExoSOFTlogger(logging.getLoggerClass()):
                 self.removeHandler(h)
                 break
         addStreamHandler(self,lvl)
+    def getStreamLevel(self):
+        """
+        Get and return current stream handler's level.
+        """
+        shlvl = 0
+        for i in range(0,len(self.handlers)):
+            h = self.handlers[i]
+            if isinstance(h,logging.StreamHandler):
+                shlvl = h.level
+        return shlvl
         
 def getLogger(name='generalLoggerName',dir='',lvl=20,addFH=True,addSH=True,):
     """This will either return the logging object already
@@ -201,4 +211,16 @@ def logSystemInfo(log):
     infoStr+="\n"+'Python Version = '+repr(platform.python_version())
     infoStr+="\n"+'='*50
     log.debug(infoStr)
-        
+    
+def logDict(log,d):
+    """
+    Log all Key=value for every key in d.  For logging settingsDict after loaded up once ExoSOFT has started.
+    """
+    keys = d.keys()
+    keys.sort()
+    s = "\n"+"-"*78+"\n"+" "*20+"settings dictionary currently contains:\n"+"-"*78+"\n"
+    for key in keys:
+        s+=key+" = "+repr(d[key])+"\n"
+    log.debug(s+"-"*78+"\n")
+    
+# END OF FILE    

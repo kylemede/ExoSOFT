@@ -6,6 +6,7 @@ from exoSOFTlogger import setUpLogger
 from exoSOFTlogger import logSystemInfo
 from exoSOFTlogger import addFileHandler
 from exoSOFTlogger import addStreamHandler
+from exoSOFTlogger import logDict
 
 from startupTools import startup
 

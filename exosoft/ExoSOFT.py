@@ -197,6 +197,7 @@ def exoSOFT():
     ## Call startup to get dict and load up final directories into it.
     settingsDict = tools.startup(sys.argv,ExoSOFTdir)
     log = tools.getLogger('main',dir=settingsDict['finalFolder'],lvl=settingsDict['logLevel'])
+    tools.logDict(log,settingsDict)
     #log.debug("Prepend string passed in was '"+settingsDict['prepend']+"'")
     Sim = simulator.Simulator(settingsDict)
        
