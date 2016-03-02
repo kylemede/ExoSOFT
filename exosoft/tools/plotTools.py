@@ -53,7 +53,7 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
         print "output dat file:\n"+outFilename
 
 
-def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='k',xLims=False,latex=False,showYlabel=False,parInt=0,centersOnly=False):
+def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='k',xLims=False,latex=False,showYlabel=False,parInt=0,centersOnly=False,trueVal=None):
     """
     Loads previously plotted histograms that were written to disk by histPlotAndDump, and plot them up 
     in a way that is ready for publication.  This version is to plot a posterior of the same parameter 
@@ -74,6 +74,7 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
     if parInt==1:
         if np.max(histData[:,0])<0.02:
             histData[:,0]=histData[:,0]*(const.KGperMsun/const.KGperMjupiter)
+            trueVal = trueVal*(const.KGperMsun/const.KGperMjupiter)
             valRange = np.max(histData[:,0])-np.min(histData[:,0])
             xLabel='m2 [Mjupiter]'
             if latex:
@@ -133,6 +134,11 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
     if 'JD' in xLabel:
         fsize=fsize-3
     plot.axes.set_xlabel(xLabel,fontsize=fsize)
+    if trueVal is not None:
+        try:
+            plot.plot([trueVal-minSub,trueVal-minSub],[0.0,1.02],'--',color='green',linewidth=1.0)
+        except:
+            log.error("Tried to plot a line on the stacked histogram for the true val, but failed")
     
     return plot
 
@@ -308,7 +314,7 @@ def addDIdataToPlot(subPlot,realData,asConversion,errMult=1.0,thkns=1.0,pasa=Fal
                 subPlot.plot([xCent,xCent],[btm-hfHgt,top+hfHgt],linewidth=thkns,color='k',alpha=1.0)
     return (subPlot,[xmin,xmax,ymin,ymax])
 
-def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],xLims=[],stage='MCMC',centersOnly=False,plotALLpars=False):
+def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],xLims=[],stage='MCMC',centersOnly=False,plotALLpars=False,trueVals=None):
     """
     This will plot a simple posterior distribution for each parameter in the data files
     stacked ontop of each other for comparison between different runs.
@@ -421,6 +427,13 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
             par=0
             try:
                 par = paramList[i]
+                trueVal = None
+                if trueVals is not None:
+                    trueVal = trueVals[paramList[i]]
+                #print str(i)
+                #print str(trueVal)
+                #print repr(trueVals)
+                #print repr(paramList)
             except:
                 log.warning("Parameter "+str(i)+" not in paramList: \n"+repr(paramList))
             ## go through each file and plot this param's hist on same plot
@@ -439,7 +452,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
                         log.debug("plotting file:\n"+histDataBaseName)
                         if colorInt>len(colorsList):
                             log.warning("More plots requested than colors available in colorsList!! "+str(len(colorsList))+' < '+str(colorInt))
-                        subPlot = histLoadAndPlot_StackedPosteriors(subPlot,outFilename=histDataBaseName,xLabel=paramStrs[i],lineColor=colorsList[colorInt],xLims=xLim,latex=latex,showYlabel=showYlabel,parInt=par,centersOnly=centersOnly)
+                        subPlot = histLoadAndPlot_StackedPosteriors(subPlot,outFilename=histDataBaseName,xLabel=paramStrs[i],lineColor=colorsList[colorInt],xLims=xLim,latex=latex,showYlabel=showYlabel,parInt=par,centersOnly=centersOnly,trueVal=trueVal)
                     else:
                         log.debug("Not plotting hist for "+paramStrs2[i]+" as its hist file doesn't exist:\n"+histDataBaseName)
                     colorInt+=1
@@ -702,7 +715,6 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
     RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
     """
     latex=True
-    plotFormat='eps'
     plt.rcParams['ps.useafm']= True
     plt.rcParams['pdf.use14corefonts'] = True
     plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
@@ -830,7 +842,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         ## plot predicted locations for the data points
         if True:
             for i in range(0,len(predictedDataDI[:,0])):
-                main.plot(predictedDataDI[i,0]*asConversion,predictedDataDI[i,1]*asConversion,c='red',marker='.',markersize=diLnThk*5)#$$$$$$$$ Place for custimization
+                main.plot(predictedDataDI[i,0]*asConversion,predictedDataDI[i,1]*asConversion,c='red',marker='.',markersize=diLnThk*9)#$$$$$$$$ Place for custimization
                 #print 'plotted point ['+str(predictedDataDI[i,0]*asConversion)+', '+str(predictedDataDI[i,1]*asConversion)+']'
         ## Add DI data to plot
         (main,[xmin,xmax,ymin,ymax]) =  addDIdataToPlot(main,realDataDI,asConversion,errMult=diErrMult,thkns=diLnThk,pasa=pasa)#$$$$$$$$ Place for custimization
