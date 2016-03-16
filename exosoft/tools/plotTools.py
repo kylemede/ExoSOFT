@@ -213,7 +213,10 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     plot.axes.set_ylim([0.0,1.02])
     if bestVal is not False:
         try:
-            plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],color='blue',linewidth=1.5)
+            if False:
+                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],'--',color='green',linewidth=1.5)
+            else:
+                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],color='blue',linewidth=1.5)
         except:
             log.error("Tried to plot a line on the shaded histogram for the best val, but failed")
     if xLims!=False:
@@ -842,7 +845,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         ## plot predicted locations for the data points
         if True:
             for i in range(0,len(predictedDataDI[:,0])):
-                main.plot(predictedDataDI[i,0]*asConversion,predictedDataDI[i,1]*asConversion,c='red',marker='.',markersize=diLnThk*9)#$$$$$$$$ Place for custimization
+                main.plot(predictedDataDI[i,0]*asConversion,predictedDataDI[i,1]*asConversion,c='red',marker='.',markersize=diLnThk*11)#$$$$$$$$ Place for custimization
                 #print 'plotted point ['+str(predictedDataDI[i,0]*asConversion)+', '+str(predictedDataDI[i,1]*asConversion)+']'
         ## Add DI data to plot
         (main,[xmin,xmax,ymin,ymax]) =  addDIdataToPlot(main,realDataDI,asConversion,errMult=diErrMult,thkns=diLnThk,pasa=pasa)#$$$$$$$$ Place for custimization

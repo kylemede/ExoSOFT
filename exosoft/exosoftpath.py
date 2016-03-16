@@ -1,2 +1,2 @@
 ##FULL PATH to exosoft folder with '/' at end
-rootDir='/mnt/HOME/Dropbox/EclipseWorkspaceDB/ExoSOFT/exosoft/'
+rootDir='/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/exosoft/'

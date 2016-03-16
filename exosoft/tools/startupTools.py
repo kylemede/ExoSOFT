@@ -99,8 +99,9 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             ## copy all of current code to output directory
             codeCopyDir = os.path.join(settingsDict['finalFolder'],'codeUsed')
             os.mkdir(codeCopyDir)
-            log.debug('Copying all files in the RESULTS folder over to DropBox folder:\n '+codeCopyDir)
-            genTools.copytree(settingsDict['ExoSOFTdir'], codeCopyDir)
+            log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
+            setFiles = [settingsDict['settFilePath'],settingsDict['RVdataFile'],settingsDict['DIdataFile']]
+            genTools.copyCodeFiles(settingsDict['ExoSOFTdir'], codeCopyDir,setFiles)
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
@@ -179,6 +180,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         rangeMinsRaw = copy.deepcopy(rangeMins)
         if genTools.getSimpleDictVal(settingsDict,'lowEcc'):
             ## run through the possible numbers for e and omega to find min/max for RAW versions
+            ## Only relevent for MC and the begining jumps of SA,  
+            ## Otherwise the values are converted back to omega and e and the original ranges are used for the check.
             fourMin=1e6
             fourMax=-1e6
             nineMin=1e6

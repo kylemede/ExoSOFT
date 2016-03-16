@@ -32,6 +32,7 @@ from generalTools import timeStrMaker
 from generalTools import dateStrMaker
 from generalTools import copyToDB
 from generalTools import copytree
+from generalTools import copyCodeFiles
 from generalTools import chiSquaredCalc3D
 from generalTools import recheckFit3D
 from generalTools import predictLocation

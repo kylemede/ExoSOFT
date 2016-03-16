@@ -268,6 +268,7 @@ def exoSOFT():
                 if returnsST[3][i] in chisSorted:
                     startParams.append(returnsST[1][i])
                     startSigmas.append(returnsST[2][i])
+            ##$$$$$$$$$$$$$$$$$ MAKE THIS WORK IF nMCMCchains<nSTchains $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
         else:
             log.critical("No ST results available to start the MCMC chains with.")
         if len(chisSorted)>0:

@@ -655,9 +655,9 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         s+= "\n68%   "+repr(conf68Vals)+'\n95%   '+repr(conf95Vals)+'\n'
         s+= "\nerror is centered on Median \n"
         s+="68.3% error level = "+str(dataMedian-conf68Vals[0])
-        s+=" ->   "+str(dataMedian)+'  +/-  '+str(dataMedian-conf68Vals[0])+'\n'
+        s+=" ->   "+str(dataMedian)+'  + '+str(conf68Vals[1]-dataMedian)+', '+str(conf68Vals[0]-dataMedian)+'\n'
         if (colNum==1) and (dataMedian<0.1):
-            s=s+"Or in Mjup: ->   "+str(dataMedian*mJupMult)+'  +/-  '+str(dataMedian*mJupMult-conf68Vals[0]*mJupMult)+'\n'
+            s=s+"Or in Mjup: ->   "+str(dataMedian*mJupMult)+'  + '+str(mJupMult*(conf68Vals[1]-dataMedian))+', '+str(mJupMult*(conf68Vals[0]-dataMedian))+'\n'
         outStr+=s
         s=s+'\n'+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
         log.debug(s)
@@ -757,6 +757,27 @@ def nparyTolistStr(ary,brackets=True):
         s+=']'
     return s
    
+def copyCodeFiles(src, dst,settingsFiles=None):
+    """
+    For copying the code and settings files used to the output directory.
+    """
+    #First copy the code directory/tree
+    copytree(src, dst)
+    #now copy the settings files
+    if settingsFiles is not None:
+        if (type(settingsFiles)!=list)and(type(settingsFiles)==str):
+            settingsFiles = [settingsFiles]
+        setdst = os.path.join(dst,'settingsFilesUsed')
+        os.mkdir(setdst)
+        for f in settingsFiles:
+            s=f
+            d=os.path.join(setdst, os.path.basename(f))
+            try:
+                shutil.copy2(s, d)
+                log.debug("Copying:\n "+repr(s)+'\nto:\n'+repr(d))
+            except:
+                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
+    
 def copytree(src, dst):
     """
     Recursively copy a directory and its contents to another directory.
@@ -767,19 +788,27 @@ def copytree(src, dst):
     Code taken and simplified from:
     http://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
     """
+    skipStrs = [".git",".pyc",".py~",".sty",".so",".cxx",".o",".h~",".cc~"]
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
             try:
                 shutil.copytree(s, d)
-                log.debug("Copying:\n "+repr(s)+'\nto:\n'+repr(d))
+                log.debug("Copying directory:\n "+repr(s)+'\nto:\n'+repr(d))
             except:
                 log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
         else:
             try:
-                shutil.copy2(s, d)
-                log.debug("Copying:\n "+repr(s)+'\nto:\n'+repr(d))
+                #Check if filepath contains one of the skip 
+                #strs and copy only if it is fine.
+                fine = True
+                for skipStr in skipStrs:
+                    if skipStr in item:
+                        fine=False
+                if fine:
+                    shutil.copy2(s, d)
+                    log.debug("Copying file:\n "+repr(s)+'\nto:\n'+repr(d))
             except:
                 log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))                        
     
