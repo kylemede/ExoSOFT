@@ -810,9 +810,15 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         for i in range(0,len(predictedDataDI[:,0])):
             outPredictedDIdata.append([predictedDataDI[i,0],predictedDataDI[i,1]])
         fnameBase = os.path.join(os.path.dirname(plotDataDir),'DIplotData')
-        np.savetxt(fnameBase+'-real.dat',outDIdataReal)
-        np.savetxt(fnameBase+'-predicted.dat',outPredictedDIdata)
-        np.savetxt(fnameBase+'-fit.dat',outDIdataFit)
+        if pasa:
+            hReal = "[PA,PAerr,SA,SAerr]"
+            hFit = hPredicted = '[PA,SA]'
+        else:
+            hReal = "[x,xerr,y,yerr]"
+            hFit = hPredicted = '[x,y]'
+        np.savetxt(fnameBase+'-real.dat',outDIdataReal,header=hReal)
+        np.savetxt(fnameBase+'-predicted.dat',outPredictedDIdata,header=hPredicted)
+        np.savetxt(fnameBase+'-fit.dat',outDIdataFit,header=hFit)
         residualDIdata = []
         if pasa:
             (xcenters, E_error, ycenters, N_error)=genTools.PASAtoEN(realDataDI[:,1],0,realDataDI[:,3],0)
@@ -822,7 +828,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             for i in range(0,len(predictedDataDI)):
                 residualDIdata.append([realDataDI[i,1]-predictedDataDI[i,0],realDataDI[i,3]-predictedDataDI[i,1]])
         #O-C [RAo-c,DECo-c]
-        np.savetxt(fnameBase+'-O-C.dat',residualDIdata)
+        np.savetxt(fnameBase+'-O-C.dat',residualDIdata,header="[RAo-c,DECo-c]")
             
         diFig = plt.figure(2,figsize=(10,9))
         main = diFig.add_subplot(111)
@@ -1064,8 +1070,8 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             for i in range(0,len(phasesFit)):
                 outRVdataFit.append([phasesFit[i],fakeRealData[i,0],fitDataRV[i,2]])
             fnameBase = os.path.join(os.path.dirname(plotDataDir),'RVplotData')
-            np.savetxt(fnameBase+'-real.dat',outRVdataReal)
-            np.savetxt(fnameBase+'-fit.dat',outRVdataFit)
+            np.savetxt(fnameBase+'-real.dat',outRVdataReal,header="[phases,JD,offset subtracted RV, residual, dataset#]")
+            np.savetxt(fnameBase+'-fit.dat',outRVdataFit,header="[phases,JD,RV]")
             for i in range(0,int(np.max(residualData[:,7])+1)):
                 ary = []
                 chiSqr = 0
