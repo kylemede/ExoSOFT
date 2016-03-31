@@ -136,7 +136,7 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
     plot.axes.set_xlabel(xLabel,fontsize=fsize)
     if trueVal is not None:
         try:
-            plot.plot([trueVal-minSub,trueVal-minSub],[0.0,1.02],'--',color='green',linewidth=1.0)
+            plot.plot([trueVal-minSub,trueVal-minSub],[0.0,1.02],'-',color='k',linewidth=2.0)
         except:
             log.error("Tried to plot a line on the stacked histogram for the true val, but failed")
     
@@ -198,11 +198,14 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     if (type(confLevels)==list)or(type(confLevels)==np.ndarray):
         for i in range(0,histData.shape[0]):
             x=histData[i][0]-halfBinWidth+minSub
+            # >95% confidence color
             c = 'w'
             if (x>confLevels[1][0])and(x<confLevels[1][1]):
-                c = '0.8'
+                # 95% confidence color
+                c = '#80b3ff'
             if (x>confLevels[0][0])and(x<confLevels[0][1]):
-                c = '0.5'
+                # 68% confidence color
+                c = '#3366ff'
             recs.append(patches.Rectangle(xy=(histData[i][0]-halfBinWidth,0), width=halfBinWidth*2.0,height=histData[i][1]/maxN,facecolor=c, edgecolor=c))
         # draw updated patches on plot
         for rec in recs:
@@ -214,9 +217,9 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     if bestVal is not False:
         try:
             if False:
-                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],'--',color='green',linewidth=1.5)
+                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],'--',color='green',linewidth=2)
             else:
-                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],color='blue',linewidth=1.5)
+                plot.plot([bestVal-minSub,bestVal-minSub],[0.0,1.02],color='k',linewidth=2)
         except:
             log.error("Tried to plot a line on the shaded histogram for the best val, but failed")
     if xLims!=False:
@@ -347,7 +350,8 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
     if type(outputDataFilenames)!=list:
         outputDataFilenames = [outputDataFilenames]
     
-    colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
+    #colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
+    colorsList =['Green','Blue','Red']
     colorsList2 = []
     while len(outputDataFilenames)>len(colorsList2):
         for color in colorsList:
@@ -834,10 +838,10 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         main = diFig.add_subplot(111)
         #determine if to plot [mas] or ["]
         asConversion=1.0
-        unitStr = '"'
+        unitStr = ' ["]'
         if abs(np.min([np.min(realDataDI[:,1]),np.min(realDataDI[:,3])]))<1.5:
             asConversion = 1000.0
-            unitStr = '[mas]'
+            unitStr = ' [mas]'
         ## Draw orbit fit
         main.plot(fitDataDI[:,0]*asConversion,fitDataDI[:,1]*asConversion,linewidth=diLnThk,color='Blue') 
         ## Draw line-of-nodes
@@ -898,21 +902,21 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         a = main.axis()
         main.axis([a[1],a[0],a[2],a[3]])
         plt.minorticks_on()
-        main.tick_params(axis='both',which='major',width=1,length=5,pad=10,direction='in',labelsize=25)
+        main.tick_params(axis='both',which='major',width=1,length=5,pad=10,direction='in',labelsize=30)
         main.tick_params(axis='both',which='minor',width=1,length=2,pad=10,direction='in')
         main.spines['right'].set_linewidth(1.0)
         main.spines['bottom'].set_linewidth(1.0)
         main.spines['top'].set_linewidth(1.0)
         main.spines['left'].set_linewidth(1.0)
         #[left,btm,width,height]
-        main.set_position([0.15,0.115,0.80,0.84])
-        xLabel = 'Relative RA '+unitStr
-        yLabel = 'Relative Dec '+unitStr
+        main.set_position([0.18,0.124,0.75,0.82])
+        xLabel = 'Relative RA  '+unitStr
+        yLabel = 'Relative Dec  '+unitStr
         if latex:
-            xLabel = r'$\Delta\alpha{\rm '+unitStr+"}$"
-            yLabel = r'$\Delta\delta{\rm '+unitStr+"}$"
-        main.set_xlabel(xLabel, fontsize=25)
-        main.set_ylabel(yLabel, fontsize=25)
+            xLabel = r'$\Delta\alpha$  ${\rm'+unitStr+"}$"
+            yLabel = r'$\Delta\delta$  ${\rm'+unitStr+"}$"
+        main.set_xlabel(xLabel, fontsize=35)
+        main.set_ylabel(yLabel, fontsize=35)
         ##
         ## Save full size fig, then cropped to file and maybe convert to pdf if format=='eps'
         ##
@@ -1006,20 +1010,20 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             ## start making figure for residual and fit plots
             figRV = plt.figure(3,figsize=(10,5))
             residualsPlot = figRV.add_subplot(212)
-            residualsPlot.set_position([0.13,0.15,0.84,0.23])
+            residualsPlot.set_position([0.13,0.17,0.84,0.23])
             fitPlot = figRV.add_subplot(211)
-            fitPlot.set_position([0.13,0.38,0.84,0.57])
+            fitPlot.set_position([0.13,0.39,0.84,0.57])
             xLabel = "Orbital Phase"
             fitYlabel = 'v '+unitStr
             residYlabel = 'O-C '
             if latex:
                 residYlabel = r'${\rm O-C}$ '
-                fitYlabel = r'$v{\rm '+unitStr+'}$'
+                fitYlabel = r'$v$  ${\rm '+unitStr+'}$'
                 xLabel = r"${\rm Orbital}$  ${\rm Phase}$"
-            residualsPlot.axes.set_xlabel(xLabel,fontsize=20)
+            residualsPlot.axes.set_xlabel(xLabel,fontsize=30)
             residualsPlot.axes.set_ylabel(residYlabel,fontsize=20)
             fitPlot.xaxis.set_ticklabels([])#this is just a hack way of killing the tick labels
-            fitPlot.axes.set_ylabel(fitYlabel,fontsize=20)
+            fitPlot.axes.set_ylabel(fitYlabel,fontsize=30)
             
             ## real-model=residual, then plot it
             residualData = copy.deepcopy(realDataRV)
@@ -1034,7 +1038,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             residualsPlot = addRVdataToPlot(residualsPlot,phasesReal,residualData[:,5]*kmConversion,residualData[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.1,color='k',plotErrorBars=True)
             fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,color='k',plotErrorBars=True)
             ##plot fit epochsORphases,RVs,RVerrs
-            fitPlot.plot(phasesFit,fitDataRV[:,2]*kmConversion,c='Blue',linewidth=1.0,alpha=1.0)
+            fitPlot.plot(phasesFit,fitDataRV[:,2]*kmConversion,c='Blue',linewidth=diLnThk*0.8,alpha=1.0)
             
             ## Find and set limits 
             xLims = (np.min([np.min(phasesFit),np.min(phasesReal)]),np.max([np.max(phasesFit),np.max(phasesReal)]))
@@ -1057,7 +1061,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             fitPlot.axes.set_xlim(xLims)
             fitPlot.axes.set_ylim(fitYlims)
             ##plot zero vel line
-            residualsPlot.axhline(linewidth=1.0,c='Blue') #adds a x-axis origin line
+            residualsPlot.axhline(linewidth=diLnThk*0.8,c='Blue') #adds a x-axis origin line
             
             ##load resulting data to file for re-plotting by others
             #real [phases,JD,offset subtracted RV, residual, dataset#]
@@ -1095,7 +1099,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             
             ##clean up boarders, axis ticks and such 
             plt.minorticks_on()
-            fitPlot.tick_params(axis='both',which='major',width=1,length=5,pad=8,direction='in',labelsize=20)
+            fitPlot.tick_params(axis='both',which='major',width=1,length=5,pad=8,direction='in',labelsize=25)
             fitPlot.tick_params(axis='both',which='minor',width=1,length=2,pad=8,direction='in')
             fitPlot.spines['right'].set_linewidth(1.0)
             fitPlot.spines['bottom'].set_linewidth(1.0)
@@ -1107,7 +1111,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             #plot.axvline(linewidth=2.0) #adds a y-axis origin line
             plt.minorticks_on()
             residualsPlot.tick_params(axis='y',which='major',width=1,length=5,pad=8,direction='in',labelsize=15)
-            residualsPlot.tick_params(axis='x',which='major',width=1,length=5,pad=8,direction='in',labelsize=20)
+            residualsPlot.tick_params(axis='x',which='major',width=1,length=5,pad=8,direction='in',labelsize=25)
             residualsPlot.tick_params(axis='y',which='minor',width=2,length=4,pad=8,direction='in')
             residualsPlot.tick_params(axis='x',which='minor',width=2,bottom='on',length=4,pad=8,direction='in')
             residualsPlot.locator_params(axis='y',nbins=4) #fix number of y-axis label points

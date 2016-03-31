@@ -40,19 +40,19 @@ def incPriorRatio(incProposed,incLast):
 def mass1PriorRatio(MProposed,MLast):
     if (sett.settingsDict['mass1MAX']!=0)and True:
         if MProposed!=MLast!=0:
-            prop = chabrierPrior(MProposed,IMF=False)
-            lst = chabrierPrior(MLast,IMF=False)
+            prop = pdmfPrior(MProposed)
+            lst = pdmfPrior(MLast)
             return prop/lst
         else:
             return 1.0
     else:
         return 1.0
     
-def mass2PriorRatio(MProposed,MLast):
+def mass2PriorRatio(m2Prop,m2Last,m1Prop,m1Last):
     if (sett.settingsDict['mass2MAX']!=0)and True:
-        if MProposed!=MLast!=0:
-            prop = chabrierPrior(MProposed,IMF=False)
-            lst = chabrierPrior(MLast,IMF=False)
+        if 0.0 not in [m2Prop,m2Last,m1Prop,m1Last]:
+            prop = cmfPrior(m2Prop,m1Prop)
+            lst = cmfPrior(m2Last,m1Last)
             return prop/lst
         else:
             return 1.0
@@ -72,21 +72,27 @@ def paraPriorRatio(paraProposed,paraLast):
     else:
         return 1.0
     
-def chabrierPrior(m,IMF=False):
-    if IMF==False:
-        if m<1.0:
-            d = (0.068618528140713786/m)*np.exp((-(np.log10(m)+1.1023729087095586)**2)/0.9521999999999998)
-        elif m<3.47:
-            d = 0.019108957203743077*(m**(-5.37))
-        elif m<18.20:
-            d = 0.0065144172285487769*(m**(-4.53))
-        else:
-            d = 0.00010857362047581295*(m**(-3.11))
+def imfPrior(m):
+    if m<1.0:
+        d = (0.068618528140713786/m)*np.exp((-(np.log10(m)+1.1023729087095586)**2)/0.9521999999999998)
     else:
-        if m<1.0:
-            d = (0.068618528140713786/m)*np.exp((-(np.log10(m)+1.1023729087095586)**2)/0.9521999999999998)
-        else:
-            d = 0.019239245548314052*(m**(-2.3))
+        d = 0.019239245548314052*(m**(-2.3))
+    return d
+
+def pdmfPrior(m):
+    if m<1.0:
+        d = (0.068618528140713786/m)*np.exp((-(np.log10(m)+1.1023729087095586)**2)/0.9521999999999998)
+    elif m<3.47:
+        d = 0.019108957203743077*(m**(-5.37))
+    elif m<18.20:
+        d = 0.0065144172285487769*(m**(-4.53))
+    else:
+        d = 0.00010857362047581295*(m**(-3.11))
+    return d
+
+def cmfPrior(m2,m1):
+    beta = -0.39
+    d = (m2**(beta))*(m1**(-1.0*beta-1.0))
     return d
 
 def gaussian(x,mu,sig):

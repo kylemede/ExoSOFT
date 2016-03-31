@@ -653,11 +653,14 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         mJupMult=(const.KGperMsun/const.KGperMjupiter)
         s = "\nFinal Range values:\nTOTAL "+repr([dataAry[0],dataAry[-1]])
         s+= "\n68%   "+repr(conf68Vals)+'\n95%   '+repr(conf95Vals)+'\n'
-        s+= "\nerror is centered on Median \n"
-        s+="68.3% error level = "+str(dataMedian-conf68Vals[0])
-        s+=" ->   "+str(dataMedian)+'  + '+str(conf68Vals[1]-dataMedian)+', '+str(conf68Vals[0]-dataMedian)+'\n'
+        s+= "   median,      68.3% error above,   68.3% error below\n"
+        s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)+'\n'
+        s+="Average 68.3% error = +/- "+str((conf68Vals[1]-conf68Vals[0])/2.0)+'\n'
         if (colNum==1) and (dataMedian<0.1):
-            s=s+"Or in Mjup: ->   "+str(dataMedian*mJupMult)+'  + '+str(mJupMult*(conf68Vals[1]-dataMedian))+', '+str(mJupMult*(conf68Vals[0]-dataMedian))+'\n'
+            s+="~"*55+'\n'
+            s+= "Or in Mjup:\n"+str(dataMedian*mJupMult)+',  +'+str(mJupMult*(conf68Vals[1]-dataMedian))+',   '+str(mJupMult*(conf68Vals[0]-dataMedian))+'\n'
+            s+="Average 68.3% error = +/- "+str(mJupMult*((conf68Vals[1]-conf68Vals[0])/2.0))+'\n'
+            s+="~"*55+'\n'
         outStr+=s
         s=s+'\n'+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
         log.debug(s)

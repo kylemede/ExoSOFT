@@ -143,7 +143,7 @@ class Simulator(object):
                 #print 'M1Prior'
             if self.dictVal('M2Prior'):
                 #print 'M2Prior'
-                priorsRatio*=self.settingsDict['M2Prior'][2](parsCurr[1],parsLast[1])
+                priorsRatio*=self.settingsDict['M2Prior'][2](parsCurr[1],parsLast[1],parsCurr[0],parsLast[0])
                 #print 'M2Prior'
             if self.dictVal('parPrior'):
                 #print 'parPrior'
