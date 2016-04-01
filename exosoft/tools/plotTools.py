@@ -79,23 +79,24 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
             xLabel='m2 [Mjupiter]'
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
-    if (np.max(histData[:,0])>100000) or (valRange<(np.min(histData[:,0])/100.0)):
-        #must be the To or Tc, so subtract int(min) and add to x-axis label
-        #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise
-        minSub = int(np.min(histData[:,0]))
-        histData[:,0]-=minSub
-        if latex:
-            if xLabel not in [r'$e$',r'$\chi^2$']:
-                xLabel = xLabel[:-3]+"+"+str(minSub)+"]}$"
-            elif xLabel== r'$m_2$ [$M_{J}$]':
-                xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
-            else:            
-                xLabel = xLabel[:-1]+"+"+str(minSub)+"$"
-        else:
-            if xLabel not in ['e','chiSquared']:
-                xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
+    if False:
+        if (np.max(histData[:,0])>100000) or (valRange<(np.min(histData[:,0])/100.0)):
+            #must be the To or Tc, so subtract int(min) and add to x-axis label
+            #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise
+            minSub = int(np.min(histData[:,0]))
+            histData[:,0]-=minSub
+            if latex:
+                if xLabel not in [r'$e$',r'$\chi^2$']:
+                    xLabel = xLabel[:-3]+"+"+str(minSub)+"]}$"
+                elif xLabel== r'$m_2$ [$M_{J}$]':
+                    xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
+                else:            
+                    xLabel = xLabel[:-1]+"+"+str(minSub)+"$"
             else:
-                xLabel = xLabel+"+"+str(minSub)
+                if xLabel not in ['e','chiSquared']:
+                    xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
+                else:
+                    xLabel = xLabel+"+"+str(minSub)
             
     halfBinWidth = (histData[1][0]-histData[0][0])/2.0
     # load up list of x,y values for tops of bins
@@ -250,7 +251,7 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
         
     return plot
 
-def addRVdataToPlot(subPlot,epochsORphases,RVs,RVerrs,datasetInts=[],alf=1.0,color='blue',plotErrorBars=False):
+def addRVdataToPlot(subPlot,epochsORphases,RVs,RVerrs,datasetInts=[],alf=1.0,markersize=9,plotErrorBars=False):
     """
     Add '+' markers for the data locations with respective y axis errors 
     shown as the height of the markers. 
@@ -261,12 +262,12 @@ def addRVdataToPlot(subPlot,epochsORphases,RVs,RVerrs,datasetInts=[],alf=1.0,col
             ys = [RVs[i]-RVerrs[i],RVs[i]+RVerrs[i]]
             #print str(RVerrs[i])+", -> ["+str(epochsORphases[i])+", "+str(RVs[i])+']'
             if plotErrorBars:
-                subPlot.plot(xs,ys,c=color,linewidth=2,alpha=alf)
+                subPlot.plot(xs,ys,c='k',linewidth=2,alpha=alf)
             if len(datasetInts)<len(RVs):
-                clr = 'k'
+                clr = 'red'
             else:
                 clr=colorsList[int(datasetInts[i])]
-            subPlot.plot(epochsORphases[i],RVs[i],c=clr,marker='.',markersize=9)
+            subPlot.plot(epochsORphases[i],RVs[i],c=clr,marker='.',markersize=markersize)
     return subPlot
 
 def addDIdataToPlot(subPlot,realData,asConversion,errMult=1.0,thkns=1.0,pasa=False):
@@ -351,7 +352,8 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         outputDataFilenames = [outputDataFilenames]
     
     #colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
-    colorsList =['Green','Blue','Red']
+    colorsList =['Blue','#ff751a']
+    #colorsList =['Green','Blue','Red']
     colorsList2 = []
     while len(outputDataFilenames)>len(colorsList2):
         for color in colorsList:
@@ -850,7 +852,12 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         ## Draw Semi-Major axis
         main.plot(semiMajorLocs[:,0]*asConversion,semiMajorLocs[:,1]*asConversion,'-',linewidth=diLnThk,color='Green')
         ## Draw larger star for primary star's location
-        starPolygon = star(2*paramsDI[10],0,0,color='yellow',N=6,thin=0.5)
+        atot = asConversion*np.sqrt((semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2 + (semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2)
+        #print '5*paramsDI[10] = '+str(5*paramsDI[10])
+        #print 'atot/15.0 = '+str(atot/15.0)
+        starWidth = atot/15.0
+        #old width was 5*paramsDI[10]
+        starPolygon = star(starWidth,0,0,color='yellow',N=6,thin=0.5)
         main.add_patch(starPolygon)
         ## plot predicted locations for the data points
         if True:
@@ -1029,16 +1036,13 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             residualData = copy.deepcopy(realDataRV)
             residualData[:,5]-= modelDataRV[:,2]
             
-            #for i in range(0,residualData.shape[0]):
-            #    print 'residual Data = '+str(residualData[i,0])+', '+str(residualData[i,5])+", "+str(residualData[i,6])+", "+str(residualData[i,7])
-            #for i in range(0,modelDataRV.shape[0]):
-            #    print 'model Data = '+str(modelDataRV[i,2])
-            
-            ## add real data to plots
-            residualsPlot = addRVdataToPlot(residualsPlot,phasesReal,residualData[:,5]*kmConversion,residualData[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.1,color='k',plotErrorBars=True)
-            fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,color='k',plotErrorBars=True)
             ##plot fit epochsORphases,RVs,RVerrs
             fitPlot.plot(phasesFit,fitDataRV[:,2]*kmConversion,c='Blue',linewidth=diLnThk*0.8,alpha=1.0)
+            ##plot zero vel line
+            residualsPlot.axhline(linewidth=diLnThk*0.8,c='Blue') #adds a x-axis origin line
+            ## add real data to plots
+            residualsPlot = addRVdataToPlot(residualsPlot,phasesReal,residualData[:,5]*kmConversion,residualData[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.1,markersize=15,plotErrorBars=True)
+            fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,markersize=9,plotErrorBars=True)
             
             ## Find and set limits 
             xLims = (np.min([np.min(phasesFit),np.min(phasesReal)]),np.max([np.max(phasesFit),np.max(phasesReal)]))
@@ -1060,8 +1064,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
             #RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
             fitPlot.axes.set_xlim(xLims)
             fitPlot.axes.set_ylim(fitYlims)
-            ##plot zero vel line
-            residualsPlot.axhline(linewidth=diLnThk*0.8,c='Blue') #adds a x-axis origin line
+            
             
             ##load resulting data to file for re-plotting by others
             #real [phases,JD,offset subtracted RV, residual, dataset#]

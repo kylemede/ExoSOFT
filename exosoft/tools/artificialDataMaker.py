@@ -33,7 +33,7 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     NumDataPointsOutRV = 25 #must be much less than 10000.  values between 10-500 are suitable.
     NumDataPointsOutDI = 10 #must be much less than 10000.  values between 10-500 are suitable.
     storePrimaryRVs = True
-    percentError = 1 #error is set to a percentage of the median
+    percentError = 5 #error is set to a percentage of the median
     realizeErrors = True
     percentCoverage = 100.00 #percent of total orbit for data to span.  Over 100% is ok if you want overlapping data.
     overlapEnds = False # will ensure some points near end overlap the beginning of the orbit.
@@ -44,7 +44,7 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     distance = 20.0 #parsecs
     #Orbital Elements
     TimeLastPeri =2450639.5  #JD  #2450817.5
-    e =0.048#0.017  #
+    e =0.3#0.017  #
     period = 11.9#1.0000697145834374#0.99997862 # years  #11.9#
     Omega =100.6*const.pi/180# Longitude of ascending node#348.73936 100.6
     omega = 14.8*const.pi/180 # Argument of periastron$ 102.94719    14.8

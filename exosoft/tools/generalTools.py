@@ -426,6 +426,8 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
                     bestStr+="m1 = m_total [Msun] = "+str(bestFit[0])+'\n'
                 else:
                     bestStr+=paramStrs[0]+" = "+str(bestFit[0])+'\n'
+            elif i in [5,6]:
+                bestStr+=paramStrs[i]+" = "+str(bestFit[i])+", OR "+str(bestFit[i]-2400000.5)+' in [MJD]\n'
             else:
                 bestStr+=paramStrs[i]+" = "+str(bestFit[i])+'\n'
         bestStr+='\n'+'*'*90+'\nBEST REDUCED CHISQUAREDS: [total,DI,RV] = ['+str(reduced3D)+", "+str(reducedDI)+", "+str(reducedRV)+"]\n"+'*'*90
@@ -606,6 +608,8 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             dataAry = np.sort(dataAry)
             size = dataAry.size
             mid=size//2
+            minVal = np.min(dataAry)
+            maxVal = np.max(dataAry)
                 
             minLoc68=mid-int(float(size)*0.683)//2
             if minLoc68<0:
@@ -654,15 +658,22 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         s = "\nFinal Range values:\nTOTAL "+repr([dataAry[0],dataAry[-1]])
         s+= "\n68%   "+repr(conf68Vals)+'\n95%   '+repr(conf95Vals)+'\n'
         s+= "   median,      68.3% error above,   68.3% error below\n"
-        s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)+'\n'
-        s+="Average 68.3% error = +/- "+str((conf68Vals[1]-conf68Vals[0])/2.0)+'\n'
+        s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)
+        s+= "\nAverage 68.3% error = +/- "+str((conf68Vals[1]-conf68Vals[0])/2.0)
+        s+= "\nWidth Estimates:\n((68.3% error range)/median)x100% = "+str(((conf68Vals[1]-conf68Vals[0])/abs(dataMedian))*100.0)+"%"
+        s+= "\n((68.3% error range)/(95.4% error range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(conf95Vals[1]-conf95Vals[0]))*100.0)+"%"
+        s+= "\n((68.3% error range)/(Total range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(maxVal-minVal))*100.0)+"%"
         if (colNum==1) and (dataMedian<0.1):
-            s+="~"*55+'\n'
-            s+= "Or in Mjup:\n"+str(dataMedian*mJupMult)+',  +'+str(mJupMult*(conf68Vals[1]-dataMedian))+',   '+str(mJupMult*(conf68Vals[0]-dataMedian))+'\n'
-            s+="Average 68.3% error = +/- "+str(mJupMult*((conf68Vals[1]-conf68Vals[0])/2.0))+'\n'
-            s+="~"*55+'\n'
+            s+='\n'+"~"*55+'\nOR in units of Mjupiter:\n'
+            s+=str(dataMedian*mJupMult)+',  +'+str(mJupMult*(conf68Vals[1]-dataMedian))+',   '+str(mJupMult*(conf68Vals[0]-dataMedian))
+            s+="\nAverage 68.3% error = +/- "+str(mJupMult*((conf68Vals[1]-conf68Vals[0])/2.0))+'\n'
+            s+="~"*55
+        if colNum in [5,6]:
+            s+='\n'+"~"*55+'\nOR in units of MJD:\n'
+            s+=str(dataMedian-2400000.5)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)
+            s+='\n'+"~"*55
         outStr+=s
-        s=s+'\n'+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
+        s=s+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
         log.debug(s)
         
         if verboseInternal:
