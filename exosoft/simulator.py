@@ -34,7 +34,7 @@ class Simulator(object):
         self.settings = settings
         self.log = tools.getLogger('main.simulator',lvl=100,addFH=False)
         tools.logSystemInfo(self.log)
-        (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV) = self.starter() 
+        (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV,self.Priors) = self.starter() 
         self.Orbit = tools.cppTools.Orbit()
         self.Orbit.loadStaticVars(self.dictVal('omegaFdi'),self.dictVal('omegaFrv'),self.dictVal('lowEcc'),self.dictVal('pasa'))
         self.Orbit.loadRealData(self.realData)
@@ -109,51 +109,10 @@ class Simulator(object):
         self.settings['parInts'] = (paramIntsStr,"Varried params")
         self.settings['chainNum'] = (self.chainNum,"chain number")
         ## check priors are ok with range mins
-        self.combinedPriors(rangeMins,rangeMins,True)
+        Priors = tools.priors.Priors(self.settings,self.log)
+        Priors.testPriors(rangeMins,rangeMins)
         
-        return (realData,rangeMaxsRaw,rangeMinsRaw,rangeMaxs,rangeMins,sigmas,paramInts,nu,nuDI,nuRV)
-    
-    def combinedPriors(self,parsCurr,parsLast,test=False):
-        """
-        A function to combine priors in the settings dict.
-        This can be used at the Simulator's instantiation to make sure the
-        priors have no errors before starting a run.  This will be done 
-        using the minimum range values.
-        Else, it is just called during accept to calc the priors ratio.
-        
-        NOTE: -priors in the Advanced settings dict must be a tuple 
-              of (bool, comment string, function).
-              -Also, remember that non of the range values are allowed to be zero
-              as it breaks this and a few other functions.
-        """
-        priorsRatio = 1.0
-        try:
-            if self.dictVal('ePrior'):
-                #print 'ePrior'
-                priorsRatio*=self.settings['ePrior'][2](parsCurr[4],parsLast[4])
-            if self.dictVal('pPrior'):
-                #print 'pPrior'
-                priorsRatio*=self.settings['pPrior'][2](parsCurr[7],parsLast[7])
-            if self.dictVal('incPrior'):
-                #print 'incPrior'
-                priorsRatio*=self.settings['incPrior'][2](parsCurr[8],parsLast[8])
-            if self.dictVal('M1Prior'):
-                #print 'M1Prior'
-                priorsRatio*=self.settings['M1Prior'][2](parsCurr[0],parsLast[0])
-                #print 'M1Prior'
-            if self.dictVal('M2Prior'):
-                #print 'M2Prior'
-                priorsRatio*=self.settings['M2Prior'][2](parsCurr[1],parsLast[1],parsCurr[0],parsLast[0])
-                #print 'M2Prior'
-            if self.dictVal('parPrior'):
-                #print 'parPrior'
-                priorsRatio*=self.settings['parPrior'][2](parsCurr[2],parsLast[2])
-                #print 'parPrior out'
-            if test==False:
-                return priorsRatio
-        except:
-            self.log.critical("An error occured while trying to calculate the priors.")
-            sys.exit(0)
+        return (realData,rangeMaxsRaw,rangeMinsRaw,rangeMaxs,rangeMins,sigmas,paramInts,nu,nuDI,nuRV,Priors)
             
     def dictVal(self,key):
         """
@@ -276,7 +235,7 @@ class Simulator(object):
             ## For SA after first sample, MCMC, and ST
             try:
                 likelihoodRatio = np.exp((self.paramsLast[11] - raw3D)/(2.0*temp))
-                priorsRatio = self.combinedPriors(paramsOut,self.paramsLast)
+                priorsRatio = self.Priors.combinedPriors(paramsOut,self.paramsLast)
                 if np.random.uniform(0.0, 1.0)<=(priorsRatio*likelihoodRatio):
                     accept = True
             except:

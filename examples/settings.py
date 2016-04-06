@@ -1,9 +1,8 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
-from priors import ePriorRatio,pPriorRatio,incPriorRatio,mass1PriorRatio,mass2PriorRatio,paraPriorRatio
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (100000,"Number of MCMC or MC samples"),
+'nSamples' : (500000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
@@ -202,12 +201,15 @@ priorsDict={
 ##################################
 # Push prior functions into dict #
 ##################################
-'ePrior'    :(True,'Use prior for eccentricity?',ePriorRatio),
-'pPrior'    :(True,'Use prior for period?',pPriorRatio),
-'incPrior'  :(True,'Use prior for inclination?',incPriorRatio),
-'M1Prior':(True,'Use prior for m1?',mass1PriorRatio),
-'M2Prior':(True,'Use prior for m2?',mass2PriorRatio),
-'parPrior' :(True,'Use prior for parallax?',paraPriorRatio),
+# For ALL: False indicates a flat prior. True indicates to use defaults.
+'ePrior'    :(True,'Use prior for eccentricity?'),
+'pPrior'    :(True,'Use prior for period?'),
+'incPrior'  :(True,'Use prior for inclination?'),
+# For m1 and m2: use strings to indicate specific prior function.
+# m1 default is 'PDMF', m2 default is 'CMF'.
+'M1Prior':(True,"m1 prior ['PDMF', 'IMF', True or False]"),
+'M2Prior':(True,"m2 prior ['PDMF', 'IMF', 'CMF', True or False]"),
+'parPrior' :(True,'Use prior for parallax?'),
 }
 
 ######################

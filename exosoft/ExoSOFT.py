@@ -183,7 +183,6 @@ def iterativeSA(settings,Sim):
                 bestpars = bestRetAry[1][i]
                 bestsigs = bestRetAry[2][i]
         tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'SA')
-        tools.pushIntoOrigSettFiles(settings,bestpars,sigs=bestsigs)
     toc=timeit.default_timer()
     s = "ALL "+str(iter+1)+" iterations of SA took a total of "+tools.timeStrMaker(int(toc-tic))
     retStr2 +=s+"\n"
@@ -247,7 +246,6 @@ def exoSOFT():
                     bestpars = returnsST[1][i]
                     bestsigs = returnsST[2][i]
             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'ST')
-            tools.pushIntoOrigSettFiles(settings,bestpars,sigs=bestsigs)
         
     if 'MCMC' in stageList:
         startParams = []
@@ -281,7 +279,6 @@ def exoSOFT():
                     bestpars = returnsMCMC[1][i]
                     bestsigs = returnsMCMC[2][i]
             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'MCMC')
-            tools.pushIntoOrigSettFiles(settings,bestpars,sigs=[])
     outFiles = returns[0]
     toc=tic2=timeit.default_timer()
     s = "ALL stages took a total of "+tools.timeStrMaker(int(toc-tic))

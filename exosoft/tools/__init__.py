@@ -17,7 +17,6 @@ from readWriteTools import writeFits
 from readWriteTools import combineFits
 from readWriteTools import periodicDataDump
 from readWriteTools import writeBestsFile
-from readWriteTools import pushIntoOrigSettFiles
 from readWriteTools import renameFits
 from readWriteTools import rmFiles
 
@@ -39,6 +38,8 @@ from generalTools import predictLocation
 from generalTools import getSimpleDictVal
 from generalTools import nparyTolistStr
 from generalTools import unitlessSTD
+
+import priors
 
 from progressbar.progressbar import ProgressBar
 
