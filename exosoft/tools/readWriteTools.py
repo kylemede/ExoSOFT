@@ -254,13 +254,7 @@ def loadSettings(ExoSOFTdir,settFilePath):
     settings['omegaFdi'] = (omegaFdi,"Total fixed val added to DI omega in model")
     settings['omegaFrv'] = (omegaFrv,"Total fixed val added to RV omega in model")
     log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
-    ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
-    if settings['dataMode'][0]=='DI':
-        settings['mass1MIN']=settings['mass1MIN']+settings['mass2MIN']
-        settings['mass1MAX']=settings['mass1MAX']+settings['mass2MAX']
-        settings['mass2MIN']=0
-        settings['mass2MAX']=0
-        log.debug("DI dataMode, so pushed all mass range vals into M1 and set ones for M2 to zero")
+    
     #for key in settings:
     #    print key+' = '+repr(settings[key])
     #sys.exit('shirt')

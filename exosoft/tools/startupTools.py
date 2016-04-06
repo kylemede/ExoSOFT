@@ -122,6 +122,32 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             ## set T range to [earliest Epoch-max period,earliest epoch]
             settings['TMAX']=np.min(realData[:,0])
             settings['TMIN']=np.min(realData[:,0])-genTools.getSimpleDictVal(settings,'PMAX')*const.daysPerYear
+        ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
+        if settings['dataMode'][0]=='DI':
+            settings['mass1MIN']=settings['mass1MIN']+settings['mass2MIN']
+            settings['mass1MAX']=settings['mass1MAX']+settings['mass2MAX']
+            settings['mass2MIN']=0
+            settings['mass2MAX']=0
+            log.debug("DI dataMode, so pushed all mass range vals into M1 and set ones for M2 to zero")
+        if settings['OmegaMIN']==None:
+            settings['OmegaMIN'] = 0.0
+        if settings['OmegaMAX']==None:
+            if settings['dataMode']=='3D':
+                settings['OmegaMAX'] = 360.0
+            else:
+                settings['OmegaMAX'] = 180.0
+        if settings['eMIN']==None:  
+            settings['eMIN'] = 0.0
+        if settings['eMAX']==None:
+            settings['eMAX'] = 0.98
+        if settings['incMIN']==None:
+            settings['incMIN'] = 0.0
+        if settings['incMAX']==None:
+            settings['incMAX'] = 180.0  
+        if settings['omegaMIN']==None:
+            settings['omegaMIN'] = 0.0
+        if settings['omegaMAX']==None:
+            settings['omegaMAX'] = 360.0
         ##load up range min,max and sigma arrayS
         rangeMaxs = [genTools.getSimpleDictVal(settings,'mass1MAX'),\
                    genTools.getSimpleDictVal(settings,'mass2MAX'),\
@@ -211,7 +237,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                     elif genTools.getSimpleDictVal(settings,'Kdirect'):
                         if (rangeMaxs[12]!=0)and(i==12):
                             paramInts.append(12)                                           
-                elif (i==2)or(i==3)or(i==0)or(i==1):
+                elif i<4:
                     if (genTools.getSimpleDictVal(settings,'dataMode')!='RV'):
                         if(rangeMaxs[i]!=0):
                             paramInts.append(i)

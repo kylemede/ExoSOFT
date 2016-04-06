@@ -146,33 +146,42 @@ rangesDict={
 ###################################################
 # Ranges for acceptable random number inputs ######
 ###################################################
+## For Omega, e, T, inc and omega, None indicates to use default ranges.
+## For Omega and omega, values can vary outside ranges, but are shifted by 
+## +/-360 befire being stored.
 # Minimum/Maximum allowed value for the mass of the primary body [double][Msun]
 # NOTE: For DI only cases, use mass1 values as total mass and set mass2 values to zero.
+#       This will be done during start up otherwise.
 'mass1MIN' : 0.2,
 'mass1MAX' : 2.55,
 # Minimum/Maximum allowed value for the mass of the secondary body [double][Msun]
+# Note: 1Mj ~ 0.00095 Msun
 'mass2MIN' : 0.0001,
 'mass2MAX' : 0.005,
 # Minimum/Maximum allowed value for the Parallax [double][mas]
 'paraMIN' : 1.0,
 'paraMAX' : 100.0,
-# Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg]
-'OmegaMIN' : 1.0,
-'OmegaMAX' : 180.0,
-# Minimum/Maximum allowed value for the Eccentricity [double]
-'eMIN' : 0.0,
-'eMAX' : 0.98,
-# Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD]
-#(-1 indicates to use [earliestsEpoch-period,earliestEpoch])
+# Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg] OR None
+# Default: [0,360] if 'dataMode' is '3D', else [0,180].
+'OmegaMIN' : None,
+'OmegaMAX' : None,
+# Minimum/Maximum allowed value for the Eccentricity [double] OR None
+# Default: [0,0.98]
+'eMIN' : None,
+'eMAX' : None,
+# Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD] OR None
+# Default: [earliestsEpoch-period,earliestEpoch]
 'TMIN' : 2449000,
 'TMAX' : 2453500,
 # Minimum/Maximum allowed value for the Period [double][yrs]
 'PMIN' : 1.0,
 'PMAX' : 50.0,
-# Minimum/Maximum allowed value for the Inclination [double][deg]
+# Minimum/Maximum allowed value for the Inclination [double][deg] OR None
+# Default: [0,180].  [0,90] is another popular choice.
 'incMIN' : 1,
 'incMAX' : 90,
-# Minimum/Maximum allowed value for the Argument of Perigee [double][deg]
+# Minimum/Maximum allowed value for the Argument of Perigee [double][deg] OR None
+# Default: [0,360]
 'omegaMIN' : -50,
 'omegaMAX' : 90,
 # Minimum/Maximum value for Semi-major amplitude of RV curve [m/s]
