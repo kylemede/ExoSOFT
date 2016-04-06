@@ -14,8 +14,8 @@ import sys
 import pyfits
 import warnings
 import readWriteTools as rwTools
-warnings.simplefilter("error")
 
+warnings.simplefilter("error")
 log = exoSOFTlogger.getLogger('main.genTools',lvl=100,addFH=False)  
     
 def mcmcEffPtsCalc(outputDataFilename):
@@ -385,7 +385,7 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
         numFilesStr+="\n"+"*"*61+"\nThe final combined file was for a total of "+str(totalSamps)+" samples\n"+"*"*61+'\n'
         f.write(numFilesStr)
         f.write(chiSquaredsStr)
-        bestStr = '\n'+'-'*21+'\nBest fit values were:\n'+'-'*21+'\n'
+        bestStr = '\n'+'-'*35+"\nBest fit values were:\n"+'-'*35+'\n'
         ############################################
         ## calculate chi squareds for the best fit #
         ############################################
@@ -430,6 +430,24 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
                 bestStr+=paramStrs[i]+" = "+str(bestFit[i])+", OR "+str(bestFit[i]-2400000.5)+' in [MJD]\n'
             else:
                 bestStr+=paramStrs[i]+" = "+str(bestFit[i])+'\n'
+        bestStr+='-'*35+"\nValues differing for the two bodies:\n"+'-'*35+'\n'
+        bestStr+="(Masses, Parallax, e, To, P, i, chiSquared and RV offsets)"
+        bestStr+=" all SAME as above."
+        bestStr+="\nONLY Omega, omega and semi-major axis values differ.\n"
+        omega1 = bestFit[93]+180.0
+        if omega1>360.0:
+            omega1-=360.0
+        bestStr+="Omega_1 [deg] = "+str(omega1)+'\n'
+        bestStr+="Omega_2 [deg] = "+str(bestFit[3])+'\n'
+        omega1 = bestFit[9]+180.0
+        if omega1>360.0:
+            omega1-=360.0
+        bestStr+="omega_1 [deg] = "+str(omega1)+'\n'
+        bestStr+="omega_2 [deg] = "+str(bestFit[9])+'\n'
+        if bestFit[1]!=0:
+            a1 = bestFit[10]/(1.0+(bestFit[0]/bestFit[1]))
+            bestStr+="a_1 [AU] = "+str(a1)+'\n'
+            bestStr+="a_2 [AU] = "+str(bestFit[10]-a1)+'\n'
         bestStr+='\n'+'*'*90+'\nBEST REDUCED CHISQUAREDS: [total,DI,RV] = ['+str(reduced3D)+", "+str(reducedDI)+", "+str(reducedRV)+"]\n"+'*'*90
         f.write(bestStr)
     except:

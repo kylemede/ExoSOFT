@@ -244,12 +244,10 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     ## determine argPeriOffsetRV and argPeriOffsetDI values
     #######################################################
     omegaFdi = 0
-    omegaFrv = 0
-    #first using RV special bools
-    if (settingsDict['primeRVs'][0] and settingsDict['fitPrime'][0]):
-        omegaFdi=-180.0
-    elif (settingsDict['primeRVs'][0] and(settingsDict['fitPrime'][0]==False)):
-        omegaFrv=180.0
+    ## ExoSOFT assumes the RV data was measured from the primary's spectra, and 
+    ## the orbit of the companion is being fit, NOT the orbit of the primary.
+    ## Thus, there is a 180deg shift forced to account for this.
+    omegaFrv=180.0
     #now update due to fixed argPeriPlus values
     omegaFdi+=settingsDict['omegaPdi'][0]
     omegaFrv+=settingsDict['omegaPrv'][0]

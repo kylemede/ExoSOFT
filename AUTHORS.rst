@@ -8,4 +8,4 @@ Direct contributions to the code base:
 
 Comments, corrections & suggestions:
 
-- `John Livingston <https://github.com/jckhnk>`_
+- `John Livingston <https://github.com/john-livingston>`_

@@ -1,19 +1,19 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
-from priors import ePriorRatio,pPriorRatio,incPriorRatio,mass1PriorRatio,mass2PriorRatio,paraPriorRatio,chabrierPrior
+from priors import ePriorRatio,pPriorRatio,incPriorRatio,mass1PriorRatio,mass2PriorRatio,paraPriorRatio
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (240000000,"Number of MCMC or MC samples"),
+'nSamples' : (100000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
-'nChains' : (25,"Number MC/SA/ST of chains"),
+'nChains' : (2,"Number MC/SA/ST of chains"),
 # Number of MCMC chains to run in parallel. ONLY available in 'MCMC' mode. [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
-'nMCMCcns' : (7,"Number MCMC of chains"),
+'nMCMCcns' : (2,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
-'logLevel' : 30,
+'logLevel' : 10,
 # data mode, choices {'RV','DI','3D'} [string]
 'dataMode' : ('3D',"Data Mode (RV,DI,3D)"),
 # Run in Automatic mode? This will perform checks and select the stages to run automatically. [bool]
@@ -21,7 +21,7 @@ simpleSettingsDict={
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
 # NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'MCMC',
+'stages' : 'SA',
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
 'initCrit' : 'enough',
@@ -43,12 +43,12 @@ directoriesDict = {
 'outDir' : '/mnt/Data1/Todai_Work/Data/data_SMODT',
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
 #*************************************************************************************************************************
-'outRoot' : "TEST-ArtificialJupiter-5percentError",
+'outRoot' : "TEST-ArtificialJupiter-5percentError-tst",
 #*************************************************************************************************************************               
 # full path to input astrometry data file. [string]
-'DIdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',                
+'DIdataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',                
 # full path to input radial velocity data file. [string]
-'RVdataFile': '/mnt/HOME/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
+'RVdataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
 }
 
 advancedSettingsDict = {
@@ -61,7 +61,7 @@ advancedSettingsDict = {
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
 'chiMaxST':(5,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
-'cMaxMCMC':(1.0,'Max reduced chiSquared to enter MCMC.'),
+'cMaxMCMC':(2.0,'Max reduced chiSquared to enter MCMC.'),
 #number of times to produce a summary log msg during a stage's progress [int]
 'nSumry'  :10,
 # make plot of posterior distributions? [bool]
@@ -72,12 +72,10 @@ advancedSettingsDict = {
 'delChains' :True,
 # Delete combined data files after simulation is complete? [bool]
 'delCombined' :False,
-# run 'make' on C++/SWIG code to make sure it is up-to-date [bool]
-'remake' :False,
 ###$$$$$$$$$$$$$$$$$$$$$$ Keep in final version $$$$$$$$$$$$$$$$$$$$$$$$$$
 # Copy output non-data files to a Dropbox folder? [bool]  
 'CopyToDB' :False,
-'dbFolder' : '/mnt/HOME/Dropbox/SMODT-outputCopies/',
+'dbFolder' : '/mnt/HOME/MEGA/Dropbox/SMODT-outputCopies/',
 ##$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 ############################
 # Settings for MCMC mode ###
@@ -91,7 +89,7 @@ advancedSettingsDict = {
 # NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
 'calcCL' :False,
 # number of samples to draw for simulated annealing stage [int] 
-'nSAsamp' :(3000000,"Num SA samples"),
+'nSAsamp' :(100000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
 'strtTemp' : (50.0,"SA start temp."),
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
@@ -103,7 +101,7 @@ advancedSettingsDict = {
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : (50,"Num steps till temp drops in SA."),
 # number of samples to draw for sigma tuning stage [int].
-'nSTsamp' :(1000000,"Num ST samples"),
+'nSTsamp' :(100000,"Num ST samples"),
 # number of steps per varying parameter until calculating the acceptance rate and tuning sigmas. [int]
 # Allowed vals [1,nSTsamp), testing shows a value of ~200 works well.
 'sigInt': (200,"Num steps/par till calc acc rate/tune sigs."),
@@ -131,10 +129,6 @@ advancedSettingsDict = {
 # Operate in low eccenctricity mode? [bool]
 # Then step through in sqrt(e)sin(omega) and sqrt(e)cos(omega) instead of e & omega directly
 'lowEcc'   : (True,"low eccentricty stepping?"),
-# fit to the primary's RV orbit [bool]
-'fitPrime' : (False,"Fit primary's orbit?"),
-# Are the RVs in the RVdata.dat for the Primary star? [bool]
-'primeRVs' : (True,"RVs measured from Primary?"),
 # Draw values for K directly, do NOT calculate it [bool]. Kills varying of Inclination.  Only possible in RV only mode.
 'Kdirect'  : (False,'Vary K direct, do not calc it'),
 # Step through parameter space in Time of Center Transit (Inferior Conjunction)?  [bool]
@@ -159,32 +153,32 @@ rangesDict={
 # Minimum/Maximum allowed value for the mass of the primary body [double][Msun]
 # NOTE: For DI only cases, use mass1 values as total mass and set mass2 values to zero.
 'mass1MIN' : 0.2,
-'mass1MAX' : 2.35,
+'mass1MAX' : 2.55,
 # Minimum/Maximum allowed value for the mass of the secondary body [double][Msun]
 'mass2MIN' : 0.0001,
 'mass2MAX' : 0.005,
 # Minimum/Maximum allowed value for the Parallax [double][mas]
-'paraMIN' : 30.0,
-'paraMAX' : 70.0,
+'paraMIN' : 1.0,
+'paraMAX' : 100.0,
 # Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg]
-'OmegaMIN' : 80.0,
-'OmegaMAX' : 130.0,
+'OmegaMIN' : 1.0,
+'OmegaMAX' : 180.0,
 # Minimum/Maximum allowed value for the Eccentricity [double]
-'eMIN' : 0.00000001,
-'eMAX' : 0.15,
+'eMIN' : 0.0,
+'eMAX' : 0.98,
 # Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD]
 #(-1 indicates to use [earliestsEpoch-period,earliestEpoch])
-'TMIN' : 2449550,
-'TMAX' : 2452500,
+'TMIN' : 2449000,
+'TMAX' : 2453500,
 # Minimum/Maximum allowed value for the Period [double][yrs]
-'PMIN' : 8.0,
-'PMAX' : 16.0,
+'PMIN' : 1.0,
+'PMAX' : 50.0,
 # Minimum/Maximum allowed value for the Inclination [double][deg]
-'incMIN' : 20,
-'incMAX' : 65,
+'incMIN' : 1,
+'incMAX' : 90,
 # Minimum/Maximum allowed value for the Argument of Perigee [double][deg]
-'omegaMIN' : -70,
-'omegaMAX' : 170,
+'omegaMIN' : -50,
+'omegaMAX' : 90,
 # Minimum/Maximum value for Semi-major amplitude of RV curve [m/s]
 'KMIN' : 0,
 'KMAX' : 0,
