@@ -713,7 +713,7 @@ def epochsToPhases(epochs,Tc,P_yrs, halfOrbit=False):
             print 'phase = ',phase        
     return phases
 
-def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],RVlims=[],diErrMult=1,diLnThk=1.0):
+def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVlims=[],diErrMult=1,diLnThk=1.0):
     """
     Make both the DI and RV plots.
     '-DI.png' and/or '-RV.png' will be added to end of plotFnameBase 
@@ -743,14 +743,14 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         os.mkdir(plotDataDir)
     plotDataDir+='/'
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=genTools.getSimpleDictVal(settingsDict,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=genTools.getSimpleDictVal(settings,'dataMode'))
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settingsDict["pasa"][0]
+        pasa = settings["pasa"][0]
     except:
         pasa = False
-    Orbit.loadStaticVars(settingsDict['omegaFdi'][0],settingsDict['omegaFrv'][0],settingsDict['lowEcc'][0],False)
+    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],False)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []
@@ -761,7 +761,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
     ################
     # Make DI plot #
     ################
-    if settingsDict['dataMode'][0]!='RV':
+    if settings['dataMode'][0]!='RV':
         paramsDI = copy.deepcopy(params)
         realDataDI = copy.deepcopy(realData)
         realDataDI = realDataDI[np.where(realDataDI[:,2]<1e6)[0],:]
@@ -795,7 +795,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
         xCOM = (fakeRealDataQuarter[3,0]+fakeRealDataQuarter[0,0])/2.0
         yCOM = (fakeRealDataQuarter[3,1]+fakeRealDataQuarter[0,1])/2.0
         ## Find Ascending and Descending Node locations
-        nodeEpochs = nodeEpochsCalc(paramsDI,settingsDict["omegaFdi"][0]) 
+        nodeEpochs = nodeEpochsCalc(paramsDI,settings["omegaFdi"][0]) 
         #print 'period/2 = '+repr(const.daysPerYear*paramsDI[7]*(1.0/2.0))
         #print 'nodeEpochs = '+repr(nodeEpochs)
         lonData = np.ones((2,8),dtype=np.dtype('d'),order='C')
@@ -956,12 +956,12 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
                 log.warning("Seems epstopdf failed.  Check if it is installed properly.")    
         ## log params used in DI plot
         log.info('\n'+"*"*50+"\nOrbital Elements used in DI plot:\n"+repr(paramsDI))
-        log.info("\n with an omega value = "+str(paramsDI[9]+settingsDict["omegaFdi"][0])+'\n'+"*"*50+'\n')
+        log.info("\n with an omega value = "+str(paramsDI[9]+settings["omegaFdi"][0])+'\n'+"*"*50+'\n')
 
     ################
     # Make RV plot #
     ################
-    if settingsDict['dataMode'][0]!='DI':        
+    if settings['dataMode'][0]!='DI':        
         realDataRV = copy.deepcopy(realData)
         realDataRV = realDataRV[np.where(realDataRV[:,6]<1e6)[0],:]
         ##Ensuring that params are in required format for SWIG
@@ -1142,7 +1142,7 @@ def orbitPlotter(orbParams,settingsDict,plotFnameBase="",format='png',DIlims=[],
                     log.warning("Seems epstopdf failed.  Check if it is installed properly.")
                 ## log params used in RV plot
             log.info('\n'+"*"*50+"\nOrbital Elements used in RV plot:\n"+repr(paramsRV))
-            log.info("\n with an omega value = "+str(paramsRV[9]+settingsDict["omegaFrv"][0])+'\n'+"*"*50+'\n')
+            log.info("\n with an omega value = "+str(paramsRV[9]+settings["omegaFrv"][0])+'\n'+"*"*50+'\n')
 
 def nodeEpochsCalc(paramsDI,omegaDIoffset):
     """

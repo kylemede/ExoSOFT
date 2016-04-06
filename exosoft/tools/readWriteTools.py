@@ -182,7 +182,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         log.critical("An error occured while trying to load data!!")
     return realData
             
-def loadSettingsDict(ExoSOFTdir,settFilePath):
+def loadSettings(ExoSOFTdir,settFilePath):
     """
     Load the values from both the simple (symSettingsSimple.py) and advanced (symSettingsAdvanced.py)
     into a dictionary for use throughout the simulation and post-processing.
@@ -230,7 +230,7 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     shutil.copy(os.path.join(toolsdir,'constants.py'),\
                 os.path.join(toolsdir,'temp/constants.py'))
     os.chdir(toolsdir)
-    from temp.settings import settingsDict
+    from temp.settings import settings
     try:
         os.remove(os.path.join(toolsdir,'temp/settings.py'))
         os.remove(os.path.join(toolsdir,'temp/constants.py'))
@@ -249,22 +249,22 @@ def loadSettingsDict(ExoSOFTdir,settFilePath):
     ## Thus, there is a 180deg shift forced to account for this.
     omegaFrv=180.0
     #now update due to fixed argPeriPlus values
-    omegaFdi+=settingsDict['omegaPdi'][0]
-    omegaFrv+=settingsDict['omegaPrv'][0]
-    settingsDict['omegaFdi'] = (omegaFdi,"Total fixed val added to DI omega in model")
-    settingsDict['omegaFrv'] = (omegaFrv,"Total fixed val added to RV omega in model")
+    omegaFdi+=settings['omegaPdi'][0]
+    omegaFrv+=settings['omegaPrv'][0]
+    settings['omegaFdi'] = (omegaFdi,"Total fixed val added to DI omega in model")
+    settings['omegaFrv'] = (omegaFrv,"Total fixed val added to RV omega in model")
     log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
     ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
-    if settingsDict['dataMode'][0]=='DI':
-        settingsDict['mass1MIN']=settingsDict['mass1MIN']+settingsDict['mass2MIN']
-        settingsDict['mass1MAX']=settingsDict['mass1MAX']+settingsDict['mass2MAX']
-        settingsDict['mass2MIN']=0
-        settingsDict['mass2MAX']=0
+    if settings['dataMode'][0]=='DI':
+        settings['mass1MIN']=settings['mass1MIN']+settings['mass2MIN']
+        settings['mass1MAX']=settings['mass1MAX']+settings['mass2MAX']
+        settings['mass2MIN']=0
+        settings['mass2MAX']=0
         log.debug("DI dataMode, so pushed all mass range vals into M1 and set ones for M2 to zero")
-    #for key in settingsDict:
-    #    print key+' = '+repr(settingsDict[key])
+    #for key in settings:
+    #    print key+' = '+repr(settings[key])
     #sys.exit('shirt')
-    return settingsDict
+    return settings
 
 def loadFits(filename):
     """
@@ -281,12 +281,12 @@ def loadFits(filename):
         head=data=False
     return (head,data)
 
-def writeFits(baseFilename,data,settingsDict):
+def writeFits(baseFilename,data,settings):
     """
     Data will be written to a fits file with a single PrimaryHDU,
-    with the .header loaded up with the tuples from the settingsDict 
+    with the .header loaded up with the tuples from the settings 
     and .data = provided data.
-    File will be stored in the 'finalFolder' directory from the settingsDict.
+    File will be stored in the 'finalFolder' directory from the settings.
     If data variable is a string, this function will assume it is a filename 
     of where the data is stored in a .npy file, and load it in.
     """
@@ -302,25 +302,25 @@ def writeFits(baseFilename,data,settingsDict):
         if len(data)>0:
             if '.fits' not in baseFilename:
                 baseFilename=baseFilename+'.fits'
-            outFname = os.path.join(settingsDict['finalFolder'],baseFilename)
+            outFname = os.path.join(settings['finalFolder'],baseFilename)
             hdu = pyfits.PrimaryHDU(data)
             hdulist = pyfits.HDUList([hdu])
             header = hdulist[0].header
-            ##load up header with tuples from settingsDict
-            for key in settingsDict:
-                if type(settingsDict[key])==tuple:
-                    header[key]=settingsDict[key][0]
-                    if len(settingsDict[key][1])>47:
-                        log.warning("comment too long for pyfits headers:"+settingsDict[key][1])
+            ##load up header with tuples from settings
+            for key in settings:
+                if type(settings[key])==tuple:
+                    header[key]=settings[key][0]
+                    if len(settings[key][1])>47:
+                        log.warning("comment too long for pyfits headers:"+settings[key][1])
                     else:
-                        header.comments[key] = settingsDict[key][1]
+                        header.comments[key] = settings[key][1]
                         #print key+' = '+repr((header[key],header.comments[key]))
             hdulist.writeto(outFname)
             log.info("output file written to:below\n"+outFname)
             hdulist.close()
             ## check resulting fits file header
             if False:
-                f = pyfits.open(os.path.join(settingsDict['finalFolder'],baseFilename),'readonly')
+                f = pyfits.open(os.path.join(settings['finalFolder'],baseFilename),'readonly')
                 head = f[0].header
                 f.close()
                 if False:
@@ -404,16 +404,16 @@ def rmFiles(files):
             log.error('Failed to delete file: '+os.path.basename(fname))
     
     
-def writeBestsFile(settingsDict,pars,sigs,bstChiSqr,stage):
+def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
     
-    filename = os.path.join(settingsDict['finalFolder'],'best'+stage+'paramsAndSigs.txt')
+    filename = os.path.join(settings['finalFolder'],'best'+stage+'paramsAndSigs.txt')
     f = open(filename,'w')
     f.write("Best-fit between all "+stage+" chains had a reduce chi squared of "+str(bstChiSqr)+'\n')
     f.write("\nIts parameters were:\n")
     f.write(genTools.nparyTolistStr(pars)+'\n')
     f.write("\n\nIts sigmas were:\n")
     #double check clean up sigs of pars that were not varying
-    paramInts = settingsDict['paramInts']
+    paramInts = settings['paramInts']
     if stage=='MC':
         sigs = np.zeros(len(pars))
     else:
@@ -422,51 +422,7 @@ def writeBestsFile(settingsDict,pars,sigs,bstChiSqr,stage):
                 sigs[i] = 0
     f.write(genTools.nparyTolistStr(sigs)+'\n')
     f.close()
-    log.info("Best fit params and sigmas from "+stage+" stage were written to :\n"+filename)  
-    
-def pushIntoOrigSettFiles(settingsDict,pars,sigs=[]):
-    """
-    Push the latest found parameters into startParams if better, also replace sigmas?
-    Set 'pushToSettFiles'=False to avoid this.
-    """
-    if settingsDict["pushToSettFiles"]==True:
-        origSettFileRoot = settingsDict['origSettFileRoot']
-        simpFname = origSettFileRoot+"settingsSimple.py"
-        advFname = origSettFileRoot+"settingsAdvanced.py" 
-        f = open(simpFname,'r')
-        lines = f.readlines()
-        f.close()
-        linesOut =[]
-        replacePars = False
-        #go through lines and replace the lines if new vals better than old.
-        if settingsDict['startParams'][11]>float(str(pars[11])):
-            replacePars = True
-            log.debug(repr(settingsDict['startParams'][11])+' > '+str(pars[11]))
-        if replacePars==False:
-            log.info("Best pars were not better than those in the current settings file.")
-        for line in lines:
-            key = line.split(':')[0].replace(' ','').replace('"','').replace("'",'')
-            if (key=='startParams')and replacePars:
-                linesOut.append("'"+key+"'"+" : "+genTools.nparyTolistStr(pars)+',\n')
-                log.info('Updated original *settingsSimple.py startParams value to latest best-fit values.')
-            elif (key=='startSigmas')and(len(sigs)>1):
-                linesOut.append("'"+key+"'"+" : "+genTools.nparyTolistStr(sigs)+',\n')
-                log.info('Updated original *settingsSimple.py startSigmas value to latest best-fit values.')
-            else:
-                linesOut.append(line)
-        #Write updated lines to file by the same name, ie replace old version.
-        f = open(simpFname,'w')
-        f.writelines(linesOut)
-        f.close()
-        log.info('just overwrote an updated set of values to settings dict:\n'+simpFname+'\n')
-        
-    
-    
-    
-    
-    
+    log.info("Best fit params and sigmas from "+stage+" stage were written to :\n"+filename)    
     
     
 #END OF FILE
-    
-      

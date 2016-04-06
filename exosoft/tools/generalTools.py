@@ -308,31 +308,31 @@ def getSimpleDictVal(dict,key):
     except:
         return False
     
-def cleanUp(settingsDict,stageList,allFname):
+def cleanUp(settings,stageList,allFname):
     """
     Clean up final directory after simulation completes
     """
-    #os.mkdir(settingsDict['finalFolder'])
+    #os.mkdir(settings['finalFolder'])
     
     delFiles = []
     
-    fnames = glob.glob(os.path.join(settingsDict['finalFolder'],"pklTemp-*"))
+    fnames = glob.glob(os.path.join(settings['finalFolder'],"pklTemp-*"))
     for i in range(0,len(fnames)):
         delFiles.append(fnames[i])
     ##get chain data filenames to delete
-    if settingsDict["delChains"]:
+    if settings["delChains"]:
         for stage in stageList:
-            fnames = glob.glob(os.path.join(settingsDict['finalFolder'],"outputData"+stage+"*.fits"))
+            fnames = glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*.fits"))
             for i in range(0,len(fnames)):
                 delFiles.append(fnames[i])
             if stage=='SA':
-                fnames = glob.glob(os.path.join(settingsDict['finalFolder'],"SAtempData*.fits"))
+                fnames = glob.glob(os.path.join(settings['finalFolder'],"SAtempData*.fits"))
                 for i in range(0,len(fnames)):
                     delFiles.append(fnames[i])
     ##get combined data filename to delete
-    if settingsDict["delCombined"]:
+    if settings["delCombined"]:
         delFiles.append(allFname)
-    if (settingsDict['rmBurn'][0])and(settingsDict['nChains'][0]>1):
+    if (settings['rmBurn'][0])and(settings['nChains'][0]>1):
         ##the burn-in was stripped in the final file, so kill the non-stripped version if it exists
         nm = os.path.join(os.path.dirname(allFname),'combinedMCMCdata.fits')
         if os.path.exists(nm):
@@ -341,11 +341,11 @@ def cleanUp(settingsDict,stageList,allFname):
     ##try to delete files
     rwTools.rmFiles(delFiles)
     
-def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings):
+def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings):
     """
     Make a txt file that summarizes the results nicely.
     """
-    summaryFname = os.path.join(settingsDict['finalFolder'],'RESULTS.txt')
+    summaryFname = os.path.join(settings['finalFolder'],'RESULTS.txt')
     if os.path.exists(summaryFname):
         f = open(summaryFname,'a')
     else:
@@ -354,7 +354,7 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
     totalSamps = head['NSAMPLES']
     (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
-    f.write("\n"+"*"*80+"\noutRoot:  "+settingsDict['outRoot']+"\n"+"*"*80+"\n")
+    f.write("\n"+"*"*80+"\noutRoot:  "+settings['outRoot']+"\n"+"*"*80+"\n")
     f.write('\n'+'-'*7+'\nBasics:\n'+'-'*7)
     f.write('\nparamList:\n'+repr(paramListCleaned))
     f.write('\nparamStrs:\n'+repr(paramStrsCleaned))
@@ -367,10 +367,10 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
         numFilesStr = '\nTotal # of files that finished each stage were:\n'
         chiSquaredsStr = '\nBest Reduced Chi Squareds for each stage were:\n'
         for stage in stageList:
-            fnames = np.sort(glob.glob(os.path.join(settingsDict['finalFolder'],"outputData"+stage+"*.fits")))
-            if (stage=="MCMC")and settingsDict["rmBurn"][0]:
-                fnames = np.sort(glob.glob(os.path.join(settingsDict['finalFolder'],"outputData"+stage+"*BIstripped.fits")))
-            numFilesStr+=stage+' = '+str(len(fnames))+", each with "+str(settingsDict[stgNsampStrDict[stage]][0])+" samples\n"
+            fnames = np.sort(glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*.fits")))
+            if (stage=="MCMC")and settings["rmBurn"][0]:
+                fnames = np.sort(glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*BIstripped.fits")))
+            numFilesStr+=stage+' = '+str(len(fnames))+", each with "+str(settings[stgNsampStrDict[stage]][0])+" samples\n"
             if len(fnames)>0:
                 chiSquaredsStr+=stage+" = ["
                 for fname in fnames: 
@@ -385,19 +385,19 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
         numFilesStr+="\n"+"*"*61+"\nThe final combined file was for a total of "+str(totalSamps)+" samples\n"+"*"*61+'\n'
         f.write(numFilesStr)
         f.write(chiSquaredsStr)
-        bestStr = '\n'+'-'*35+"\nBest fit values were:\n"+'-'*35+'\n'
+        bestStr = '\n'+'-'*21+"\nBest fit values were:\n"+'-'*21+'\n'
         ############################################
         ## calculate chi squareds for the best fit #
         ############################################
         ##get the real data
-        realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=getSimpleDictVal(settingsDict,'dataMode'))
+        realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
         ## Make Orbit cpp obj
         Orbit = cppTools.Orbit()
         try:
-            pasa = settingsDict["pasa"][0]
+            pasa = settings["pasa"][0]
         except:
             pasa = False
-        Orbit.loadStaticVars(settingsDict['omegaFdi'][0],settingsDict['omegaFrv'][0],settingsDict['lowEcc'][0],pasa)
+        Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
         Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
         ## ensure bestFit are in required format for Orbit
         params = []
@@ -430,11 +430,11 @@ def summaryFile(settingsDict,stageList,finalFits,clStr,burnInStr,bestFit,grStr,e
                 bestStr+=paramStrs[i]+" = "+str(bestFit[i])+", OR "+str(bestFit[i]-2400000.5)+' in [MJD]\n'
             else:
                 bestStr+=paramStrs[i]+" = "+str(bestFit[i])+'\n'
-        bestStr+='-'*35+"\nValues differing for the two bodies:\n"+'-'*35+'\n'
+        bestStr+='-'*36+"\nValues differing for the two bodies:\n"+'-'*36+'\n'
         bestStr+="(Masses, Parallax, e, To, P, i, chiSquared and RV offsets)"
         bestStr+=" all SAME as above."
         bestStr+="\nONLY Omega, omega and semi-major axis values differ.\n"
-        omega1 = bestFit[93]+180.0
+        omega1 = bestFit[3]+180.0
         if omega1>360.0:
             omega1-=360.0
         bestStr+="Omega_1 [deg] = "+str(omega1)+'\n'
@@ -480,7 +480,7 @@ def keplersThird(p=0,atot=0,mtot=0):
     
     return (p,atot,mtot)
     
-def recheckFit3D(orbParams,settingsDict,finalFits='',nus=[]):
+def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
     if finalFits!='':
         (head,data) = rwTools.loadFits(finalFits)
         nu = head['NU']
@@ -497,14 +497,14 @@ def recheckFit3D(orbParams,settingsDict,finalFits='',nus=[]):
         nuRV = 1.0
         
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=getSimpleDictVal(settingsDict,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settingsDict["pasa"][0]
+        pasa = settings["pasa"][0]
     except:
         pasa = False
-    Orbit.loadStaticVars(settingsDict['omegaFdi'][0],settingsDict['omegaFrv'][0],settingsDict['lowEcc'][0],pasa)
+    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []
@@ -518,17 +518,17 @@ def recheckFit3D(orbParams,settingsDict,finalFits='',nus=[]):
     (raw3D, reducedDI, reducedRV, reduced3D) = chiSquaredCalc3D(realData,predictedData,nuDI,nuRV,nu)
     print '(raw3D, reducedDI, reducedRV, reduced3D) = '+repr((raw3D, reducedDI, reducedRV, reduced3D))
     
-def predictLocation(orbParams,settingsDict,epochs=[]):
+def predictLocation(orbParams,settings,epochs=[]):
     
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=getSimpleDictVal(settingsDict,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settingsDict["pasa"][0]
+        pasa = settings["pasa"][0]
     except:
         pasa = False
-    Orbit.loadStaticVars(settingsDict['omegaFdi'][0],settingsDict['omegaFrv'][0],settingsDict['lowEcc'][0],pasa)
+    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []
@@ -570,17 +570,17 @@ def chiSquaredCalc3D(realData,modelData,nuDI,nuRV,nu3D,pasa=False):
     rawRV = np.sum((diffsRV[np.where(diffsRV!=0)]**2)/(errorsRV**2))
     return (raw3D,rawDI/nuDI,rawRV/nuRV,raw3D/nu3D)
 
-def copyToDB(settingsDict):
+def copyToDB(settings):
     """
     Copy vital results files to Dropbox.
     """
     fnamesALL = []
     for extension in ['pdf','txt','log']:
-        fnames = glob.glob(os.path.join(settingsDict['finalFolder'],"*."+extension))
+        fnames = glob.glob(os.path.join(settings['finalFolder'],"*."+extension))
         log.debug('found files to copy to DB:\n'+repr(fnames))
         for name in fnames:
             fnamesALL.append(name)
-    dbDir = os.path.join(settingsDict['dbFolder'],settingsDict['outRoot'])
+    dbDir = os.path.join(settings['dbFolder'],settings['outRoot'])
     os.mkdir(dbDir)
     log.debug('DB dir is:\n'+repr(dbDir))
     for f in fnamesALL:

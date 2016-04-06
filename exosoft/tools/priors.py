@@ -8,9 +8,9 @@ import settings as sett
 ########################################
 #NOTE: only change the code and not the name of the functions or their inputs.
 def ePriorRatio(eProposed,eLast):
-    if (sett.settingsDict['lowEcc'][0]==False)and(sett.settingsDict['eMAX']!=0):
+    if (sett.settings['lowEcc'][0]==False)and(sett.settings['eMAX']!=0):
         if eProposed!=eLast!=0:
-            if (sett.settingsDict['PMIN']*constants.daysPerYear)>1000.0:
+            if (sett.settings['PMIN']*constants.daysPerYear)>1000.0:
                 return eProposed/eLast
             else:
                 return 1.0
@@ -20,7 +20,7 @@ def ePriorRatio(eProposed,eLast):
         return 1.0
     
 def pPriorRatio(Pproposed,Plast):
-    if sett.settingsDict['PMAX']!=0:
+    if sett.settings['PMAX']!=0:
         if Pproposed!=0:
             return Plast/Pproposed
         else:
@@ -29,7 +29,7 @@ def pPriorRatio(Pproposed,Plast):
         return 1.0
     
 def incPriorRatio(incProposed,incLast):
-    if sett.settingsDict['incMAX']!=0:
+    if sett.settings['incMAX']!=0:
         if (incLast%90.0)!=0:
             return np.sin(incProposed*(constants.pi/180.0))/np.sin(incLast*(constants.pi/180.0))
         else:
@@ -38,7 +38,7 @@ def incPriorRatio(incProposed,incLast):
         return 1.0
     
 def mass1PriorRatio(MProposed,MLast):
-    if (sett.settingsDict['mass1MAX']!=0)and True:
+    if (sett.settings['mass1MAX']!=0)and True:
         if MProposed!=MLast!=0:
             prop = pdmfPrior(MProposed)
             lst = pdmfPrior(MLast)
@@ -49,7 +49,7 @@ def mass1PriorRatio(MProposed,MLast):
         return 1.0
     
 def mass2PriorRatio(m2Prop,m2Last,m1Prop,m1Last):
-    if (sett.settingsDict['mass2MAX']!=0)and True:
+    if (sett.settings['mass2MAX']!=0)and True:
         if 0.0 not in [m2Prop,m2Last,m1Prop,m1Last]:
             prop = cmfPrior(m2Prop,m1Prop)
             lst = cmfPrior(m2Last,m1Last)
@@ -60,13 +60,13 @@ def mass2PriorRatio(m2Prop,m2Last,m1Prop,m1Last):
         return 1.0
     
 def paraPriorRatio(paraProposed,paraLast):
-    if paraProposed!=paraLast!=sett.settingsDict['paraMAX']!=0:
+    if paraProposed!=paraLast!=sett.settings['paraMAX']!=0:
         ratioA = (paraLast**4.0)/(paraProposed**4.0)
         ratioB = 1.0
-        if sett.settingsDict['paraEst'][0]!=0:
+        if sett.settings['paraEst'][0]!=0:
             ## a Gaussian prior centered on hipparcos and width of hipparcos estimated error
-            top = gaussian(paraProposed, sett.settingsDict['paraEst'][0], sett.settingsDict['paraErr'][0])
-            btm = gaussian(paraLast, sett.settingsDict['paraEst'][0], sett.settingsDict['paraErr'][0])
+            top = gaussian(paraProposed, sett.settings['paraEst'][0], sett.settings['paraErr'][0])
+            btm = gaussian(paraLast, sett.settings['paraEst'][0], sett.settings['paraErr'][0])
             ratioB = top/btm
         return ratioA*ratioB
     else:

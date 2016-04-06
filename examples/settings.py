@@ -33,9 +33,6 @@ simpleSettingsDict={
 'startParams' : False,
 # if unknown, set to False!! else [comma separated list of doubles]
 'startSigmas' : False,
-# If better startParams are found during exosoft, push them and the newest sigmas into this file? [bool]
-# NOTE: this can be helpful, but use caution if you do not wish to overwrite the values in here.
-"pushToSettFiles":False,
 }
 
 directoriesDict = {
@@ -87,7 +84,7 @@ advancedSettingsDict = {
 'rmBurn' : (True,"Remove Burn-in?"),
 # Calculate the Correlation lengths and number of effective points of each chain (must be more than 1 chain)? [bool]
 # NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
-'calcCL' :False,
+'calcCL' :True,
 # number of samples to draw for simulated annealing stage [int] 
 'nSAsamp' :(100000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
@@ -216,14 +213,14 @@ priorsDict={
 ######################
 # Merge All dicts#
 ######################
-settingsDict = {}
+settings = {}
 for key in simpleSettingsDict:
-    settingsDict[key]=simpleSettingsDict[key]
+    settings[key]=simpleSettingsDict[key]
 for key in directoriesDict:
-    settingsDict[key]=directoriesDict[key]
+    settings[key]=directoriesDict[key]
 for key in advancedSettingsDict:
-    settingsDict[key]=advancedSettingsDict[key]
+    settings[key]=advancedSettingsDict[key]
 for key in rangesDict:
-    settingsDict[key]=rangesDict[key]
+    settings[key]=rangesDict[key]
 for key in priorsDict:
-    settingsDict[key]=priorsDict[key]
+    settings[key]=priorsDict[key]

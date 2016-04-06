@@ -11,7 +11,7 @@ from exoSOFTlogger import logDict
 from startupTools import startup
 
 from readWriteTools import loadRealData
-from readWriteTools import loadSettingsDict
+from readWriteTools import loadSettings
 from readWriteTools import loadFits
 from readWriteTools import writeFits
 from readWriteTools import combineFits

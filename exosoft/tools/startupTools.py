@@ -14,7 +14,7 @@ log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False)
 
 def startup(argv,ExoSOFTdir,rePlot=False):
     """
-    Perform the following vital start up steps (and return filled out and cleaned up settingsDict):
+    Perform the following vital start up steps (and return filled out and cleaned up settings):
     -Figure out important directories
     -Copy settings files to temp directory to combine them into the master settings dict
     -Get master settings dict
@@ -55,50 +55,50 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         sys.exit(s)
         #***************************************************************************************************
     else:
-        settingsDict = rwTools.loadSettingsDict(ExoSOFTdir,settFilePath)
-        log.setStreamLevel(settingsDict['logLevel'])
-        settingsDict['ExoSOFTdir']=ExoSOFTdir
-        settingsDict['settingsDir']=os.path.dirname(settFilePath)
-        settingsDict['settFilePath']= settFilePath
+        settings = rwTools.loadSettings(ExoSOFTdir,settFilePath)
+        log.setStreamLevel(settings['logLevel'])
+        settings['ExoSOFTdir']=ExoSOFTdir
+        settings['settingsDir']=os.path.dirname(settFilePath)
+        settings['settFilePath']= settFilePath
         ## Make a directory (folder) to place all the files from this simulation run
-        settingsDict['finalFolder'] = os.path.join(settingsDict['outDir'],settingsDict['outRoot'])
+        settings['finalFolder'] = os.path.join(settings['outDir'],settings['outRoot'])
         ##if not doing a re-post analysis with customPost.py
         if rePlot==False:
-            if os.path.exists(settingsDict['finalFolder']):
-                if settingsDict['logLevel']<50: ## Handle this with a 'clob' bool in dict??? $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+            if os.path.exists(settings['finalFolder']):
+                if settings['logLevel']<50: ## Handle this with a 'clob' bool in dict??? $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                     print '\n'+'$'*50
-                    print 'WARNING!! the folder:\n"'+settingsDict['finalFolder']+'"\nALREADY EXISTS!'
+                    print 'WARNING!! the folder:\n"'+settings['finalFolder']+'"\nALREADY EXISTS!'
                     print 'You can overwrite the data in it, or exit this simulation.'
                     YN = raw_input('OVERWRITE current folder (y/n):')
                 else:
                     YN = 'y'
                 if (('y' in YN) or ('Y' in YN)):
-                    shutil.rmtree(settingsDict['finalFolder'])
-                    os.mkdir(settingsDict['finalFolder'])
-                    dbDir = os.path.join(settingsDict['dbFolder'],settingsDict['outRoot'])
+                    shutil.rmtree(settings['finalFolder'])
+                    os.mkdir(settings['finalFolder'])
+                    dbDir = os.path.join(settings['dbFolder'],settings['outRoot'])
                     if os.path.exists(dbDir):
                         shutil.rmtree(dbDir)
                 else: #elif (('n' in YN) or ('N' in YN)):
                     sys.exit()
-                if settingsDict['logLevel']<50:
+                if settings['logLevel']<50:
                     print '$'*50+'\n'
             else:
-                os.mkdir(settingsDict['finalFolder'])
+                os.mkdir(settings['finalFolder'])
             if False:
-                for key in settingsDict:
-                    print key+' = '+repr(settingsDict[key])
+                for key in settings:
+                    print key+' = '+repr(settings[key])
             ## copy all of current code to output directory
-            codeCopyDir = os.path.join(settingsDict['finalFolder'],'codeUsed')
+            codeCopyDir = os.path.join(settings['finalFolder'],'codeUsed')
             os.mkdir(codeCopyDir)
             log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
-            setFiles = [settingsDict['settFilePath'],settingsDict['RVdataFile'],settingsDict['DIdataFile']]
-            genTools.copyCodeFiles(settingsDict['ExoSOFTdir'], codeCopyDir,setFiles)
+            setFiles = [settings['settFilePath'],settings['RVdataFile'],settings['DIdataFile']]
+            genTools.copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
         ## Note: Originally this was done in simulator startup, but thought better to move here.#
         #########################################################################################
-        realData = rwTools.loadRealData(diFilename=settingsDict['DIdataFile'],rvFilename=settingsDict['RVdataFile'],dataMode=genTools.getSimpleDictVal(settingsDict,'dataMode'))
+        realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=genTools.getSimpleDictVal(settings,'dataMode'))
         if (type(realData)!=list)and(type(realData)!=np.ndarray):
             log.critical('Critical error occured while trying to load real data files.  Quiting exosoft!!')
             #***************************************************************************************************
@@ -111,48 +111,48 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             #***************************************************************************************************
         ##check there are matching number of RV datasets and provided min/max vals for offsets
         if np.min(realData[:,6])<1e6:
-            numVmins=len(genTools.getSimpleDictVal(settingsDict,'vMINs'))
+            numVmins=len(genTools.getSimpleDictVal(settings,'vMINs'))
             if numVmins==0:
                 numVmins=1
             if np.max(realData[:,7])!=(numVmins-1):
                 log.error("THE NUMBER OF vMINs DOES NOT MATCH THE NUMBER OF RV DATASETS!!!\n"+\
                                "please check the vMINs/vMAXs arrays in the simple settings file\n"+\
                                "to make sure they have matching lengths to the number of RV datasets.")
-        if genTools.getSimpleDictVal(settingsDict,'TMAX')==genTools.getSimpleDictVal(settingsDict,'TMIN')==-1:
+        if genTools.getSimpleDictVal(settings,'TMAX')==genTools.getSimpleDictVal(settings,'TMIN')==-1:
             ## set T range to [earliest Epoch-max period,earliest epoch]
-            settingsDict['TMAX']=np.min(realData[:,0])
-            settingsDict['TMIN']=np.min(realData[:,0])-genTools.getSimpleDictVal(settingsDict,'PMAX')*const.daysPerYear
+            settings['TMAX']=np.min(realData[:,0])
+            settings['TMIN']=np.min(realData[:,0])-genTools.getSimpleDictVal(settings,'PMAX')*const.daysPerYear
         ##load up range min,max and sigma arrayS
-        rangeMaxs = [genTools.getSimpleDictVal(settingsDict,'mass1MAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'mass2MAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'paraMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'OmegaMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'eMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'TMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'TMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'PMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'incMAX'),\
-                   genTools.getSimpleDictVal(settingsDict,'omegaMAX'),\
+        rangeMaxs = [genTools.getSimpleDictVal(settings,'mass1MAX'),\
+                   genTools.getSimpleDictVal(settings,'mass2MAX'),\
+                   genTools.getSimpleDictVal(settings,'paraMAX'),\
+                   genTools.getSimpleDictVal(settings,'OmegaMAX'),\
+                   genTools.getSimpleDictVal(settings,'eMAX'),\
+                   genTools.getSimpleDictVal(settings,'TMAX'),\
+                   genTools.getSimpleDictVal(settings,'TMAX'),\
+                   genTools.getSimpleDictVal(settings,'PMAX'),\
+                   genTools.getSimpleDictVal(settings,'incMAX'),\
+                   genTools.getSimpleDictVal(settings,'omegaMAX'),\
                    0,\
                    0,\
-                   genTools.getSimpleDictVal(settingsDict,'KMAX')]
-        rangeMins = [genTools.getSimpleDictVal(settingsDict,'mass1MIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'mass2MIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'paraMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'OmegaMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'eMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'TMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'TMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'PMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'incMIN'),\
-                   genTools.getSimpleDictVal(settingsDict,'omegaMIN'),\
+                   genTools.getSimpleDictVal(settings,'KMAX')]
+        rangeMins = [genTools.getSimpleDictVal(settings,'mass1MIN'),\
+                   genTools.getSimpleDictVal(settings,'mass2MIN'),\
+                   genTools.getSimpleDictVal(settings,'paraMIN'),\
+                   genTools.getSimpleDictVal(settings,'OmegaMIN'),\
+                   genTools.getSimpleDictVal(settings,'eMIN'),\
+                   genTools.getSimpleDictVal(settings,'TMIN'),\
+                   genTools.getSimpleDictVal(settings,'TMIN'),\
+                   genTools.getSimpleDictVal(settings,'PMIN'),\
+                   genTools.getSimpleDictVal(settings,'incMIN'),\
+                   genTools.getSimpleDictVal(settings,'omegaMIN'),\
                    0,\
                    0,\
-                   genTools.getSimpleDictVal(settingsDict,'KMIN')]
+                   genTools.getSimpleDictVal(settings,'KMIN')]
         ##start with uniform sigma values
-        sigSize = genTools.getSimpleDictVal(settingsDict,'strtSig')
+        sigSize = genTools.getSimpleDictVal(settings,'strtSig')
         sigmas = [sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,0,0,sigSize]
-        if len(genTools.getSimpleDictVal(settingsDict,'vMINs'))!=len(genTools.getSimpleDictVal(settingsDict,'vMAXs')):
+        if len(genTools.getSimpleDictVal(settings,'vMINs'))!=len(genTools.getSimpleDictVal(settings,'vMAXs')):
             log.critical("THE NUMBER OF vMINs NOT EQUAL TO NUMBER OF vMAXs!!!")
             #***************************************************************************************************
             s="THE NUMBER OF vMINs NOT EQUAL TO NUMBER OF vMAXs!!!\n"
@@ -160,16 +160,16 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             s+="!\n\n!!EXITING exosoft!!"
             sys.exit(s)
             #***************************************************************************************************
-        for i in range(0,len(genTools.getSimpleDictVal(settingsDict,'vMINs'))):
+        for i in range(0,len(genTools.getSimpleDictVal(settings,'vMINs'))):
             sigmas.append(sigSize)
-            rangeMins.append(genTools.getSimpleDictVal(settingsDict,'vMINs')[i])
-            rangeMaxs.append(genTools.getSimpleDictVal(settingsDict,'vMAXs')[i])
+            rangeMins.append(genTools.getSimpleDictVal(settings,'vMINs')[i])
+            rangeMaxs.append(genTools.getSimpleDictVal(settings,'vMAXs')[i])
         rangeMaxs = np.array(rangeMaxs)
         rangeMins = np.array(rangeMins)
         ##For lowEcc case, make Raw min/max vals for param drawing during MC mode
         rangeMaxsRaw = copy.deepcopy(rangeMaxs)
         rangeMinsRaw = copy.deepcopy(rangeMins)
-        if genTools.getSimpleDictVal(settingsDict,'lowEcc'):
+        if genTools.getSimpleDictVal(settings,'lowEcc'):
             ## run through the possible numbers for e and omega to find min/max for RAW versions
             ## Only relevent for MC and the begining jumps of SA,  
             ## Otherwise the values are converted back to omega and e and the original ranges are used for the check.
@@ -201,57 +201,57 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         for i in range(0,len(rangeMins)):
             if (i!=10)and(i!=11):
                 if (i>12):
-                    if genTools.getSimpleDictVal(settingsDict,'dataMode')!='DI':
+                    if genTools.getSimpleDictVal(settings,'dataMode')!='DI':
                         if rangeMaxs[i]!=0:
                             paramInts.append(i) 
                 elif (i==8)or(i==12):
-                    if (genTools.getSimpleDictVal(settingsDict,'dataMode')!='RV')or(genTools.getSimpleDictVal(settingsDict,'Kdirect')==False):
+                    if (genTools.getSimpleDictVal(settings,'dataMode')!='RV')or(genTools.getSimpleDictVal(settings,'Kdirect')==False):
                         if (rangeMaxs[8]!=0)and(i==8):
                             paramInts.append(8)
-                    elif genTools.getSimpleDictVal(settingsDict,'Kdirect'):
+                    elif genTools.getSimpleDictVal(settings,'Kdirect'):
                         if (rangeMaxs[12]!=0)and(i==12):
                             paramInts.append(12)                                           
                 elif (i==2)or(i==3)or(i==0)or(i==1):
-                    if (genTools.getSimpleDictVal(settingsDict,'dataMode')!='RV'):
+                    if (genTools.getSimpleDictVal(settings,'dataMode')!='RV'):
                         if(rangeMaxs[i]!=0):
                             paramInts.append(i)
-                    elif (genTools.getSimpleDictVal(settingsDict,'Kdirect')==False)and((i!=3)and(i!=2)):
+                    elif (genTools.getSimpleDictVal(settings,'Kdirect')==False)and((i!=3)and(i!=2)):
                         if(rangeMaxs[i]!=0):
                             paramInts.append(i)
                 elif rangeMaxs[i]!=0:
                     if (i==5)or(i==6):
-                        if genTools.getSimpleDictVal(settingsDict,'TcStep')and(i!=5):
+                        if genTools.getSimpleDictVal(settings,'TcStep')and(i!=5):
                                 paramInts.append(i)
-                        elif (genTools.getSimpleDictVal(settingsDict,'TcStep')==False)and(i!=6):
+                        elif (genTools.getSimpleDictVal(settings,'TcStep')==False)and(i!=6):
                                 paramInts.append(i)
                     else:
                         paramInts.append(i)
             
         ## push all these important parameter related items into the dict for later use.
-        settingsDict['realData'] = realData
-        settingsDict['rangeMinsRaw'] = rangeMinsRaw
-        settingsDict['rangeMaxsRaw'] = rangeMaxsRaw
-        settingsDict['rangeMins'] = rangeMins
-        settingsDict['rangeMaxs'] = rangeMaxs
-        settingsDict['paramInts'] = np.array(paramInts)
+        settings['realData'] = realData
+        settings['rangeMinsRaw'] = rangeMinsRaw
+        settings['rangeMaxsRaw'] = rangeMaxsRaw
+        settings['rangeMins'] = rangeMins
+        settings['rangeMaxs'] = rangeMaxs
+        settings['paramInts'] = np.array(paramInts)
         
-        settingsDict = modePrep(settingsDict,sigmas)
+        settings = modePrep(settings,sigmas)
         
-        return settingsDict
+        return settings
         
 
-def modePrep(settingsDict,sigmas):
+def modePrep(settings,sigmas):
     """
     Check if start startParams and startSigmas in dictionary make sense.
     Arrays must exist, be the right length, and have non-zeros values for all varying parameters.     
     Mode logic:
     
     """
-    startParams = genTools.getSimpleDictVal(settingsDict,'startParams')
-    startSigmas = genTools.getSimpleDictVal(settingsDict,'startSigmas')
-    paramInts = genTools.getSimpleDictVal(settingsDict,'paramInts')
-    rangeMaxs = genTools.getSimpleDictVal(settingsDict,'rangeMaxs')
-    autoMode = genTools.getSimpleDictVal(settingsDict,'autoMode')
+    startParams = genTools.getSimpleDictVal(settings,'startParams')
+    startSigmas = genTools.getSimpleDictVal(settings,'startSigmas')
+    paramInts = genTools.getSimpleDictVal(settings,'paramInts')
+    rangeMaxs = genTools.getSimpleDictVal(settings,'rangeMaxs')
+    autoMode = genTools.getSimpleDictVal(settings,'autoMode')
     
     ##check if startParams in settings file are useful
     gotParams = False
@@ -288,7 +288,7 @@ def modePrep(settingsDict,sigmas):
     if gotParams==False:
         if autoMode==False:
             #No useful params proided, so check if manual settings make sense
-            if (settingsDict['stages'] in ['ST','MCMC']):
+            if (settings['stages'] in ['ST','MCMC']):
                 log.critical('ST or MCMC mode requested, but not starting parameters provided.  Quiting exosoft!!')
                 #***************************************************************************************************
                 s="MUST PROVIDE USEFUL STARTPARAMS IN SIMPLE SETTINGS DICT FOR ST or MCMC MODE, ELSE NOTHING TO START CHAINS WITH"
@@ -298,14 +298,14 @@ def modePrep(settingsDict,sigmas):
                 #***************************************************************************************************
         else:
             log.critical("Auto mode and no params provided, so run default stages: SASTMCMC.")
-            settingsDict['stages']='SASTMCMC'  
+            settings['stages']='SASTMCMC'  
         if gotSigmas==False:
             startSigmas = sigmas
     elif gotSigmas==False:
         #Got params, but no useful sigmas in settings file, so check if there should be and update stages or exit.
         if autoMode==False:
             #check if manual settings make sense
-            if (settingsDict['stages'] in ['MCMC']):
+            if (settings['stages'] in ['MCMC']):
                 log.critical('MCMC mode requested, but not starting sigmas provided.  Quiting exosoft!!')
                 #***************************************************************************************************
                 s = "MUST PROVIDE USEFUL STARTSIGMAS IN SIMPLE SETTINGS DICT FOR MCMC MODE, ELSE NOTHING TO START CHAINS WITH."
@@ -315,10 +315,10 @@ def modePrep(settingsDict,sigmas):
         else:
             if type(startParams)!=np.ndarray:
                 log.info("Auto mode and no params or sigmas provided, so run default stages: SASTMCMC.")
-                settingsDict['stages']='SASTMCMC'
+                settings['stages']='SASTMCMC'
             else:
                 log.info("Auto mode and params, but no sigmas provided, so run default stages: STMCMC.")
-                settingsDict['stages']='STMCMC'
+                settings['stages']='STMCMC'
             log.info("Original startSigmas in settings files were not usable, so setting to default values.")
         startSigmas = sigmas
     else:
@@ -326,9 +326,9 @@ def modePrep(settingsDict,sigmas):
         log.info("Both startParams and startSigmas passed examination :-D")
         if autoMode:
             #So we can skip all the initialization and go right to the juicy MCMC stage :-D
-            settingsDict['stages']='MCMC'
+            settings['stages']='MCMC'
             log.info("Skipping initialization stages and going straight to MCMC.")
-    log.info("Logic checks on mode/stages requested, and startParams/startSigmas provided, the resulting stages to run are: "+settingsDict['stages'])
+    log.info("Logic checks on mode/stages requested, and startParams/startSigmas provided, the resulting stages to run are: "+settings['stages'])
     # clean up sigs of pars that were not varying, and that ary is a ndarray.
     for i in range(0,len(startSigmas)):
         if i not in paramInts:
@@ -338,18 +338,18 @@ def modePrep(settingsDict,sigmas):
         
     ##make list of stages to run
     stgLstDict = {'MC':['MC'],'SA':['SA'],'SAST':['SA','ST'],'ST':['ST'],'SASTMCMC':['SA','ST','MCMC'],'STMCMC':['ST','MCMC'],'MCMC':['MCMC']}
-    stageList = stgLstDict[genTools.getSimpleDictVal(settingsDict,'stages')]
+    stageList = stgLstDict[genTools.getSimpleDictVal(settings,'stages')]
     ## take care of initialization settings if in autoMode
     if autoMode:
         uSTDdict = {'loose':0.1,'enough':0.05,'tight':0.02}
-        settingsDict['maxUstd'] = uSTDdict[genTools.getSimpleDictVal(settingsDict,'initCrit')]
+        settings['maxUstd'] = uSTDdict[genTools.getSimpleDictVal(settings,'initCrit')]
         nSTsampDict = {'loose':10000,'enough':100000,'tight':500000}
-        settingsDict['nSTsamp']= (nSTsampDict[genTools.getSimpleDictVal(settingsDict,'initCrit')],"Num ST samples")
+        settings['nSTsamp']= (nSTsampDict[genTools.getSimpleDictVal(settings,'initCrit')],"Num ST samples")
         
-    settingsDict['startParams'] = startParams
-    settingsDict['startSigmas'] = startSigmas
-    settingsDict['stageList'] = stageList
+    settings['startParams'] = startParams
+    settings['startSigmas'] = startSigmas
+    settings['stageList'] = stageList
     
-    return settingsDict
+    return settings
 
 #END OF FILE

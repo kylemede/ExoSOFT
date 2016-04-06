@@ -16,7 +16,7 @@ class Simulator(object):
     It contains the functions to perform basic 'shotgun' Monte Carlo, 
     Simulated Annealing, Sigma Tunning, and pure MCMC simulations.
     """
-    def __init__(self,settingsDict):
+    def __init__(self,settings):
         self.paramsLast = 0
         self.paramsBest = 0
         self.nSaved = 0
@@ -31,7 +31,7 @@ class Simulator(object):
         self.acceptBoolAry = []
         self.parIntVaryAry = []
         self.chainNum =0
-        self.settingsDict = settingsDict
+        self.settings = settings
         self.log = tools.getLogger('main.simulator',lvl=100,addFH=False)
         tools.logSystemInfo(self.log)
         (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV) = self.starter() 
@@ -49,7 +49,7 @@ class Simulator(object):
         Things needed by all simulator modes that can be internal, but 
         need code to load them up.
         """
-        ## Recover parameter related items in the settingsDict put there during startup
+        ## Recover parameter related items in the settings put there during startup
         realData = self.dictVal('realData')
         sigmas = self.dictVal('startSigmas')
         rangeMinsRaw = self.dictVal('rangeMinsRaw')
@@ -98,16 +98,16 @@ class Simulator(object):
             self.log.debug("(nDIepochs*2+nRVepochs)>nVars is False so setting nu=1")
         self.log.debug('[nu, nuDI, nuRV] = ['+str(nu)+', '+str(nuDI)+', '+str(nuRV)+']')
         #load these into settings dict
-        self.settingsDict["nRVdsets"] = (len(self.dictVal('vMINs')),"Number of RV data sets")
-        self.settingsDict['nDIepoch'] = (nDIepochs,"Number of DI epochs")
-        self.settingsDict['nRVepoch'] = (nRVepochs,"Number of RV epochs")
-        self.settingsDict['n3Depoch'] = (nEpochs,"Number of 3D epochs")
-        self.settingsDict['nu'] = (nu,"Total nu")
-        self.settingsDict['nuDI'] = (nuDI,"nu for DI")
-        self.settingsDict['nuRV'] = (nuRV,"nu for RV")
+        self.settings["nRVdsets"] = (len(self.dictVal('vMINs')),"Number of RV data sets")
+        self.settings['nDIepoch'] = (nDIepochs,"Number of DI epochs")
+        self.settings['nRVepoch'] = (nRVepochs,"Number of RV epochs")
+        self.settings['n3Depoch'] = (nEpochs,"Number of 3D epochs")
+        self.settings['nu'] = (nu,"Total nu")
+        self.settings['nuDI'] = (nuDI,"nu for DI")
+        self.settings['nuRV'] = (nuRV,"nu for RV")
         paramIntsStr = repr(paramInts).replace(' ','')
-        self.settingsDict['parInts'] = (paramIntsStr,"Varried params")
-        self.settingsDict['chainNum'] = (self.chainNum,"chain number")
+        self.settings['parInts'] = (paramIntsStr,"Varried params")
+        self.settings['chainNum'] = (self.chainNum,"chain number")
         ## check priors are ok with range mins
         self.combinedPriors(rangeMins,rangeMins,True)
         
@@ -130,24 +130,24 @@ class Simulator(object):
         try:
             if self.dictVal('ePrior'):
                 #print 'ePrior'
-                priorsRatio*=self.settingsDict['ePrior'][2](parsCurr[4],parsLast[4])
+                priorsRatio*=self.settings['ePrior'][2](parsCurr[4],parsLast[4])
             if self.dictVal('pPrior'):
                 #print 'pPrior'
-                priorsRatio*=self.settingsDict['pPrior'][2](parsCurr[7],parsLast[7])
+                priorsRatio*=self.settings['pPrior'][2](parsCurr[7],parsLast[7])
             if self.dictVal('incPrior'):
                 #print 'incPrior'
-                priorsRatio*=self.settingsDict['incPrior'][2](parsCurr[8],parsLast[8])
+                priorsRatio*=self.settings['incPrior'][2](parsCurr[8],parsLast[8])
             if self.dictVal('M1Prior'):
                 #print 'M1Prior'
-                priorsRatio*=self.settingsDict['M1Prior'][2](parsCurr[0],parsLast[0])
+                priorsRatio*=self.settings['M1Prior'][2](parsCurr[0],parsLast[0])
                 #print 'M1Prior'
             if self.dictVal('M2Prior'):
                 #print 'M2Prior'
-                priorsRatio*=self.settingsDict['M2Prior'][2](parsCurr[1],parsLast[1],parsCurr[0],parsLast[0])
+                priorsRatio*=self.settings['M2Prior'][2](parsCurr[1],parsLast[1],parsCurr[0],parsLast[0])
                 #print 'M2Prior'
             if self.dictVal('parPrior'):
                 #print 'parPrior'
-                priorsRatio*=self.settingsDict['parPrior'][2](parsCurr[2],parsLast[2])
+                priorsRatio*=self.settings['parPrior'][2](parsCurr[2],parsLast[2])
                 #print 'parPrior out'
             if test==False:
                 return priorsRatio
@@ -162,10 +162,10 @@ class Simulator(object):
         returning the value.
         """
         try:
-            if type(self.settingsDict[key])==tuple:
-                return self.settingsDict[key][0]
+            if type(self.settings[key])==tuple:
+                return self.settings[key][0]
             else:
-                return self.settingsDict[key]
+                return self.settings[key]
         except:
             return False
     
@@ -244,7 +244,7 @@ class Simulator(object):
         First this will calculate chi squared for model vs real data.
         
         For mcOnly it performs simple chisquared cut-off acceptance 
-        based on 'chiMAX' value in settingsDict.
+        based on 'chiMAX' value in settings.
         Else, it will calculate the priors and accept based on 
         the Metropolis-Hastings algorithm. The temp factor will 
         be set to 1.0 for MCMC and Sigma Tuning, and should be provided 
@@ -393,7 +393,7 @@ class Simulator(object):
         self.nSavedPeriodic = 0
         self.acceptBoolAry = []
         self.parIntVaryAry = []
-        self.settingsDict['chainNum'] = (self.chainNum,"chain number")
+        self.settings['chainNum'] = (self.chainNum,"chain number")
         # make a very random seed value to ensure each chain is different.  
         # Should we make this value an optional input and pass on as a return value to keep a process number using the same seed?? $$$
         # if so, it needs to be pushed into the results file as well.
@@ -433,7 +433,7 @@ class Simulator(object):
         bar = tools.ProgressBar('green',width=1,block=' ',empty=' ',lastblock='')
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
-        self.settingsDict['curStg']=(stage,'Current stage either [SA,ST,MCMC or MC]')
+        self.settings['curStg']=(stage,'Current stage either [SA,ST,MCMC or MC]')
         strtTemp = temp      
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.
@@ -509,7 +509,7 @@ class Simulator(object):
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
         self.endSummary(temp,sigmas,stage)
         tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
-        outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settingsDict)
+        outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settings)
         if stage=='SA':
             ##start ST at the best location with tight sigmas, and it will tune to ideal sigmas
             sigmas = np.ones(np.array(sigmas).shape)*self.dictVal('sigMin')   
