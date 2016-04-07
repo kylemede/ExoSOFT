@@ -341,15 +341,18 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
     f.write("\n"+"*"*80+"\noutRoot:  "+settings['outRoot']+"\n"+"*"*80+"\n")
     f.write('\n'+'-'*7+'\nBasics:\n'+'-'*7)
-    f.write("\nParams that varied directly:\n"+'-'*25)
+    f.write("\nComplete set of parameters that varied directly:\n"+'-'*49)
     f.write('\nTheir integers:\n'+repr(paramListCleaned))
     f.write('\nTheir name+units:\n'+repr(paramStrsCleaned))
     f.write('\nTheir file name postpends:\n'+repr(paramFileStrsCleaned))
+    f.write("\n\nIntegers of those used in Astrometry/DI nu calc: ")
+    f.write(repr(settings['DIvars']))
+    f.write("\nIntegers of those used in RV nu calc: "+repr(settings['RVvars']))
     try:
         ## try to make and write the more advanced summary strings to the file
-        nusStr = "\n\nnu values were: [total,DI,RV] = ["+str(head['NU'])+", "+str(head['NUDI'])+", "+str(head['NURV'])+"]\n"
+        nusStr = "\nnu values were: [total,DI,RV] = ["+str(head['NU'])+", "+str(head['NUDI'])+", "+str(head['NURV'])+"]\n"
         f.write(nusStr)
-        numEpochsStr = "\nNumber of epochs in data [total, DI, RV, num RV datasets] = "
+        numEpochsStr = "Number of epochs in data [total, DI, RV, num RV datasets] = "
         numEpochsStr+="["+str(settings['n3Depoch'])+", "+str(settings['nDIepoch'])+", "+str(settings['nRVepoch'])+", "+str(settings['nRVdsets'])+"]\n"
         f.write(numEpochsStr)
         stgNsampStrDict = {"MC":"nSamples","SA":"nSAsamp","ST":"nSTsamp","MCMC":"nSamples"}

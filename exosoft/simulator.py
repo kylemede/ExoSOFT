@@ -69,13 +69,18 @@ class Simulator(object):
         for val in notInNuInts:
             paramIntsClean=paramIntsClean[np.where(paramIntsClean!=val)]
         nDIvars = np.sum(np.where(paramIntsClean<10,1,0))
-        self.log.debug('DIvars cleaned = '+repr(paramIntsClean[np.where(paramIntsClean<10)]))
-        self.log.debug('RVvars cleaned = '+repr(paramIntsClean[np.where(paramIntsClean!=3)]))
+        diVars = paramIntsClean[np.where(paramIntsClean<10)]
+        self.log.debug('DIvars cleaned = '+repr(diVars))
+        rvVars = paramIntsClean[np.where(paramIntsClean!=3)]
+        self.log.debug('RVvars cleaned = '+repr(rvVars))
         nRVvars = np.sum(np.where(paramIntsClean!=3,1,0))
+        allVars = paramInts
         if nDIepochs==0:
             nVars = nRVvars
+            allVars = diVars
         elif nRVepochs==0:
             nVars = nDIvars
+            allVars = rvVars
         else:
             nVars = len(paramInts)
         self.log.debug("vars = "+repr(paramInts))
@@ -117,6 +122,9 @@ class Simulator(object):
         self.settings['commentsDict']['parInts'] = "Varried params"
         self.settings['chainNum'] = self.chainNum
         self.settings['commentsDict']['chainNum'] = "chain number"
+        self.settings['3DVars'] = allVars
+        self.settings['DIvars'] = diVars
+        self.settings['RVvars'] = rvVars
         
         sigMaxs = np.zeros(rangeMinsRaw.shape)
         sigMins = np.zeros(rangeMinsRaw.shape)
