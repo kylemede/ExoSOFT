@@ -292,21 +292,6 @@ def getParStrs(head,latex=True,getALLpars=False):
     elif getALLpars:
         paramList=np.arange(0,len(paramStrs))
     return (paramList,paramStrs,paramFileStrs)
-        
-def getSimpleDictVal(dict,key):
-    
-    """
-    Get the value for a key in the settings dictionary.
-    This will handle the values that are tuples and not
-    returning the value.
-    """
-    try:
-        if type(dict[key])==tuple:
-            return dict[key][0]
-        else:
-            return dict[key]
-    except:
-        return False
     
 def cleanUp(settings,stageList,allFname):
     """
@@ -332,7 +317,7 @@ def cleanUp(settings,stageList,allFname):
     ##get combined data filename to delete
     if settings["delCombined"]:
         delFiles.append(allFname)
-    if (settings['rmBurn'][0])and(settings['nChains'][0]>1):
+    if (settings['rmBurn'])and(settings['nChains']>1):
         ##the burn-in was stripped in the final file, so kill the non-stripped version if it exists
         nm = os.path.join(os.path.dirname(allFname),'combinedMCMCdata.fits')
         if os.path.exists(nm):
@@ -368,9 +353,9 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         chiSquaredsStr = '\nBest Reduced Chi Squareds for each stage were:\n'
         for stage in stageList:
             fnames = np.sort(glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*.fits")))
-            if (stage=="MCMC")and settings["rmBurn"][0]:
+            if (stage=="MCMC")and settings["rmBurn"]:
                 fnames = np.sort(glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*BIstripped.fits")))
-            numFilesStr+=stage+' = '+str(len(fnames))+", each with "+str(settings[stgNsampStrDict[stage]][0])+" samples\n"
+            numFilesStr+=stage+' = '+str(len(fnames))+", each with "+str(settings[stgNsampStrDict[stage]])+" samples\n"
             if len(fnames)>0:
                 chiSquaredsStr+=stage+" = ["
                 for fname in fnames: 
@@ -390,14 +375,14 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         ## calculate chi squareds for the best fit #
         ############################################
         ##get the real data
-        realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
+        realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=settings['dataMode'])
         ## Make Orbit cpp obj
         Orbit = cppTools.Orbit()
         try:
-            pasa = settings["pasa"][0]
+            pasa = settings["pasa"]
         except:
             pasa = False
-        Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
+        Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
         Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
         ## ensure bestFit are in required format for Orbit
         params = []
@@ -497,14 +482,14 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
         nuRV = 1.0
         
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=settings['dataMode'])
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settings["pasa"][0]
+        pasa = settings["pasa"]
     except:
         pasa = False
-    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
+    Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []
@@ -521,14 +506,14 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
 def predictLocation(orbParams,settings,epochs=[]):
     
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=getSimpleDictVal(settings,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode= settings['dataMode'])
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settings["pasa"][0]
+        pasa = settings["pasa"]
     except:
         pasa = False
-    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],pasa)
+    Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []

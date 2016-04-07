@@ -743,14 +743,14 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         os.mkdir(plotDataDir)
     plotDataDir+='/'
     ##get the real data
-    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=genTools.getSimpleDictVal(settings,'dataMode'))
+    realData = rwTools.loadRealData(diFilename=settings['DIdataFile'],rvFilename=settings['RVdataFile'],dataMode=settings['dataMode'])
     ## Make Orbit cpp obj
     Orbit = cppTools.Orbit()
     try:
-        pasa = settings["pasa"][0]
+        pasa = settings["pasa"]
     except:
         pasa = False
-    Orbit.loadStaticVars(settings['omegaFdi'][0],settings['omegaFrv'][0],settings['lowEcc'][0],False)
+    Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],False)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     ## ensure orbParams are in required format for Orbit
     params = []
@@ -761,7 +761,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     ################
     # Make DI plot #
     ################
-    if settings['dataMode'][0]!='RV':
+    if settings['dataMode']!='RV':
         paramsDI = copy.deepcopy(params)
         realDataDI = copy.deepcopy(realData)
         realDataDI = realDataDI[np.where(realDataDI[:,2]<1e6)[0],:]
@@ -795,7 +795,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         xCOM = (fakeRealDataQuarter[3,0]+fakeRealDataQuarter[0,0])/2.0
         yCOM = (fakeRealDataQuarter[3,1]+fakeRealDataQuarter[0,1])/2.0
         ## Find Ascending and Descending Node locations
-        nodeEpochs = nodeEpochsCalc(paramsDI,settings["omegaFdi"][0]) 
+        nodeEpochs = nodeEpochsCalc(paramsDI,settings["omegaFdi"]) 
         #print 'period/2 = '+repr(const.daysPerYear*paramsDI[7]*(1.0/2.0))
         #print 'nodeEpochs = '+repr(nodeEpochs)
         lonData = np.ones((2,8),dtype=np.dtype('d'),order='C')
@@ -956,12 +956,12 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 log.warning("Seems epstopdf failed.  Check if it is installed properly.")    
         ## log params used in DI plot
         log.info('\n'+"*"*50+"\nOrbital Elements used in DI plot:\n"+repr(paramsDI))
-        log.info("\n with an omega value = "+str(paramsDI[9]+settings["omegaFdi"][0])+'\n'+"*"*50+'\n')
+        log.info("\n with an omega value = "+str(paramsDI[9]+settings["omegaFdi"])+'\n'+"*"*50+'\n')
 
     ################
     # Make RV plot #
     ################
-    if settings['dataMode'][0]!='DI':        
+    if settings['dataMode']!='DI':        
         realDataRV = copy.deepcopy(realData)
         realDataRV = realDataRV[np.where(realDataRV[:,6]<1e6)[0],:]
         ##Ensuring that params are in required format for SWIG
@@ -1142,7 +1142,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     log.warning("Seems epstopdf failed.  Check if it is installed properly.")
                 ## log params used in RV plot
             log.info('\n'+"*"*50+"\nOrbital Elements used in RV plot:\n"+repr(paramsRV))
-            log.info("\n with an omega value = "+str(paramsRV[9]+settings["omegaFrv"][0])+'\n'+"*"*50+'\n')
+            log.info("\n with an omega value = "+str(paramsRV[9]+settings["omegaFrv"])+'\n'+"*"*50+'\n')
 
 def nodeEpochsCalc(paramsDI,omegaDIoffset):
     """

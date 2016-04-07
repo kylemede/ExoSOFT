@@ -56,7 +56,7 @@ class Priors(object):
         
     #NOTE: only change the code and not the name of the functions or their inputs.
     def ePriorRatio(self,eProposed,eLast):
-        if (self.settings['lowEcc'][0]==False)and(self.settings['eMAX']!=0):
+        if (self.settings['lowEcc']==False)and(self.settings['eMAX']!=0):
             if eProposed!=eLast!=0:
                 if (self.settings['PMIN']*constants.daysPerYear)>1000.0:
                     return eProposed/eLast
@@ -124,10 +124,10 @@ class Priors(object):
         if paraProposed!=paraLast!=self.settings['paraMAX']!=0:
             ratioA = (paraLast**4.0)/(paraProposed**4.0)
             ratioB = 1.0
-            if self.settings['paraEst'][0]!=0:
+            if self.settings['paraEst']!=0:
                 ## a Gaussian prior centered on hipparcos and width of hipparcos estimated error
-                top = self.gaussian(paraProposed, self.settings['paraEst'][0], self.settings['paraErr'][0])
-                btm = self.gaussian(paraLast, self.settings['paraEst'][0], self.settings['paraErr'][0])
+                top = self.gaussian(paraProposed, self.settings['paraEst'], self.settings['paraErr'])
+                btm = self.gaussian(paraLast, self.settings['paraEst'], self.settings['paraErr'])
                 ratioB = top/btm
             return ratioA*ratioB
         else:

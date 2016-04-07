@@ -301,13 +301,17 @@ def writeFits(baseFilename,data,settings):
             hdulist = pyfits.HDUList([hdu])
             header = hdulist[0].header
             ##load up header with tuples from settings
+            commentsDict = settings['commentsDict']
             for key in settings:
-                if type(settings[key])==tuple:
-                    header[key]=settings[key][0]
-                    if len(settings[key][1])>47:
-                        log.warning("comment too long for pyfits headers:"+settings[key][1])
-                    else:
-                        header.comments[key] = settings[key][1]
+                if key in commentsDict:                
+                    header[key]=settings[key]
+                    com = commentsDict[key]
+                    if len(com)>47:
+                        s = "comment too long for pyfits headers:"+com
+                        s+=". still writting to file, but cutting >47th characters off"
+                        log.warning(s)
+                        com = com[:46]
+                    header.comments[key] = com
                         #print key+' = '+repr((header[key],header.comments[key]))
             hdulist.writeto(outFname)
             log.info("output file written to:below\n"+outFname)

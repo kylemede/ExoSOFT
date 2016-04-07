@@ -36,13 +36,13 @@ class Simulator(object):
         tools.logSystemInfo(self.log)
         (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV,self.Priors) = self.starter() 
         self.Orbit = tools.cppTools.Orbit()
-        self.Orbit.loadStaticVars(self.dictVal('omegaFdi'),self.dictVal('omegaFrv'),self.dictVal('lowEcc'),self.dictVal('pasa'))
+        self.Orbit.loadStaticVars(self.settings['omegaFdi'],self.settings['omegaFrv'],self.settings['lowEcc'],self.settings['pasa'])
         self.Orbit.loadRealData(self.realData)
         self.Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
         #Just initial seed val, reset in resetTracked() to be unique for each chain.
         self.seed = int(timeit.default_timer())
         np.random.seed(self.seed)
-        self.tmpDataFile = os.path.join(self.dictVal('finalFolder'),"tmpOutdata-"+str(self.chainNum)+".npy")
+        self.tmpDataFile = os.path.join(self.settings['finalFolder'],"tmpOutdata-"+str(self.chainNum)+".npy")
         
     def starter(self):
         """
@@ -50,13 +50,13 @@ class Simulator(object):
         need code to load them up.
         """
         ## Recover parameter related items in the settings put there during startup
-        realData = self.dictVal('realData')
-        sigmas = self.dictVal('startSigmas')
-        rangeMinsRaw = self.dictVal('rangeMinsRaw')
-        rangeMaxsRaw = self.dictVal('rangeMaxsRaw') 
-        rangeMins = self.dictVal('rangeMins')
-        rangeMaxs = self.dictVal('rangeMaxs')
-        paramInts = self.dictVal('paramInts')
+        realData = self.settings['realData']
+        sigmas = self.settings['startSigmas']
+        rangeMinsRaw = self.settings['rangeMinsRaw']
+        rangeMaxsRaw = self.settings['rangeMaxsRaw'] 
+        rangeMins = self.settings['rangeMins']
+        rangeMaxs = self.settings['rangeMaxs']
+        paramInts = self.settings['paramInts']
 
         ##find total number of RV and DI epochs in real data
         nDIepochs = np.sum(np.where(realData[:,2]<1e6,1,0))
@@ -98,35 +98,31 @@ class Simulator(object):
             self.log.debug("(nDIepochs*2+nRVepochs)>nVars is False so setting nu=1")
         self.log.debug('[nu, nuDI, nuRV] = ['+str(nu)+', '+str(nuDI)+', '+str(nuRV)+']')
         #load these into settings dict
-        self.settings["nRVdsets"] = (len(self.dictVal('vMINs')),"Number of RV data sets")
-        self.settings['nDIepoch'] = (nDIepochs,"Number of DI epochs")
-        self.settings['nRVepoch'] = (nRVepochs,"Number of RV epochs")
-        self.settings['n3Depoch'] = (nEpochs,"Number of 3D epochs")
-        self.settings['nu'] = (nu,"Total nu")
-        self.settings['nuDI'] = (nuDI,"nu for DI")
-        self.settings['nuRV'] = (nuRV,"nu for RV")
+        self.settings["nRVdsets"] = len(self.settings['vMINs'])
+        self.settings['commentsDict']['nRVdsets'] = "Number of RV data sets"
+        self.settings['nDIepoch'] = nDIepochs
+        self.settings['commentsDict']['nDIepoch'] = "Number of DI epochs"
+        self.settings['nRVepoch'] = nRVepochs
+        self.settings['commentsDict']['nRVepoch'] = "Number of RV epochs"
+        self.settings['n3Depoch'] = nEpochs
+        self.settings['commentsDict']['n3Depoch'] = "Number of 3D epochs"
+        self.settings['nu'] = nu
+        self.settings['commentsDict']['nu'] = "Total nu"
+        self.settings['nuDI'] = nuDI
+        self.settings['commentsDict']['nuDI'] = "nu for DI"
+        self.settings['nuRV'] = nuRV
+        self.settings['commentsDict']['nuRV'] = "nu for RV"
         paramIntsStr = repr(paramInts).replace(' ','')
-        self.settings['parInts'] = (paramIntsStr,"Varried params")
-        self.settings['chainNum'] = (self.chainNum,"chain number")
+        self.settings['parInts'] = paramIntsStr
+        self.settings['commentsDict']['parInts'] = "Varried params"
+        self.settings['chainNum'] = self.chainNum
+        self.settings['commentsDict']['chainNum'] = "chain number"
+        
         ## check priors are ok with range mins
         Priors = tools.priors.Priors(self.settings,self.log)
         Priors.testPriors(rangeMins,rangeMins)
         
         return (realData,rangeMaxsRaw,rangeMinsRaw,rangeMaxs,rangeMins,sigmas,paramInts,nu,nuDI,nuRV,Priors)
-            
-    def dictVal(self,key):
-        """
-        Get the value for a key in the settings dictionary.
-        This will handle the values that are tuples and not
-        returning the value.
-        """
-        try:
-            if type(self.settings[key])==tuple:
-                return self.settings[key][0]
-            else:
-                return self.settings[key]
-        except:
-            return False
     
     def increment(self,pars=[],sigs=[],stage=''):
         """
@@ -149,8 +145,8 @@ class Simulator(object):
             sig = sigs[varyInt]*(self.rangeMaxsRaw[varyInt]-self.rangeMinsRaw[varyInt])
             parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)        
         ## if TcEqualT, push the varied one into the other
-        if self.dictVal('TcEqualT'):
-            if self.dictVal('TcStep'):
+        if self.settings['TcEqualT']:
+            if self.settings['TcStep']:
                 parsOut[5]=parsOut[6]
             else:
                 parsOut[6]=parsOut[5]
@@ -181,10 +177,10 @@ class Simulator(object):
                     paramsOut[par]-=360.0
         for i in range(0,len(pars)):
             if i in self.paramInts:
-                if (i==6)and(self.dictVal('TcStep')):
+                if (i==6)and(self.settings['TcStep']):
                     if (self.rangeMins[i]>paramsOut[i])or(paramsOut[i]>self.rangeMaxs[i]):
                         inRange=False
-                elif (i==5)and(self.dictVal('TcStep')==False):
+                elif (i==5)and(self.settings['TcStep']==False):
                     if (self.rangeMins[i]>paramsOut[i])or(paramsOut[i]>self.rangeMaxs[i]):
                         inRange=False
                 elif (i!=5) and (i!=6):
@@ -214,7 +210,7 @@ class Simulator(object):
         (raw3D, reducedDI, reducedRV, reduced3D) = tools.chiSquaredCalc3D(self.realData,modelData,self.nuDI,self.nuRV,self.nu)
         paramsOut[11] = raw3D
         if self.bestSumStr=='':
-            self.bestSumStr = stage+" chain #"+str(self.chainNum)+' Nothing accepted yet below chi squared max = '+str(self.dictVal('chiMAX'))
+            self.bestSumStr = stage+" chain #"+str(self.chainNum)+' Nothing accepted yet below chi squared max = '+str(self.settings['chiMAX'])
             self.latestSumStr="Latest reduced chiSquared : [total,DI,RV] = ["+str(reduced3D)+", "+str(reducedDI)+", "+str(reducedRV)+"]"
         if (reduced3D)<self.bestRedChiSqr:
             self.bestRedChiSqr=(reduced3D)
@@ -229,7 +225,7 @@ class Simulator(object):
         accept = False
         if (stage=='MC')or(stage=='SA'and(self.acceptCount==0)):
             ## for MC or first step of SA
-            if (paramsOut[11]/self.nu)<self.dictVal('chiMAX'):
+            if (paramsOut[11]/self.nu)<self.settings['chiMAX']:
                 accept=True
         else:
             ## For SA after first sample, MCMC, and ST
@@ -254,13 +250,13 @@ class Simulator(object):
         else:
             self.acceptBoolAry.append(0)
         ##log a status summary?
-        if self.dictVal('nSumry')>0:
-            if sample%(self.dictVal(self.stgNsampDict[stage])//self.dictVal('nSumry'))==0:
-                perc = sample*100//self.dictVal(self.stgNsampDict[stage])
+        if self.settings['nSumry']>0:
+            if sample%(self.settings[self.stgNsampDict[stage]]//self.settings['nSumry'])==0:
+                perc = sample*100//self.settings[self.stgNsampDict[stage]]
                 ####str(self.nSaved)+' (curr '+str(self.nSavedPeriodic)+"), Finished: "+str(sample)+"/"+\
                 sumStr = "below\n"+stage+" chain #"+str(self.chainNum)+", # Accepted: "+str(self.acceptCount)+", # Saved: "+\
                 str(self.nSaved)+", Finished: "+str(sample)+"/"+\
-                str(self.dictVal(self.stgNsampDict[stage]))+" = "+str(perc)+"%, Current T: "+str(temp)+"\n"
+                str(self.settings[self.stgNsampDict[stage]])+" = "+str(perc)+"%, Current T: "+str(temp)+"\n"
                 sumStr+=self.latestSumStr+'\n'+self.bestSumStr+'\n'
                 self.log.debug(sumStr)
         return (paramsOut,accept)
@@ -274,8 +270,8 @@ class Simulator(object):
         There will be a fixed number of temperature steps = 'nTmpStps'.
         """
         if stage=='SA':
-            if sample%self.dictVal('tempInt')==0:
-                temp-=(strtTemp-0.01)*(float(self.dictVal('tempInt'))/float(self.dictVal('nSAsamp')))
+            if sample%self.settings['tempInt']==0:
+                temp-=(strtTemp-0.01)*(float(self.settings['tempInt'])/float(self.settings['nSAsamp']))
         return temp
     
     def sigTune(self,sample,sigs=[],stage=''):
@@ -288,7 +284,7 @@ class Simulator(object):
         """
         sigmasOut = copy.deepcopy(sigs)
         if (stage=='ST')or(stage=='MCMC'):
-            if (sample%(len(self.paramInts)*self.dictVal('sigInt'))==0)and(self.acceptCount>1):
+            if (sample%(len(self.paramInts)*self.settings['sigInt'])==0)and(self.acceptCount>1):
                 self.acceptStr = '\n'+stage+" chain #"+str(self.chainNum)+'\n'
                 self.shiftStr = ''
                 self.parIntVaryAry = np.array(self.parIntVaryAry)
@@ -302,16 +298,16 @@ class Simulator(object):
                     if stage=='ST':
                         ##check each rate to choose up/down shift and do so and update shiftStr
                         self.shiftStr+= '\n'+stage+" chain #"+str(self.chainNum)+'\nparameter # '+str(i)+" shifting sigma "+str(sigs[i])+" -> "
-                        if ((float(nAcc)/float(nTot))>0.35)and(sigs[i]<self.dictVal('sigMax')):
-                            sigmasOut[i]+=self.dictVal('sigMin')
-                        elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.dictVal('sigMin')):
-                            sigmasOut[i]-=self.dictVal('sigMin')
+                        if ((float(nAcc)/float(nTot))>0.35)and(sigs[i]<self.settings['sigMax']):
+                            sigmasOut[i]+=self.settings['sigMin']
+                        elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMin']):
+                            sigmasOut[i]-=self.settings['sigMin']
                         self.shiftStr+=str(sigmasOut[i])+"\n"
                 self.acceptBoolAry = []
                 self.parIntVaryAry = []
                 ##log a status summary?
-                if self.dictVal('nSumry')>0:
-                    if sample%(self.dictVal(self.stgNsampDict[stage])//self.dictVal('nSumry'))==0:
+                if self.settings['nSumry']>0:
+                    if sample%(self.settings[self.stgNsampDict[stage]]//self.settings['nSumry'])==0:
                         self.log.debug(self.acceptStr+self.shiftStr)
         else:
             #No need to track these, so reset them to empty to save any RAM they are using
@@ -326,7 +322,7 @@ class Simulator(object):
         sumStr = '\n'+"="*70+"\nEND OF "+stage+" CHAIN #"+str(self.chainNum)+" SUMMARY:\nFinalTemp = "
         sumStr+= str(temp)+"\nTotal number of steps accepted = "+str(self.acceptCount)+"\n"
         sumStr+= "Average acceptance rate = "
-        sumStr+=str(float(self.acceptCount)/float(self.dictVal(self.stgNsampDict[stage])))+"\n"
+        sumStr+=str(float(self.acceptCount)/float(self.settings[self.stgNsampDict[stage]]))+"\n"
         sumStr+= "Total number of steps stored = "+str(self.nSaved)+"\n"
         sumStr+=self.latestSumStr+'\n'+self.bestSumStr+'\n'
         sumStr+="Last params  = "+repr(self.paramsLast)+'\n'
@@ -352,7 +348,8 @@ class Simulator(object):
         self.nSavedPeriodic = 0
         self.acceptBoolAry = []
         self.parIntVaryAry = []
-        self.settings['chainNum'] = (self.chainNum,"chain number")
+        self.settings['chainNum'] = self.chainNum
+        self.settings['commentsDict']['nDIepoch'] = "chain number"
         # make a very random seed value to ensure each chain is different.  
         # Should we make this value an optional input and pass on as a return value to keep a process number using the same seed?? $$$
         # if so, it needs to be pushed into the results file as well.
@@ -360,7 +357,7 @@ class Simulator(object):
         self.seed = int((timeit.default_timer()/(self.chainNum+1))/t)
         self.log.debug("Chain# "+str(self.chainNum)+" has random number seed = "+str(self.seed))
         np.random.seed(self.seed)
-        self.tmpDataFile = os.path.join(self.dictVal('finalFolder'),"tmpOutdata-"+str(self.chainNum)+".npy")
+        self.tmpDataFile = os.path.join(self.settings['finalFolder'],"tmpOutdata-"+str(self.chainNum)+".npy")
         if os.path.exists(self.tmpDataFile):
             os.remove(self.tmpDataFile)
             self.log.debug("just removed data file from disk:\n"+self.tmpDataFile)
@@ -370,7 +367,7 @@ class Simulator(object):
         startStr+= 'params = '+repr(pars)+'\n'
         startStr+= 'rangeMins = '+repr(self.rangeMins)+'\n'
         startStr+= 'rangeMaxs = '+repr(self.rangeMaxs)+'\n'
-        if self.dictVal('lowEcc'):
+        if self.settings['lowEcc']:
             startStr+= 'rangeMinsRaw = '+repr(self.rangeMinsRaw)+'\n'
             startStr+= 'rangeMaxsRaw = '+repr(self.rangeMaxsRaw)+'\n'
         startStr+= 'sigmas = '+repr(sigs)+'\n'
@@ -386,13 +383,14 @@ class Simulator(object):
         tic=timeit.default_timer()
         lastTic=tic
         timesAry = []
-        self.log.debug("Trying "+str(self.dictVal(self.stgNsampDict[stage]))+" samples for chain #"+str(chainNum)+" in "+stage+" mode.")
+        self.log.debug("Trying "+str(self.settings[self.stgNsampDict[stage]])+" samples for chain #"+str(chainNum)+" in "+stage+" mode.")
         self.chainNum = chainNum
         self.resetTracked(stage)
         bar = tools.ProgressBar('green',width=1,block=' ',empty=' ',lastblock='')
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
-        self.settings['curStg']=(stage,'Current stage either [SA,ST,MCMC or MC]')
+        self.settings['curStg']= stage
+        self.settings['commentsDict']['nDIepoch'] = 'Current stage either [SA,ST,MCMC or MC]'
         strtTemp = temp      
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.
@@ -420,7 +418,7 @@ class Simulator(object):
         ##loop through each sample 
         ##Follows these steps: in Range?,calc model,accept?,Store?,increment,lower temp?,tune sigmas? dump data to disk? DONE ->write output data
         sample=0
-        while sample<(self.dictVal(self.stgNsampDict[stage])+1):
+        while sample<(self.settings[self.stgNsampDict[stage]]+1):
             sample+=1
             (proposedPars,inRange)=self.rangeCheck(proposedParsRaw,sample,stage)
             if inRange:
@@ -434,7 +432,7 @@ class Simulator(object):
                         acceptedParams.append(params)
                         self.nSaved+=1
                         self.nSavedPeriodic+=1  
-                    elif (self.acceptCount%self.dictVal('saveInt'))==0:
+                    elif (self.acceptCount%self.settings['saveInt'])==0:
                         acceptedParams.append(params)  
                         self.nSaved+=1   
                         self.nSavedPeriodic+=1                
@@ -443,7 +441,7 @@ class Simulator(object):
             proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
             temp = self.tempDrop(sample,strtTemp,temp,stage)
             sigmas = self.sigTune(sample,sigmas,stage)
-            if (self.nSavedPeriodic>0)and((self.nSaved%self.dictVal('dmpInt'))==0):
+            if (self.nSavedPeriodic>0)and((self.nSaved%self.settings['dmpInt'])==0):
                 ## dump acceptedParams array to disk and collect garbage
                 self.log.debug('Dumping data to filename:\n'+self.tmpDataFile+\
                                '\nThe acceptedParams Ary had '+str(np.array(acceptedParams).shape[0])+\
@@ -453,17 +451,17 @@ class Simulator(object):
                 self.nSavedPeriodic = 0
                 self.log.debug('about to collect the garbage')
                 gc.collect()
-            if sample%(self.dictVal(self.stgNsampDict[stage])//100)==0:
+            if sample%(self.settings[self.stgNsampDict[stage]]//100)==0:
                 timesAry.append(timeit.default_timer()-lastTic)
                 lastTic = timeit.default_timer()
-            if (self.dictVal('logLevel')<30)and(sample%(self.dictVal(self.stgNsampDict[stage])//100)==0):
-                timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.dictVal(self.stgNsampDict[stage])))
+            if (self.settings['logLevel']<30)and(sample%(self.settings[self.stgNsampDict[stage]]//100)==0):
+                timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.settings[self.stgNsampDict[stage]]))
                 #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
                 endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
-                perc = int(sample*100//self.dictVal(self.stgNsampDict[stage]))
+                perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
                 #print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
                 bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
-        if self.dictVal('logLevel')<30:
+        if self.settings['logLevel']<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
         self.endSummary(temp,sigmas,stage)
@@ -471,6 +469,6 @@ class Simulator(object):
         outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settings)
         if stage=='SA':
             ##start ST at the best location with tight sigmas, and it will tune to ideal sigmas
-            sigmas = np.ones(np.array(sigmas).shape)*self.dictVal('sigMin')   
+            sigmas = np.ones(np.array(sigmas).shape)*self.settings['sigMin']  
         return (outFname,self.paramsBest,sigmas,self.bestRedChiSqr)
 #END OF FILE      

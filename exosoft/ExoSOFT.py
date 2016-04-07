@@ -87,8 +87,8 @@ def iterativeSA(settings,Sim):
     """
     tic=timeit.default_timer()
     log = tools.getLogger('main.iterativeSA',lvl=100,addFH=False)
-    maxNumMCMCprocs = settings['nMCMCcns'][0]
-    numProcs = settings['nChains'][0]
+    maxNumMCMCprocs = settings['nMCMCcns']
+    numProcs = settings['nChains']
     nSAiters = 7.0
     strtPars = range(numProcs)
     strtsigmas = range(numProcs)
@@ -96,14 +96,14 @@ def iterativeSA(settings,Sim):
     uSTD = 1e6
     iter = -1
     retStr2 = ''
-    temp = settings['strtTemp'][0]
+    temp = settings['strtTemp']
     while uSTD>settings['maxUstd']:
         iter+=1
         if iter>0:
             #clean up previous SA data files on disk to avoid clash
             #tools.rmFiles(bestRetAry[0][:])
             if iter<nSAiters:
-                temp -= settings['strtTemp'][0]/nSAiters
+                temp -= settings['strtTemp']/nSAiters
         log.info("\nIteration #"+str(iter+1))
         retStr2 +="Iteration #"+str(iter+1)+"\n"
         (retAry,retStr) = multiProc(settings,Sim,'SA',numProcs,params=strtPars,sigmas=strtsigmas,strtTemp=temp)
@@ -115,7 +115,7 @@ def iterativeSA(settings,Sim):
             goodParams = []           
             #Filter inputs if more than max num MCMC proc available to use the best ones
             chisSorted = np.sort(retAry[3])
-            chisSorted = chisSorted[np.where(chisSorted<settings['chiMaxST'][0])]
+            chisSorted = chisSorted[np.where(chisSorted<settings['chiMaxST'])]
             if len(chisSorted)==0:
                 strtPars = range(0,numProcs)
             elif (len(chisSorted)==1)and(numProcs==1):
@@ -165,7 +165,7 @@ def iterativeSA(settings,Sim):
                 #print 'STD = '+str(np.std(bestRetAry[3]))
                 if len(bestRetAry[3])==numProcs:
                     uSTD = tools.unitlessSTD(bestRetAry[3])
-                log.warning("After iteration #"+str(iter+1)+" the top "+str(len(bestRetAry[3]))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'][0])+" have a unitless STD of "+str(uSTD))
+                log.warning("After iteration #"+str(iter+1)+" the top "+str(len(bestRetAry[3]))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
                 retStr2 +="The latest top "+str(len(bestRetAry[3]))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
     ## wrap up
     if len(bestRetAry[0])>1:
@@ -208,7 +208,7 @@ def exoSOFT():
     stageList = settings['stageList']
     durationStrings = ''
     if 'MC' in stageList:
-        (returns,b) = (returnsMC,durStr) = multiProc(settings,Sim,'MC',settings['nChains'][0])
+        (returns,b) = (returnsMC,durStr) = multiProc(settings,Sim,'MC',settings['nChains'])
         if len(returnsMC[0])>0:
             bstChiSqr = np.sort(returnsMC[3])[0]
             for i in range(len(returnsMC[0])):
@@ -224,12 +224,12 @@ def exoSOFT():
         startParams = []
         startSigmas = []
         if settings['stages'] in ['ST','STMCMC']:
-            for i in range(0,settings['nChains'][0]):
+            for i in range(0,settings['nChains']):
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif len(returnsSA)>0:
             for i in range(len(returnsSA[0])):
-                if returnsSA[3][i]<settings['chiMaxST'][0]:
+                if returnsSA[3][i]<settings['chiMaxST']:
                     startParams.append(returnsSA[1][i])
                     startSigmas.append(returnsSA[2][i])
         else:
@@ -251,17 +251,17 @@ def exoSOFT():
         startParams = []
         startSigmas = []
         if settings['stages']=='MCMC':
-            chisSorted = range(0,settings['nMCMCcns'][0])
-            for i in range(0,settings['nMCMCcns'][0]):
+            chisSorted = range(0,settings['nMCMCcns'])
+            for i in range(0,settings['nMCMCcns']):
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif len(returnsST)>0:
             chisSorted = []            
             #Filter inputs if more than max num MCMC proc available to use the best ones
             chisSorted = np.sort(returnsST[3])
-            chisSorted = chisSorted[np.where(chisSorted<settings['cMaxMCMC'][0])]
-            if len(chisSorted)>settings['nMCMCcns'][0]:
-                chisSorted = chisSorted[:settings['nMCMCcns'][0]]
+            chisSorted = chisSorted[np.where(chisSorted<settings['cMaxMCMC'])]
+            if len(chisSorted)>settings['nMCMCcns']:
+                chisSorted = chisSorted[:settings['nMCMCcns']]
             for i in range(len(returnsST[0])):
                 if returnsST[3][i] in chisSorted:
                     startParams.append(returnsST[1][i])
@@ -302,7 +302,7 @@ def exoSOFT():
     if (len(outFiles)>1)and(settings['CalcBurn'] and ('MCMC' in stageList)):
         if 'MCMC' in outFiles[0]:
             (burnInStr,burnInLengths) = tools.burnInCalc(outFiles,allFname)    
-            if settings['rmBurn'][0]:
+            if settings['rmBurn']:
                 strippedFnames = tools.burnInStripper(outFiles,burnInLengths)
                 outFiles = strippedFnames
                 ## combine stripped files to make final file?
@@ -330,7 +330,7 @@ def exoSOFT():
     ##calc R?
     grStr = ''
     if (len(outFiles)>1) and (settings['CalcGR'] and ('MCMC' in stageList)):
-        (GRs,Ts,grStr) = tools.gelmanRubinCalc(outFiles,settings['nSamples'][0])
+        (GRs,Ts,grStr) = tools.gelmanRubinCalc(outFiles,settings['nSamples'])
     
     ## progress plots?  INCLUDE?? maybe kill this one. Function exists, but not decided how to use it here.
     
