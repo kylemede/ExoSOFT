@@ -88,23 +88,21 @@ advancedSettingsDict = {
 'nSAsamp' :(100000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
 'strtTemp' : (50.0,"SA start temp."),
-# Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
-'maxUstd': 0.02,
-# Starting sigma size, % of parameter range, recommend [0.05,0.25].  [double]
-# After first trial of SA and ST, take ST output and use here.
-'strtSig' : (0.01,"start percent param range for SA"),
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : (50,"Num steps till temp drops in SA."),
+# Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
+'maxUstd': 0.02,
 # number of samples to draw for sigma tuning stage [int].
 'nSTsamp' :(100000,"Num ST samples"),
+# Starting sigma size, ratio of parameter range, recommend [0.05,0.25].  [double]
+# After first trial of SA and ST, take ST output and use here.
+'strtSig' : (0.01,"start percent param range for SA"),
 # number of steps per varying parameter until calculating the acceptance rate and tuning sigmas. [int]
 # Allowed vals [1,nSTsamp), testing shows a value of ~200 works well.
 'sigInt': (200,"Num steps/par till calc acc rate/tune sigs."),
-# Maximum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
-'sigMax' :(1.0,'Max ratio of params range,for step size.'),
 # Minimum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
-'sigMin' :(0.02,'Min ratio of params range,for step size.'),
+'sigMin' :(0.001,'Min ratio of params range,for step size.'),
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC) [int]
 # Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
 'saveInt' : (10,"Int between saving params, for all but MC."),

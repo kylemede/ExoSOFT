@@ -185,9 +185,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                      0,\
                      0,\
                      settings['KMIN']]
-        ##start with uniform sigma values
-        sigSize = settings['strtSig']
-        sigmas = [sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,sigSize,0,0,sigSize]
+        
         if len(settings['vMINs'])!=len(settings['vMAXs']):
             log.critical("THE NUMBER OF vMINs NOT EQUAL TO NUMBER OF vMAXs!!!")
             #***************************************************************************************************
@@ -197,7 +195,6 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             sys.exit(s)
             #***************************************************************************************************
         for i in range(0,len(settings['vMINs'])):
-            sigmas.append(sigSize)
             rangeMins.append(settings['vMINs'][i])
             rangeMaxs.append(settings['vMAXs'][i])
         rangeMaxs = np.array(rangeMaxs)
@@ -262,7 +259,13 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                                 paramInts.append(i)
                     else:
                         paramInts.append(i)
-            
+        ##start with uniform sigma values
+        sigmas = np.zeros(rangeMinsRaw.shape)
+        for i in paramInts:
+            sigmas[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*settings['strtSig']
+        # Maximum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
+        settings['sigMax'] = 1.0
+        settings['commentsDict']['sigMax']= 'Max ratio of params range,for step size.'
         ## push all these important parameter related items into the dict for later use.
         settings['realData'] = realData
         settings['rangeMinsRaw'] = rangeMinsRaw

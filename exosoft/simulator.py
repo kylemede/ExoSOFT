@@ -118,6 +118,13 @@ class Simulator(object):
         self.settings['chainNum'] = self.chainNum
         self.settings['commentsDict']['chainNum'] = "chain number"
         
+        sigMaxs = np.zeros(rangeMinsRaw.shape)
+        sigMins = np.zeros(rangeMinsRaw.shape)
+        for i in paramInts:
+            sigMaxs[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*self.settings['sigMax']
+            sigMins[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*self.settings['sigMin']
+        self.settings['sigMaxs'] = sigMaxs
+        self.settings['sigMins'] = sigMins
         ## check priors are ok with range mins
         Priors = tools.priors.Priors(self.settings,self.log)
         Priors.testPriors(rangeMins,rangeMins)
@@ -142,7 +149,7 @@ class Simulator(object):
         else:
             varyInt = self.paramInts[np.random.randint(0,len(self.paramInts))]
             self.parIntVaryAry.append(varyInt)
-            sig = sigs[varyInt]*(self.rangeMaxsRaw[varyInt]-self.rangeMinsRaw[varyInt])
+            sig = sigs[varyInt]
             parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)        
         ## if TcEqualT, push the varied one into the other
         if self.settings['TcEqualT']:
@@ -298,10 +305,10 @@ class Simulator(object):
                     if stage=='ST':
                         ##check each rate to choose up/down shift and do so and update shiftStr
                         self.shiftStr+= '\n'+stage+" chain #"+str(self.chainNum)+'\nparameter # '+str(i)+" shifting sigma "+str(sigs[i])+" -> "
-                        if ((float(nAcc)/float(nTot))>0.35)and(sigs[i]<self.settings['sigMax']):
-                            sigmasOut[i]+=self.settings['sigMin']
-                        elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMin']):
-                            sigmasOut[i]-=self.settings['sigMin']
+                        if ((float(nAcc)/float(nTot))>0.35)and(sigs[i]<self.settings['sigMaxs'][i]):
+                            sigmasOut[i]+=self.settings['sigMins'][i]
+                        elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMins'][i]):
+                            sigmasOut[i]-=self.settings['sigMins'][i]
                         self.shiftStr+=str(sigmasOut[i])+"\n"
                 self.acceptBoolAry = []
                 self.parIntVaryAry = []
@@ -333,6 +340,7 @@ class Simulator(object):
             sumStr+=self.acceptStr+self.shiftStr
         sumStr+='\n'+'='*70+'\n'
         self.log.info(sumStr)
+        return float(self.acceptCount)/float(self.settings[self.stgNsampDict[stage]])
     
     def resetTracked(self,stage):
         """
@@ -441,7 +449,7 @@ class Simulator(object):
             proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
             temp = self.tempDrop(sample,strtTemp,temp,stage)
             sigmas = self.sigTune(sample,sigmas,stage)
-            if (self.nSavedPeriodic>0)and((self.nSaved%self.settings['dmpInt'])==0):
+            if (self.nSavedPeriodic>0)and(self.nSavedPeriodic==self.settings['dmpInt']):
                 ## dump acceptedParams array to disk and collect garbage
                 self.log.debug('Dumping data to filename:\n'+self.tmpDataFile+\
                                '\nThe acceptedParams Ary had '+str(np.array(acceptedParams).shape[0])+\
@@ -464,11 +472,11 @@ class Simulator(object):
         if self.settings['logLevel']<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
-        self.endSummary(temp,sigmas,stage)
+        avgAcceptRate = self.endSummary(temp,sigmas,stage)
         tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
         outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settings)
         if stage=='SA':
             ##start ST at the best location with tight sigmas, and it will tune to ideal sigmas
-            sigmas = np.ones(np.array(sigmas).shape)*self.settings['sigMin']  
-        return (outFname,self.paramsBest,sigmas,self.bestRedChiSqr)
+            sigmas = self.settings['sigMins']
+        return (outFname,self.paramsBest,sigmas,self.bestRedChiSqr,avgAcceptRate,self.acceptStr)
 #END OF FILE      

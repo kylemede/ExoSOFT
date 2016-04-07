@@ -46,9 +46,9 @@ class singleProc(Process):
     def run(self):        
         ## run the requested stage and [ickle its return values
         self.log.debug('Starting to run process #'+str(self.chainNum))
-        (outFname,params,sigmas,bestRedChiSqr) = self.Sim.simulatorFunc(self.stage,self.chainNum,self.params,self.sigmas,self.strtTemp)
+        (outFname,params,sigmas,bestRedChiSqr,avgAcceptRate,acceptStr) = self.Sim.simulatorFunc(self.stage,self.chainNum,self.params,self.sigmas,self.strtTemp)
         self.log.debug('chain #'+str(self.chainNum)+" of "+self.stage+' stage  OUTFILE :\n'+outFname)
-        pickle.dump([outFname,params,sigmas,bestRedChiSqr], open(self.pklFilename,'wb'))
+        pickle.dump([outFname,params,sigmas,bestRedChiSqr,avgAcceptRate,acceptStr], open(self.pklFilename,'wb'))
         
 def multiProc(settings,Sim,stage,numProcs,params=[],sigmas=[],strtTemp=1.0):
     log = tools.getLogger('main.multiProc',lvl=100,addFH=False)
@@ -74,10 +74,10 @@ def multiProc(settings,Sim,stage,numProcs,params=[],sigmas=[],strtTemp=1.0):
     s = "ALL "+str(numProcs)+" chains of the "+stage+" stage took a total of "+tools.timeStrMaker(int(toc-tic))
     retStr =s+"\n"
     log.info(s)
-    retAry = [[],[],[],[]]
+    retAry = [[],[],[],[],[],[]]
     for procNumber in range(numProcs):
         ret = pickle.load(open(master[procNumber].pklFilename,'rb'))
-        for i in range(4):
+        for i in range(6):
             retAry[i].append(ret[i])
     return (retAry,retStr)
 
@@ -92,7 +92,7 @@ def iterativeSA(settings,Sim):
     nSAiters = 7.0
     strtPars = range(numProcs)
     strtsigmas = range(numProcs)
-    bestRetAry = [[],[],[],[]]
+    bestRetAry = [[],[],[],[],[],[]]
     uSTD = 1e6
     iter = -1
     retStr2 = ''
@@ -126,22 +126,22 @@ def iterativeSA(settings,Sim):
                 for i in range(len(retAry[0])):
                     if retAry[3][i] in chisSorted:                       
                         if len(bestRetAry[0])<numProcs:
-                            for j in range(4):
+                            for j in range(6):
                                 bestRetAry[j].append(retAry[j][i])
                         else:
                             bestChis = np.sort(bestRetAry[3])
                             if retAry[3][i]<bestChis[-1]:
-                                for j in range(4):
+                                for j in range(6):
                                     bestRetAry[j].append(retAry[j][i])
                 #now make list of best ones to use in next round
                 if len(bestRetAry[0])>numProcs:
                     bestChis = np.sort(bestRetAry[3])
                     log.debug("len best before filtering = "+str(len(bestRetAry[0]))+", worst was "+str(bestChis[-1]))
-                    bestRetAry2 = [[],[],[],[]]
+                    bestRetAry2 = [[],[],[],[],[],[]]
                     #trim best lists down to size
                     for i in range(0,len(bestChis)):
                         if bestRetAry[3][i] in bestChis[:numProcs]:
-                            for j in range(4):
+                            for j in range(6):
                                 bestRetAry2[j].append(bestRetAry[j][i])
                     bestRetAry = bestRetAry2
                 #copy resulting data files to new temp names

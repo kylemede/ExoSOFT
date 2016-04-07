@@ -341,13 +341,17 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
     f.write("\n"+"*"*80+"\noutRoot:  "+settings['outRoot']+"\n"+"*"*80+"\n")
     f.write('\n'+'-'*7+'\nBasics:\n'+'-'*7)
-    f.write('\nparamList:\n'+repr(paramListCleaned))
-    f.write('\nparamStrs:\n'+repr(paramStrsCleaned))
-    f.write('\nparamFileStrs:\n'+repr(paramFileStrsCleaned))
+    f.write("\nParams that varied directly:\n"+'-'*25)
+    f.write('\nTheir integers:\n'+repr(paramListCleaned))
+    f.write('\nTheir name+units:\n'+repr(paramStrsCleaned))
+    f.write('\nTheir file name postpends:\n'+repr(paramFileStrsCleaned))
     try:
         ## try to make and write the more advanced summary strings to the file
-        nusStr = "\nnu values were: [total,DI,RV] = ["+str(head['NU'])+", "+str(head['NUDI'])+", "+str(head['NURV'])+"]\n"
+        nusStr = "\n\nnu values were: [total,DI,RV] = ["+str(head['NU'])+", "+str(head['NUDI'])+", "+str(head['NURV'])+"]\n"
         f.write(nusStr)
+        numEpochsStr = "\nNumber of epochs in data [total, DI, RV, num RV datasets] = "
+        numEpochsStr+="["+str(settings['n3Depoch'])+", "+str(settings['nDIepoch'])+", "+str(settings['nRVepoch'])+", "+str(settings['nRVdsets'])+"]\n"
+        f.write(numEpochsStr)
         stgNsampStrDict = {"MC":"nSamples","SA":"nSAsamp","ST":"nSTsamp","MCMC":"nSamples"}
         numFilesStr = '\nTotal # of files that finished each stage were:\n'
         chiSquaredsStr = '\nBest Reduced Chi Squareds for each stage were:\n'
