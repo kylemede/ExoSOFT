@@ -260,7 +260,7 @@ def loadSettings(ExoSOFTdir,settFilePath):
     #sys.exit('shirt')
     return settings
 
-def loadFits(filename):
+def loadFits(filename,noData=False):
     """
     Load in a fits file written by exosoft.
     Return (header dict, data)
@@ -268,12 +268,16 @@ def loadFits(filename):
     if os.path.exists(filename):
         f = pyfits.open(filename,'readonly')
         head = f[0].header
-        data = f[0].data
+        if noData==False:
+            data = f[0].data
         f.close()
     else:
         log.critical("fits file does not exist!!! filename =\n"+str(filename))
         head=data=False
-    return (head,data)
+    if noData:
+        return head
+    else:
+        return (head,data)
 
 def writeFits(baseFilename,data,settings):
     """

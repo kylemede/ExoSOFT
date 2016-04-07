@@ -335,13 +335,13 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         f = open(summaryFname,'a')
     else:
         f = open(summaryFname,'w')
-    (head,data) = rwTools.loadFits(finalFits)
+    head = rwTools.loadFits(finalFits,noData=True)
     totalSamps = head['NSAMPLES']
     (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
     f.write("\n"+"*"*80+"\noutRoot:  "+settings['outRoot']+"\n"+"*"*80+"\n")
     f.write('\n'+'-'*7+'\nBasics:\n'+'-'*7)
-    f.write("\nComplete set of parameters that varied directly:\n"+'-'*49)
+    f.write("\nComplete set of parameters that varied directly:\n"+'-'*48)
     f.write('\nTheir integers:\n'+repr(paramListCleaned))
     f.write('\nTheir name+units:\n'+repr(paramStrsCleaned))
     f.write('\nTheir file name postpends:\n'+repr(paramFileStrsCleaned))
