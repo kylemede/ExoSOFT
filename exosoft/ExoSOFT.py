@@ -348,8 +348,14 @@ def exoSOFT():
     
     ##clean up files (move to folders or delete them)
     tools.cleanUp(settings,stageList,allFname)
-    if settings['CopyToDB']:
-        tools.copyToDB(settings)
+    try:
+        if settings['CopyToDB']:
+            tools.copyToDB(settings)
+    except:
+        s = " \nAn error occured while trying to copy files to dropbox."
+        s+= " \nThis could have happend if the key doesn't exist in your settings dictionary."
+        s+= " \nThis could have happend if the key doesn't exist in your settings dictionary.  No biggie as this function will most likely be removed prior to going public."
+        log.debug(s)
         
     ## Final log messages and end
     log.info("Post-processing took a total of "+tools.timeStrMaker(postTime))

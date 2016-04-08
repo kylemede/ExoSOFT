@@ -33,6 +33,7 @@ public:
     //For sqrt(e)sin(omega),sqrt(e)cos(omega) case
     bool lowEcc,PASA;
     double e,omega;
+    bool warningsOn;
     
     //funcs
     //for passing in a STATIC 2D data array of Real data into the object
@@ -45,6 +46,8 @@ public:
     //to convert sqrt(e)sin(omega),sqrt(e)cos(omega) to e & omega
     void convertParsToRaw(double *p, int p_n);
     void convertParsFromRaw(double *p, int p_n);
+    //to turn on/off the warnings from Newton's method.
+    void NewtonWarningsOn(bool warningsOn_in);
     //to calculate the model data and load it into an empty 2d array and 1d params array (both inplace arrays)
     void calculate(double *yy, int yy_nx, int yy_ny, double *p, int p_n);
 };

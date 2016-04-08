@@ -262,6 +262,9 @@ class Simulator(object):
             self.latestSumStr = stage+" chain #"+str(self.chainNum)+\
             ' Latest accepted reduced chiSquareds: [total,DI,RV] = ['+\
             str(reduced3D)+", "+str(reducedDI)+", "+str(reducedRV)+"]"
+            if (stage=='SA')and(self.acceptCount>10):
+                self.Orbit.NewtonWarningsOn(True)
+            
         else:
             self.acceptBoolAry.append(0)
         ##log a status summary?
@@ -406,7 +409,11 @@ class Simulator(object):
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         self.settings['curStg']= stage
-        self.settings['commentsDict']['nDIepoch'] = 'Current stage either [SA,ST,MCMC or MC]'
+        self.settings['commentsDict']['curStg'] = 'Current stage either [SA,ST,MCMC or MC]'
+        if stage=='SA':
+            self.Orbit.NewtonWarningsOn(False)
+        else:
+            self.Orbit.NewtonWarningsOn(True)
         strtTemp = temp      
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.

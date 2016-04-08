@@ -2,7 +2,7 @@
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (500000,"Number of MCMC or MC samples"),
+'nSamples' : (1000000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
@@ -12,7 +12,7 @@ simpleSettingsDict={
 'nMCMCcns' : (2,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
-'logLevel' : 10,
+'logLevel' : 25,
 # data mode, choices {'RV','DI','3D'} [string]
 'dataMode' : ('3D',"Data Mode (RV,DI,3D)"),
 # Run in Automatic mode? This will perform checks and select the stages to run automatically. [bool]
@@ -37,14 +37,14 @@ simpleSettingsDict={
 directoriesDict = {
 # Directory where you want the output data folder to go [string, at least 2 chars long]
 'outDir' : '/mnt/Data1/Todai_Work/Data/data_SMODT',
-# General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
-#*************************************************************************************************************************
-'outRoot' : "TEST-ArtificialJupiter-5percentError-tst",
-#*************************************************************************************************************************               
 # full path to input astrometry data file. [string]
 'DIdataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',                
 # full path to input radial velocity data file. [string]
 'RVdataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
+# General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
+#*************************************************************************************************************************
+'outRoot' : "TEST-ArtificialJupiter-5percentError-tst",
+#*************************************************************************************************************************               
 }
 
 advancedSettingsDict = {
@@ -53,7 +53,7 @@ advancedSettingsDict = {
 ### General Settings ###
 ########################
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
-'chiMAX' : (300.0,"Max reduced chiSquared during MC"),
+'chiMAX' : (500.0,"Max reduced chiSquared during MC"),
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
 'chiMaxST':(5,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
@@ -68,11 +68,6 @@ advancedSettingsDict = {
 'delChains' :True,
 # Delete combined data files after simulation is complete? [bool]
 'delCombined' :False,
-###$$$$$$$$$$$$$$$$$$$$$$ Keep in final version $$$$$$$$$$$$$$$$$$$$$$$$$$
-# Copy output non-data files to a Dropbox folder? [bool]  
-'CopyToDB' :False,
-'dbFolder' : '/mnt/HOME/MEGA/Dropbox/SMODT-outputCopies/',
-##$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 ############################
 # Settings for MCMC mode ###
 ############################
@@ -84,17 +79,21 @@ advancedSettingsDict = {
 # Calculate the Correlation lengths and number of effective points of each chain (must be more than 1 chain)? [bool]
 # NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
 'calcCL' :True,
+# Calculate the Gelman-Rubin statistic? [bool]
+'CalcGR' :True,
+# How many times do you want the Gelman-Rubin statistic calculated [int]
+'nGRcalc' :10,
 # number of samples to draw for simulated annealing stage [int] 
-'nSAsamp' :(100000,"Num SA samples"),
+'nSAsamp' :(200000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
-'strtTemp' : (50.0,"SA start temp."),
+'strtTemp' : (100.0,"SA start temp."),
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : (50,"Num steps till temp drops in SA."),
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
 'maxUstd': 0.02,
 # number of samples to draw for sigma tuning stage [int].
-'nSTsamp' :(100000,"Num ST samples"),
+'nSTsamp' :(200000,"Num ST samples"),
 # Starting sigma size, ratio of parameter range, recommend [0.05,0.25].  [double]
 # After first trial of SA and ST, take ST output and use here.
 'strtSig' : (0.01,"start percent param range for SA"),
@@ -108,15 +107,6 @@ advancedSettingsDict = {
 'saveInt' : (10,"Int between saving params, for all but MC."),
 # Interval of saved values before write/dump the data to disk to avoid consuming too much RAM during long runs. They take 11MB/100000.
 'dmpInt'   : 100000,
-## NOTE: progress plots have no code yet, so MUST be False!!!
-# Make plots of MCMC progress plots? [bool]  
-'pltMCMCprog' :False,
-# Make plots of Simulated Annealing progress plots? [bool]
-'pltSAprog' :False,
-# Calculate the Gelman-Rubin statistic? [bool]
-'CalcGR' :True,
-# How many times do you want the Gelman-Rubin statistic calculated [int]
-'nGRcalc' :10,
 #####################################
 # Special Settings for the models ###
 #####################################

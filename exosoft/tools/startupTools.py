@@ -77,9 +77,12 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                 if (('y' in YN) or ('Y' in YN)):
                     shutil.rmtree(settings['finalFolder'])
                     os.mkdir(settings['finalFolder'])
-                    dbDir = os.path.join(settings['dbFolder'],settings['outRoot'])
-                    if os.path.exists(dbDir):
-                        shutil.rmtree(dbDir)
+                    try:
+                        dbDir = os.path.join(settings['dbFolder'],settings['outRoot'])
+                        if os.path.exists(dbDir):
+                            shutil.rmtree(dbDir)
+                    except:
+                        log.debug('seems copy to dropbox related settings keys are not there...')
                 else: #elif (('n' in YN) or ('N' in YN)):
                     sys.exit()
                 if settings['logLevel']<50:

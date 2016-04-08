@@ -33,14 +33,16 @@ void Orbit::anomalyCalc(double ecc, double T, double Tc,double P, double epoch){
 			}
 			//double check it satisfies the original equation
 			if (fabs((E-ecc*sin(E))-M)>1.0e-5){
-				std::cout<<"PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"<<std::endl;
-				if (true){
-					std::cout<<"M = "<<M <<std::endl;
-					std::cout<<"e = "<<ecc<<std::endl;
-					std::cout<<"T = "<<T<<std::endl;
-					std::cout<<"Tc = "<<Tc<<std::endl;
-					std::cout<<"P = "<<P<<std::endl;
-					std::cout<<"Eprime = "<<Eprime <<"\n" <<std::endl;
+				if (warningsOn){
+					std::cout<<"PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"<<std::endl;
+					if (true){
+						std::cout<<"M = "<<M <<std::endl;
+						std::cout<<"e = "<<ecc<<std::endl;
+						std::cout<<"T = "<<T<<std::endl;
+						std::cout<<"Tc = "<<Tc<<std::endl;
+						std::cout<<"P = "<<P<<std::endl;
+						std::cout<<"Eprime = "<<Eprime <<"\n" <<std::endl;
+					}
 				}
 			}
 			//std::cout<<"E RV [deg] = "<<E*(180.0/pi)<<std::endl;
@@ -65,14 +67,16 @@ void Orbit::anomalyCalc(double ecc, double T, double Tc,double P, double epoch){
 				}
 				//double check it satisfies the original equation
 				if (fabs((E-ecc*sin(E))-M)>1.0e-5){
-					std::cout<<"PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"<<std::endl;
-					if (true){
-						std::cout<<"M = "<<M <<std::endl;
-						std::cout<<"e = "<<ecc<<std::endl;
-						std::cout<<"T = "<<T<<std::endl;
-						std::cout<<"Tc = "<<Tc<<std::endl;
-						std::cout<<"P = "<<P<<std::endl;
-						std::cout<<"Eprime = "<<Eprime <<"\n" <<std::endl;
+					if (warningsOn){
+						std::cout<<"PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"<<std::endl;
+						if (true){
+							std::cout<<"M = "<<M <<std::endl;
+							std::cout<<"e = "<<ecc<<std::endl;
+							std::cout<<"T = "<<T<<std::endl;
+							std::cout<<"Tc = "<<Tc<<std::endl;
+							std::cout<<"P = "<<P<<std::endl;
+							std::cout<<"Eprime = "<<Eprime <<"\n" <<std::endl;
+						}
 					}
 				}
 			}
@@ -148,6 +152,17 @@ void Orbit::convertParsToRaw(double *p, int p_n){
 			p[9] = sqrt(e)*cos((pi/180.0)*omega);
 		}
 	}
+};
+
+void Orbit::NewtonWarningsOn(bool warningsOn_in){
+	/*
+	 At the beginning of SA with lowEcc mode, there can be some errors
+	 during the newton's method to calculate the anomalies.  These warnings
+	 are off by default and need to be turned on after this beginning phase.
+
+	 warningOn_in=true will turn them back on.
+	 */
+	warningsOn = warningsOn_in;
 };
 
 void Orbit::calculate(double *yy, int yy_nx, int yy_ny, double *p, int p_n){
@@ -294,8 +309,6 @@ void Orbit::calculate(double *yy, int yy_nx, int yy_ny, double *p, int p_n){
 			std::cout<<"]"<<std::endl;//$$$$$$$$$$$$$$$$$$$$$$$$$
 		}//$$$$$$$$$$$$$$$$$$$$$$$$$
 	}
-
-
 }
 
 
