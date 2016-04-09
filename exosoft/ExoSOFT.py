@@ -144,12 +144,16 @@ def iterativeSA(settings,Sim):
                             for j in range(6):
                                 bestRetAry2[j].append(bestRetAry[j][i])
                     bestRetAry = bestRetAry2
-                #copy resulting data files to new temp names
+                #copy resulting data files to new temp names.
                 for i in range(0,len(bestRetAry[0])):
                     curNm = bestRetAry[0][i]
                     outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter)+"-"+str(i)+".fits")
                     tools.renameFits(curNm,outNm,killInput=True)
                     bestRetAry[0][i] = outNm
+                #kill those that were not good enough
+                for i in range(len(retAry[0])):
+                    if os.path.exists(retAry[0][i]):
+                        tools.rmFiles([retAry[0][i]])
                 ## Now fill out an array of starting parameter sets from the best above.
                 ## first load up with one set of goodParams, then randomly from it till full.
                 log.debug('best chis:\n' +repr(np.sort(bestRetAry[3])))
@@ -165,7 +169,7 @@ def iterativeSA(settings,Sim):
                 #print 'STD = '+str(np.std(bestRetAry[3]))
                 if len(bestRetAry[3])==numProcs:
                     uSTD = tools.unitlessSTD(bestRetAry[3])
-                log.warning("After iteration #"+str(iter+1)+" the top "+str(len(bestRetAry[3]))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
+                log.info("After iteration #"+str(iter+1)+" the top "+str(len(bestRetAry[3]))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
                 retStr2 +="The latest top "+str(len(bestRetAry[3]))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
     ## wrap up
     if len(bestRetAry[0])>1:
@@ -186,7 +190,7 @@ def iterativeSA(settings,Sim):
     toc=timeit.default_timer()
     s = "ALL "+str(iter+1)+" iterations of SA took a total of "+tools.timeStrMaker(int(toc-tic))
     retStr2 +=s+"\n"
-    log.warning(s)
+    log.warning(s+'\n')
     return (bestRetAry,retStr2)
 
 def exoSOFT():
@@ -358,9 +362,9 @@ def exoSOFT():
         log.debug(s)
         
     ## Final log messages and end
-    log.info("Post-processing took a total of "+tools.timeStrMaker(postTime))
-    log.info("\n\nEVERYTHING took a total of "+tools.timeStrMaker(allTime)+'\n\n')
-    log.info("End of exosoft main")
+    log.debug("Post-processing took a total of "+tools.timeStrMaker(postTime))
+    log.warning(" ExoSOFT is Done :-)\n EVERYTHING took a total of "+tools.timeStrMaker(allTime)+'\n')
+    log.debug("End of exosoft main")
     ##END MAIN 
 
 if __name__ == '__main__':

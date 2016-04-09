@@ -287,8 +287,12 @@ def writeFits(baseFilename,data,settings):
     File will be stored in the 'finalFolder' directory from the settings.
     If data variable is a string, this function will assume it is a filename 
     of where the data is stored in a .npy file, and load it in.
+    
+    NOTE: lots of error msg checking that can be removed if further testing 
+          does not show same issues that caused me to put them in.
     """
     outFname=''
+    errMsg = ''
     try:
         ##check if data is a .npy filename
         if type(data)==str:
@@ -301,9 +305,12 @@ def writeFits(baseFilename,data,settings):
             if '.fits' not in baseFilename:
                 baseFilename=baseFilename+'.fits'
             outFname = os.path.join(settings['finalFolder'],baseFilename)
+            errMsg = 'Got outFname, about to make PrimaryHDU for data of type:\n'+repr(type(data))+'\noutFname was:\n'+outFname
             hdu = pyfits.PrimaryHDU(data)
+            errMsg = 'Got outname and data into a PrimaryHDU, about to make an HDUList. outFname was:\n'+outFname
             hdulist = pyfits.HDUList([hdu])
             header = hdulist[0].header
+            errMsg = 'HDUList created, about to try and load up header with keys from commentsDict'
             ##load up header with tuples from settings
             commentsDict = settings['commentsDict']
             for key in settings:
@@ -317,9 +324,13 @@ def writeFits(baseFilename,data,settings):
                         com = com[:46]
                     header.comments[key] = com
                         #print key+' = '+repr((header[key],header.comments[key]))
+            errMsg = 'keys from commentsDict loaded into header, about to try to write hdu to disk at:\n'+outFname
+            if os.path.exists(outFname):
+                log.critical("That file already exists on disk!!\n")
             hdulist.writeto(outFname)
             log.info("output file written to:below\n"+outFname)
             hdulist.close()
+            errMsg=" all done, should be no errors after this."
             ## check resulting fits file header
             if False:
                 f = pyfits.open(os.path.join(settings['finalFolder'],baseFilename),'readonly')
@@ -333,7 +344,8 @@ def writeFits(baseFilename,data,settings):
         else:
             log.error("No data to write to file:\n"+baseFilename)
     except:
-        log.error("could not write file to disk for some reason")
+        m = "Could not write file to disk for some reason.  Last errMsg was:\n"
+        log.error(m+errMsg+'\n')
     return outFname
 
 def periodicDataDump(filename,d):

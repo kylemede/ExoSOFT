@@ -2,7 +2,7 @@
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (1000000,"Number of MCMC or MC samples"),
+'nSamples' : (200000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
@@ -20,7 +20,7 @@ simpleSettingsDict={
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
 # NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'SA',
+'stages' : 'SASTMCMC',
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
 'initCrit' : 'enough',
@@ -53,7 +53,7 @@ advancedSettingsDict = {
 ### General Settings ###
 ########################
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
-'chiMAX' : (500.0,"Max reduced chiSquared during MC"),
+'chiMAX' : (1000.0,"Max reduced chiSquared during MC"),
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
 'chiMaxST':(5,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
@@ -84,7 +84,7 @@ advancedSettingsDict = {
 # How many times do you want the Gelman-Rubin statistic calculated [int]
 'nGRcalc' :10,
 # number of samples to draw for simulated annealing stage [int] 
-'nSAsamp' :(200000,"Num SA samples"),
+'nSAsamp' :(50000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
 'strtTemp' : (100.0,"SA start temp."),
 # Number of samples till temperature drop. [int]

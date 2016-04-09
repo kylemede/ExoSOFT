@@ -68,10 +68,10 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         if rePlot==False:
             if os.path.exists(settings['finalFolder']):
                 if settings['logLevel']<50: ## Handle this with a 'clob' bool in dict??? $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                    print '\n'+'$'*50
-                    print 'WARNING!! the folder:\n"'+settings['finalFolder']+'"\nALREADY EXISTS!'
-                    print 'You can overwrite the data in it, or exit this simulation.'
-                    YN = raw_input('OVERWRITE current folder (y/n):')
+                    print '$'*50
+                    print '$ WARNING!! the folder:\n$ "'+settings['finalFolder']+'"\n$ ALREADY EXISTS!'
+                    print '$ You can overwrite the data in it, or exit this simulation.'
+                    YN = raw_input('$ OVERWRITE current folder (y/n): ')
                 else:
                     YN = 'y'
                 if (('y' in YN) or ('Y' in YN)):
@@ -339,8 +339,9 @@ def modePrep(settings,sigmas):
                 sys.exit(s)
                 #***************************************************************************************************
         else:
-            log.critical("Auto mode and no params provided, so run default stages: SASTMCMC.")
-            settings['stages']='SASTMCMC'  
+            if settings['stages']!='SASTMCMC':
+                log.critical("Auto mode and no params provided, so run default stages: SASTMCMC.")
+                settings['stages']='SASTMCMC'  
         if gotSigmas==False:
             startSigmas = sigmas
     elif gotSigmas==False:
@@ -356,8 +357,9 @@ def modePrep(settings,sigmas):
                 #***************************************************************************************************
         else:
             if type(startParams)!=np.ndarray:
-                log.info("Auto mode and no params or sigmas provided, so run default stages: SASTMCMC.")
-                settings['stages']='SASTMCMC'
+                if settings['stages']!='SASTMCMC':
+                    log.info("Auto mode and no params or sigmas provided, so run default stages: SASTMCMC.")
+                    settings['stages']='SASTMCMC'
             else:
                 log.info("Auto mode and params, but no sigmas provided, so run default stages: STMCMC.")
                 settings['stages']='STMCMC'

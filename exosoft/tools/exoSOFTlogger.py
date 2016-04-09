@@ -170,12 +170,15 @@ def addStreamHandler(log,lvl=20):
         print 'Setting StreamHandler level to '+str(lvl)
     sh = logging.StreamHandler(sys.stdout)
     sh.setLevel(lvl)
-    sFrmt = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    if False:
+        sFrmt = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+    sFrmt = logging.Formatter('%(message)s')
     sh.setFormatter(sFrmt)
     log.addHandler(sh)   
     
 def logSystemInfo(log):
-    """ A function to be called just after a logging object is instantiated 
+    """ 
+    A function to be called just after a logging object is instantiated 
     for exosoft to load the log up with info about the computer it is 
     being ran on and the software version.  This function utilizes the 
     psutil and platform libraries, so they must be install for it to work.  
@@ -204,10 +207,20 @@ def logSystemInfo(log):
     infoStr+="\n"+'OS Version = '+platform.uname()[2]
     infoStr+="\n"+'Machine UserName = '+platform.uname()[1]
     infoStr+="\n"+'Machine Processor Type = '+platform.processor()
-    infoStr+="\n"+'Number of cores = '+str(psutil.cpu_count())
-    totMem = int(round(psutil.virtual_memory()[0]/1073741824.0))
-    percentMem = int(round(psutil.virtual_memory()[2]))
-    infoStr+="\n"+'Total RAM = '+str(totMem)+'[GB], with ~ '+str(percentMem)+"% already in use at simulation start"
+    try:
+        infoStr+="\n"+'Number of cores = '+str(psutil.cpu_count())
+    except:
+        try:
+            import multiprocessing
+            multiprocessing.cpu_count()
+        except:
+            infoStr+="\n A problem with psutil occurred while trying to count CPUs."
+    try:
+        totMem = int(round(psutil.virtual_memory()[0]/1073741824.0))
+        percentMem = int(round(psutil.virtual_memory()[2]))
+        infoStr+="\n"+'Total RAM = '+str(totMem)+'[GB], with ~ '+str(percentMem)+"% already in use at simulation start"
+    except:
+        infoStr+="\n A problem with psutil occurred while investigating available RAM."
     infoStr+="\n"+'Python Version = '+repr(platform.python_version())
     infoStr+="\n"+'='*50
     log.debug(infoStr)
