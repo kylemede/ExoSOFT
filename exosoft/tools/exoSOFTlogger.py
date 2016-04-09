@@ -1,7 +1,6 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import logging
 import platform
-import psutil
 import sys
 import os
 #import traceback
@@ -208,6 +207,7 @@ def logSystemInfo(log):
     infoStr+="\n"+'Machine UserName = '+platform.uname()[1]
     infoStr+="\n"+'Machine Processor Type = '+platform.processor()
     try:
+        import psutil  #not good coding practice, but a quick fix as some macs have issues with psutil
         infoStr+="\n"+'Number of cores = '+str(psutil.cpu_count())
     except:
         try:

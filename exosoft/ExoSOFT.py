@@ -1,6 +1,8 @@
 #!/usr/bin/python python
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
-#import numpy as np
+import matplotlib
+# Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
+matplotlib.use('Agg') 
 import tools
 import simulator
 from exosoftpath import rootDir as ExoSOFTdir
@@ -10,7 +12,6 @@ import timeit
 import numpy as np
 from multiprocessing import Process
 import pickle
-
 
 """
     This is the 'main' of exosoft. 
@@ -190,7 +191,7 @@ def iterativeSA(settings,Sim):
     toc=timeit.default_timer()
     s = "ALL "+str(iter+1)+" iterations of SA took a total of "+tools.timeStrMaker(int(toc-tic))
     retStr2 +=s+"\n"
-    log.warning(s+'\n')
+    log.warning(s)
     return (bestRetAry,retStr2)
 
 def exoSOFT():
@@ -211,7 +212,9 @@ def exoSOFT():
     tic=timeit.default_timer()
     stageList = settings['stageList']
     durationStrings = ''
+    log.warning("Starting requested stages")
     if 'MC' in stageList:
+        log.warning("Starting MC stage")
         (returns,b) = (returnsMC,durStr) = multiProc(settings,Sim,'MC',settings['nChains'])
         if len(returnsMC[0])>0:
             bstChiSqr = np.sort(returnsMC[3])[0]
@@ -221,10 +224,15 @@ def exoSOFT():
                     bestsigs = []
             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'MC')
         durationStrings+='** MC stage **\n'+durStr
+        toc=timeit.default_timer()
+        log.warning(durStr)
     if 'SA' in stageList:
+        log.warning("Starting SA stage")
         (returns,b) = (returnsSA,durStr) = iterativeSA(settings,Sim)
         durationStrings+='** Iterative SA stage **\n'+durStr
     if 'ST' in stageList:
+        log.warning("Starting ST stage")
+        tic=timeit.default_timer()
         startParams = []
         startSigmas = []
         if settings['stages'] in ['ST','STMCMC']:
@@ -250,8 +258,11 @@ def exoSOFT():
                     bestpars = returnsST[1][i]
                     bestsigs = returnsST[2][i]
             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'ST')
-        
+        toc=timeit.default_timer()
+        s = "ST took a total of "+tools.timeStrMaker(int(toc-tic))
+        log.warning(s)
     if 'MCMC' in stageList:
+        log.warning("Starting MCMC stage")
         startParams = []
         startSigmas = []
         if settings['stages']=='MCMC':
@@ -283,6 +294,7 @@ def exoSOFT():
                     bestpars = returnsMCMC[1][i]
                     bestsigs = returnsMCMC[2][i]
             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'MCMC')
+        log.warning(durStr)
     outFiles = returns[0]
     toc=tic2=timeit.default_timer()
     s = "ALL stages took a total of "+tools.timeStrMaker(int(toc-tic))

@@ -12,7 +12,7 @@ simpleSettingsDict={
 'nMCMCcns' : (2,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
-'logLevel' : 25,
+'logLevel' : 30,
 # data mode, choices {'RV','DI','3D'} [string]
 'dataMode' : ('3D',"Data Mode (RV,DI,3D)"),
 # Run in Automatic mode? This will perform checks and select the stages to run automatically. [bool]
@@ -55,7 +55,7 @@ advancedSettingsDict = {
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
 'chiMAX' : (1000.0,"Max reduced chiSquared during MC"),
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
-'chiMaxST':(5,'Max reduced chiSquared to enter ST.'),
+'chiMaxST':(10,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
 'cMaxMCMC':(2.0,'Max reduced chiSquared to enter MCMC.'),
 #number of times to produce a summary log msg during a stage's progress [int]
@@ -86,7 +86,7 @@ advancedSettingsDict = {
 # number of samples to draw for simulated annealing stage [int] 
 'nSAsamp' :(50000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
-'strtTemp' : (100.0,"SA start temp."),
+'strtTemp' : (200.0,"SA start temp."),
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : (50,"Num steps till temp drops in SA."),

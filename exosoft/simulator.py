@@ -369,6 +369,12 @@ class Simulator(object):
         self.parIntVaryAry = []
         self.settings['chainNum'] = self.chainNum
         self.settings['commentsDict']['nDIepoch'] = "chain number"
+        self.settings['curStg']= stage
+        self.settings['commentsDict']['curStg'] = 'Current stage either [SA,ST,MCMC or MC]'
+        if stage=='SA':
+            self.Orbit.NewtonWarningsOn(False)
+        else:
+            self.Orbit.NewtonWarningsOn(True)
         # make a very random seed value to ensure each chain is different.  
         # Should we make this value an optional input and pass on as a return value to keep a process number using the same seed?? $$$
         # if so, it needs to be pushed into the results file as well.
@@ -408,12 +414,6 @@ class Simulator(object):
         bar = tools.ProgressBar('green',width=1,block=' ',empty=' ',lastblock='')
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
-        self.settings['curStg']= stage
-        self.settings['commentsDict']['curStg'] = 'Current stage either [SA,ST,MCMC or MC]'
-        if stage=='SA':
-            self.Orbit.NewtonWarningsOn(False)
-        else:
-            self.Orbit.NewtonWarningsOn(True)
         strtTemp = temp      
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.
@@ -489,7 +489,10 @@ class Simulator(object):
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
         avgAcceptRate = self.endSummary(temp,sigmas,stage)
         tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
-        outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settings)
+        clobber = False
+        if self.settings['curStg']=="SA":
+            clobber = True
+        outFname = tools.writeFits('outputData'+stage+str(chainNum)+'.fits',self.tmpDataFile,self.settings,clob=clobber)
         if stage=='SA':
             ##start ST at the best location with tight sigmas, and it will tune to ideal sigmas
             sigmas = self.settings['sigMins']

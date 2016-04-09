@@ -279,7 +279,7 @@ def loadFits(filename,noData=False):
     else:
         return (head,data)
 
-def writeFits(baseFilename,data,settings):
+def writeFits(baseFilename,data,settings,clob=False):
     """
     Data will be written to a fits file with a single PrimaryHDU,
     with the .header loaded up with the tuples from the settings 
@@ -293,6 +293,7 @@ def writeFits(baseFilename,data,settings):
     """
     outFname=''
     errMsg = ''
+    noGo=False
     try:
         ##check if data is a .npy filename
         if type(data)==str:
@@ -301,7 +302,9 @@ def writeFits(baseFilename,data,settings):
                 data = np.load(dataFname)
                 os.remove(dataFname)
                 log.debug("just removed data file from disk:\n"+dataFname)
-        if len(data)>0:
+            else:
+                noGo=True
+        if (len(data)>0)and(noGo==False):
             if '.fits' not in baseFilename:
                 baseFilename=baseFilename+'.fits'
             outFname = os.path.join(settings['finalFolder'],baseFilename)
@@ -326,11 +329,15 @@ def writeFits(baseFilename,data,settings):
                         #print key+' = '+repr((header[key],header.comments[key]))
             errMsg = 'keys from commentsDict loaded into header, about to try to write hdu to disk at:\n'+outFname
             if os.path.exists(outFname):
-                log.critical("That file already exists on disk!!\n")
-            hdulist.writeto(outFname)
-            log.info("output file written to:below\n"+outFname)
-            hdulist.close()
-            errMsg=" all done, should be no errors after this."
+                if clob:
+                    rmFiles([outFname])
+                else:
+                    log.error("That file already exists on disk!!\n")
+            else:
+                hdulist.writeto(outFname)
+                log.info("output file written to:below\n"+outFname)
+                hdulist.close()
+                errMsg=" all done, should be no errors after this."
             ## check resulting fits file header
             if False:
                 f = pyfits.open(os.path.join(settings['finalFolder'],baseFilename),'readonly')
@@ -342,7 +349,7 @@ def writeFits(baseFilename,data,settings):
                         #print 'type(header[key] = '+repr(type(header[key]))
                 print '\n\nEntire Header as a repr:\n'+repr(head)
         else:
-            log.error("No data to write to file:\n"+baseFilename)
+            log.info("No data to write to file:\n"+baseFilename+'\n')
     except:
         m = "Could not write file to disk for some reason.  Last errMsg was:\n"
         log.error(m+errMsg+'\n')

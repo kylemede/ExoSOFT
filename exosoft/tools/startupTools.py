@@ -279,6 +279,10 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
         
+        ## extra to be extra careful, but will be able to kill this soon
+        if settings['nChains']<settings['nMCMCcns']:
+            settings['nChains'] = settings['nMCMCcns']
+        
         return settings
         
 

@@ -1,13 +1,15 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import numpy as np
 import os
+import matplotlib
+#matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
+matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 import pylab
-from pylab import matplotlib, Polygon
+from pylab import Polygon
 gridspec =  matplotlib.gridspec
 plt = matplotlib.pyplot
 patches = matplotlib.patches
 MultLoc = matplotlib.ticker.MultipleLocator
-matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 import copy
 import glob
 import shutil
