@@ -38,6 +38,9 @@ from generalTools import predictLocation
 from generalTools import nparyTolistStr
 from generalTools import unitlessSTD
 
+from chainTools import multiProcObj
+from chainTools import iterativeSA
+
 import priors
 
 from progressbar.progressbar import ProgressBar

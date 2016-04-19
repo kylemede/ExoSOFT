@@ -133,7 +133,7 @@ def burnInStripper(mcmcFnames,burnInLengths):
             log.debug("burn-in stripped file written to:\n"+newFname)
     return newFnames
 
-def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1):
+def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
     """
     Calculate Gelman-Rubin statistic for each varying param.
     Input MUST be the list of more than one MCMC chain files.
@@ -208,7 +208,10 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1):
             log.critical("Gelman-Rubin stat can NOT be calculated as file does not exist!!:\n"+mcmcFileList[0])
     except:
         log.critical("Gelman-Rubin stat FAILED to be calculated for some reason")
-    return (GRs,Ts,grStr)
+    if returnStrOnly:
+        return grStr
+    else:
+        return (GRs,Ts,grStr)
 
 def timeStrMaker(deltaT):
     """
@@ -326,7 +329,7 @@ def cleanUp(settings,stageList,allFname):
     ##try to delete files
     rwTools.rmFiles(delFiles)
     
-def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings):
+def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings,MCmpo,SAmpo,STmpo,MCMCmpo):
     """
     Make a txt file that summarizes the results nicely.
     """
@@ -448,6 +451,19 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\n'+burnInStr)
     f.write('\n'+grStr)
     f.write(effPtsStr)
+    f.write('\n'+'-'*44+'\nAverage acceptance rates for each stage:\n'+'-'*44+'\n')
+    if MCmpo!=None:
+        f.write('For MC stage: '+str(np.mean(MCmpo.avgAcceptRates))+'\n')
+        #(outFname,params,sigmas,bstChi,avgAcceptRates,acceptStrs) = MCmpo.getBest()
+    if SAmpo!=None:
+        f.write('For SA stage: '+str(np.mean(SAmpo.avgAcceptRates))+'\n')
+        #(outFname,params,sigmas,bstChi,avgAcceptRates,acceptStrs) = SAmpo.getBest()
+    if STmpo!=None:
+        f.write('For ST stage: '+str(np.mean(STmpo.avgAcceptRates))+'\n')
+        #(outFname,params,sigmas,bstChi,avgAcceptRates,acceptStrs) = STmpo.getBest()
+    if MCMCmpo!=None:
+        f.write('For MCMC stage: '+str(np.mean(MCMCmpo.avgAcceptRates))+'\n')
+        #(outFname,params,sigmas,bstChi,avgAcceptRates,acceptStrs) = MCMCmpo.getBest()
     f.write('\n\n'+'-'*24+'\nDurations of each stage:\n'+'-'*24+'\n'+durationStrings)
     f.write('\nPost-Processing took: '+timeStrMaker(postTime)+'\n')
     f.write('Total simulation took: '+timeStrMaker(allTime)+'\n')
@@ -670,9 +686,10 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         s+= "   median,      68.3% error above,   68.3% error below\n"
         s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)
         s+= "\nAverage 68.3% error = +/- "+str((conf68Vals[1]-conf68Vals[0])/2.0)
-        s+= "\nWidth Estimates:\n((68.3% error range)/median)x100% = "+str(((conf68Vals[1]-conf68Vals[0])/abs(dataMedian))*100.0)+"%"
-        s+= "\n((68.3% error range)/(95.4% error range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(conf95Vals[1]-conf95Vals[0]))*100.0)+"%"
-        s+= "\n((68.3% error range)/(Total range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(maxVal-minVal))*100.0)+"%"
+        if False:
+            s+= "\nWidth Estimates:\n((68.3% error range)/median)x100% = "+str(((conf68Vals[1]-conf68Vals[0])/abs(dataMedian))*100.0)+"%"
+            s+= "\n((68.3% error range)/(95.4% error range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(conf95Vals[1]-conf95Vals[0]))*100.0)+"%"
+            s+= "\n((68.3% error range)/(Total range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(maxVal-minVal))*100.0)+"%"
         if (colNum==1) and (dataMedian<0.1):
             s+='\n'+"~"*55+'\nOR in units of Mjupiter:\n'
             s+=str(dataMedian*mJupMult)+',  +'+str(mJupMult*(conf68Vals[1]-dataMedian))+',   '+str(mJupMult*(conf68Vals[0]-dataMedian))

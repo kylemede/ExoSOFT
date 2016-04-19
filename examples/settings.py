@@ -12,18 +12,18 @@ simpleSettingsDict={
 'nMCMCcns' : (2,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
-'logLevel' : 30,
+'logLevel' : 25,
 # data mode, choices {'RV','DI','3D'} [string]
 'dataMode' : ('3D',"Data Mode (RV,DI,3D)"),
 # Run in Automatic mode? This will perform checks and select the stages to run automatically. [bool]
-'autoMode' : (True, 'Run in Automatic mode?'),
+'autoMode' : (False, 'Run in Automatic mode?'),
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
 # NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
 'stages' : 'SASTMCMC',
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
-'initCrit' : 'enough',
+'initCrit' : 'tight',
 ############################################
 # Starting parameters and sigmas for MCMC  #
 # Can be found with prior run in SAST mode #
