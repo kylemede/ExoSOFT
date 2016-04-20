@@ -45,14 +45,6 @@ def exoSOFT():
         MCmpo.run()
         MCmpo.writeBest()
         (pars,sigs,chis,outFiles) = MCmpo.getTopProcs(settings['chiMAX'])
-#         (returns,b) = (returnsMC,durStr) = tools.multiProc(settings,Sim,'MC',settings['nChains'])
-#         if len(returnsMC[0])>0:
-#             bstChiSqr = np.sort(returnsMC[3])[0]
-#             for i in range(len(returnsMC[0])):
-#                 if returnsMC[3][i] == bstChiSqr:
-#                     bestpars = returnsMC[1][i]
-#                     bestsigs = []
-#             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'MC')
         durationStrings+='** MC stage **\n'+MCmpo.latestRetStr
         toc=timeit.default_timer()
         log.warning(MCmpo.latestRetStr)
@@ -70,24 +62,14 @@ def exoSOFT():
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif SAmpo!=None:
-            (startParams,startSigmas,chis,outFiles) = SAmpo.getTopProcs(settings['chiMaxST'],killBadOnes=False,fillToNumProc=True)
+            (startParams,startSigmas,chis,outFiles) = SAmpo.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
         else:
             log.critical("No SA results available to start the ST chains with.")
         if len(chis)>0:
             STmpo = tools.multiProcObj(settings,Sim,'ST')
             STmpo.run(params=startParams,sigmas=startSigmas)
             STmpo.writeBest()
-            #(returns,b) = (returnsST,durStr) = tools.multiProc(settings,Sim,'ST',len(startSigmas),startParams,startSigmas)
             durationStrings+='** ST stage **\n'+STmpo.latestRetStr
-#         # check best results of ST and store to a file.
-#         # Maybe replace pars and sigs in original settings files?
-#         if len(returnsST[0])>0:
-#             bstChiSqr = np.sort(returnsST[3])[0]
-#             for i in range(len(returnsST[0])):
-#                 if returnsST[3][i] == bstChiSqr:
-#                     bestpars = returnsST[1][i]
-#                     bestsigs = returnsST[2][i]
-#             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'ST')
         toc=timeit.default_timer()
         s = "ST took a total of "+tools.timeStrMaker(int(toc-tic))
         log.warning(s)
@@ -101,33 +83,14 @@ def exoSOFT():
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif STmpo!=None:
-            (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],killBadOnes=False,fillToNumProc=True,nProcs=settings['nMCMCcns'])
-#             chisSorted = []            
-#             #Filter inputs if more than max num MCMC proc available to use the best ones
-#             chisSorted = np.sort(returnsST[3])
-#             chisSorted = chisSorted[np.where(chisSorted<settings['cMaxMCMC'])]
-#             if len(chisSorted)>settings['nMCMCcns']:
-#                 chisSorted = chisSorted[:settings['nMCMCcns']]
-#             for i in range(len(returnsST[0])):
-#                 if returnsST[3][i] in chisSorted:
-#                     startParams.append(returnsST[1][i])
-#                     startSigmas.append(returnsST[2][i])
-#             ##$$$$$$$$$$$$$$$$$ MAKE THIS WORK IF nMCMCchains<nSTchains $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+            (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
         else:
             log.critical("No ST results available to start the MCMC chains with.")
         if len(chis)>0:
             MCMCmpo = tools.multiProcObj(settings,Sim,'MCMC')
             MCMCmpo.run(params=startParams,sigmas=startSigmas)
             MCMCmpo.writeBest()
-            #(returns,b) = (returnsMCMC,durStr) = tools.multiProc(settings,Sim,'MCMC',len(chisSorted),startParams,startSigmas)
             durationStrings+='** MCMC stage **\n'+MCMCmpo.latestRetStr
-            # Maybe replace pars in original settings files?
-#             bstChiSqr = np.sort(returnsMCMC[3])[0]
-#             for i in range(len(returnsMCMC[0])):
-#                 if returnsMCMC[3][i] == bstChiSqr:
-#                     bestpars = returnsMCMC[1][i]
-#                     bestsigs = returnsMCMC[2][i]
-#             tools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'MCMC')
         log.warning(MCMCmpo.latestRetStr)
     
     ## Done all stages 

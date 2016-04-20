@@ -437,7 +437,7 @@ class Simulator(object):
         ## convert from Raw form if in lowEcc mode
         self.Orbit.convertParsFromRaw(paramsLast)
         self.paramsLast = paramsLast
-        #self.startSummary(proposedPars,sigmas,stage)
+        self.startSummary(paramsLast,sigmas,stage)
         ##loop through each sample 
         ##Follows these steps: in Range?,calc model,accept?,Store?,increment,lower temp?,tune sigmas? dump data to disk? DONE ->write output data
         sample=0

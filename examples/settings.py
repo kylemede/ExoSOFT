@@ -6,10 +6,10 @@ simpleSettingsDict={
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
-'nChains' : (2,"Number MC/SA/ST of chains"),
+'nChains' : (5,"Number MC/SA/ST of chains"),
 # Number of MCMC chains to run in parallel. ONLY available in 'MCMC' mode. [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
-'nMCMCcns' : (2,"Number MCMC of chains"),
+'nMCMCcns' : (5,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
 'logLevel' : 25,

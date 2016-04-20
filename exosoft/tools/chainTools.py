@@ -66,64 +66,60 @@ class multiProcObj(object):
     def _loadUpArys(self,master):
         for procNumber in range(len(master)):
             ret = master[procNumber].loadResult()
-            self.outFnames.append(ret[0])
-            self.params.append(ret[1])
-            self.sigmas.append(ret[2])
-            self.bestRedChiSqrs.append(ret[3])
-            self.avgAcceptRates.append(ret[4])
-            self.acceptStrs.append(ret[5])
+            if os.path.exists(ret[0]):
+                self.outFnames.append(ret[0])
+                self.params.append(ret[1])
+                self.sigmas.append(ret[2])
+                self.bestRedChiSqrs.append(ret[3])
+                self.avgAcceptRates.append(ret[4])
+                self.acceptStrs.append(ret[5])
+            elif ret[0]!='':
+                log.error("Resulting file from MPO.run does not exist:\n"+\
+                          ret[0]+'\nit had a reduced chi of '+str(ret[3])+'\n')
         self.sortResults()
         
     def sortResults(self):
         """
         Sort all result arrays by ascending reduced chi squared values.
         """
-        chis = np.array(self.bestRedChiSqrs)
-        chisSorted = np.sort(self.bestRedChiSqrs)
-        outFnames = []
-        params = []
-        sigmas = []
-        bestRedChiSqrs = []
-        avgAcceptRates = []
-        acceptStrs = []
-        for chi in chisSorted:
-            try:
-                goodPts = np.where(chis==chi)[0].tolist()
-                outFnames.append(self.outFnames[goodPts[0]])
-                params.append(self.params[goodPts[0]])
-                sigmas.append(self.sigmas[goodPts[0]])
-                bestRedChiSqrs.append(chi)
-                avgAcceptRates.append(self.avgAcceptRates[goodPts[0]])
-                acceptStrs.append(self.acceptStrs[goodPts[0]])
-            except:
-                log.error("A problem occured while trying to sort results.  For chi="+\
-                          str(chi)+" the resulting gootPts were "+repr(goodPts))
-        self.outFnames = outFnames
-        self.params = params
-        self.sigmas = sigmas
-        self.bestRedChiSqrs = bestRedChiSqrs
-        self.avgAcceptRates = avgAcceptRates
-        self.acceptStrs = acceptStrs
+        if len(self.bestRedChiSqrs)>0:
+            chis = np.array(self.bestRedChiSqrs)
+            chisSorted = np.sort(self.bestRedChiSqrs)
+            outFnames = []
+            params = []
+            sigmas = []
+            bestRedChiSqrs = []
+            avgAcceptRates = []
+            acceptStrs = []
+            for chi in chisSorted:
+                if chi not in bestRedChiSqrs:
+                    try:
+                        goodPts = np.where(chis==chi)[0].tolist()
+                        outFnames.append(self.outFnames[goodPts[0]])
+                        params.append(self.params[goodPts[0]])
+                        sigmas.append(self.sigmas[goodPts[0]])
+                        bestRedChiSqrs.append(chi)
+                        avgAcceptRates.append(self.avgAcceptRates[goodPts[0]])
+                        acceptStrs.append(self.acceptStrs[goodPts[0]])
+                    except:
+                        log.error("A problem occured while trying to sort "+\
+                                  "results.  For chi = "+str(chi)+" the "+\
+                                  "resulting gootPts were "+repr(goodPts))
+                else:
+                    log.debug("already a chain with a reduced chi of "+str()+\
+                              " in the sorted MPO array.")
+            self.outFnames = outFnames
+            self.params = params
+            self.sigmas = sigmas
+            self.bestRedChiSqrs = bestRedChiSqrs
+            self.avgAcceptRates = avgAcceptRates
+            self.acceptStrs = acceptStrs
     
-    def getTopProcs(self,maxRedChiSqr,killBadOnes=True,fillToNumProc=False,nProcs=None):
-        self.sortResults()
+    def getTopProcs(self,maxRedChiSqr,fillToNumProc=False,nProcs=None):
         if nProcs==None:
             nProcs = self.numProcs
-        outFnames = []
-        params = []
-        sigmas = []
-        chis = []
-        avgAcceptRates = []
-        acceptStrs = []
-        goods = np.where(np.array(self.bestRedChiSqrs)<maxRedChiSqr)[0].tolist()
-        if len(goods)>0:
-            for good in goods:
-                outFnames.append(self.outFnames[good])
-                params.append(self.params[good])
-                sigmas.append(self.sigmas[good])
-                chis.append(self.bestRedChiSqrs[good])
-                avgAcceptRates.append(self.avgAcceptRates[good])
-                acceptStrs.append(self.acceptStrs[good])
+        (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)=self.findGoodBadOnes(maxRedChiSqr) 
+        if chis!=None:           
             if (len(params)<nProcs) and fillToNumProc:
                 while len(params)<nProcs:
                     rndVal = np.random.randint(0,len(params))
@@ -134,19 +130,63 @@ class multiProcObj(object):
                 params = params[:nProcs]
                 sigmas = sigmas[:nProcs]
                 chis = chis[:nProcs]
-                if killBadOnes:
-                    rwTools.rmFiles(outFnames[nProcs:])
-                    self.outFnames = outFnames[:nProcs]
-                    self.bestRedChiSqrs = chis
-                    self.params = params
-                    self.sigmas = sigmas
-                    self.avgAcceptRates = avgAcceptRates[:nProcs]
-                    self.acceptStrs = acceptStrs[:nProcs]
                 outFnames = outFnames[:nProcs]
-        else:
-            params=sigmas=chis=outFnames=None
-        return (params,sigmas,chis,outFnames)
+        return (params,sigmas,chis,outFnames)      
     
+    def findGoodBadOnes(self,maxRedChiSqr,findGoodOnes=True):
+        self.sortResults()
+        outFnames = []
+        params = []
+        sigmas = []
+        chis = []
+        avgAcceptRates = []
+        acceptStrs = []
+        chis2 = np.array(self.bestRedChiSqrs)
+        if findGoodOnes:
+            goodBads = np.where(chis2<maxRedChiSqr)[0].tolist()
+        else:
+            goodBads = np.where(chis2>maxRedChiSqr)[0].tolist()
+        if len(goodBads)>0:            
+            for gb in goodBads:
+                outFnames.append(self.outFnames[gb])
+                params.append(self.params[gb])
+                sigmas.append(self.sigmas[gb])
+                chis.append(self.bestRedChiSqrs[gb])
+                avgAcceptRates.append(self.avgAcceptRates[gb])
+                acceptStrs.append(self.acceptStrs[gb])
+        else:
+            params=sigmas=chis=outFnames=avgAcceptRates=acceptStrs=None
+        return (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)
+    
+    def killBadOnes(self,maxRedChiSqr,limitToNumProcs=True,nProcs=None):
+        if nProcs==None:
+            nProcs = self.numProcs
+        (paramsA,sigmasA,chisA,outFnamesA,avgAcceptRatesA,acceptStrsA)=self.findGoodBadOnes(maxRedChiSqr) 
+        (paramsB,sigmasB,chisB,outFnamesB,avgAcceptRatesB,acceptStrsB)=self.findGoodBadOnes(maxRedChiSqr,findGoodOnes=False)
+        rwTools.rmFiles(outFnamesB) 
+        if paramsA!=None:
+            if limitToNumProcs and (len(paramsA)>nProcs):
+                self.outFnames = outFnamesA[:nProcs]
+                self.bestRedChiSqrs = chisA[:nProcs]
+                self.params = paramsA[:nProcs]
+                self.sigmas = sigmasA[:nProcs]
+                self.avgAcceptRates = avgAcceptRatesA[:nProcs]
+                self.acceptStrs = acceptStrsA[:nProcs]
+            else:
+                self.outFnames = outFnamesA
+                self.bestRedChiSqrs = chisA
+                self.params = paramsA
+                self.sigmas = sigmasA
+                self.avgAcceptRates = avgAcceptRatesA
+                self.acceptStrs = acceptStrsA
+        else:
+            self.outFnames = []
+            self.params = []
+            self.sigmas = []
+            self.bestRedChiSqrs = []
+            self.avgAcceptRates = []
+            self.acceptStrs = []
+            
     def writeBest(self):
         (bstChi,bstInt) = self._best()
         rwTools.writeBestsFile(self.settings,self.params[bstInt],self.sigmas[bstInt],bstChi,self.stage)
@@ -207,6 +247,7 @@ def iterativeSA(settings,Sim):
     """
     Perform SA with multiProc nSAiters times, droping the starting temperature each time by strtTemp/nSAiters.
     """
+    testing=False
     tic=timeit.default_timer()
     numProcs = settings['nChains']
     nSAiters = 7.0
@@ -228,25 +269,45 @@ def iterativeSA(settings,Sim):
                 iterativeSA(settings,Sim)
         log.info("\nIteration #"+str(iter+1))
         SAmultiProc.retStr +="Iteration #"+str(iter+1)+"\n"
-        ## run multiProc
+        ## run multiProc for this temperature, kill bad chains 
+        ## and get best as start positions of next iteration.
         SAmultiProc.run(params=strtPars,sigmas=strtsigmas,strtTemp=temp)
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
-        (pars,sigs,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],killBadOnes=False)            
+        SAmultiProc.killBadOnes(settings['chiMaxST'])
+        (pars,sigs,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
+        if testing:
+            print 'so far top chis are: '+repr(chisForCalc)   
+            if outFnms!=None:     
+                print 'matching file names are: '
+                for n in outFnms:
+                    print n
         if pars==None:
             strtPars = range(numProcs)
         else:
-            ## sift through the names of the top procs and rename their files to new temp names.
-            if False:
-                print '\n0\nchis = '+repr(chisForCalc)+'\noutFnms = '+repr(outFnms)
+            ## shift through the names of the top procs and rename 
+            ## their files to new temp names.
+            # NOTE: This code is a bit of overkill and can trim down after it 
+            #       proves working for a month or so (dated:April 20 2016).
             for i in range(len(outFnms)):
-                curNm = outFnms[i]
-                outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter)+"-"+str(i)+".fits")
-                rwTools.renameFits(curNm,outNm,killInput=True)
-                for j in range(len(SAmultiProc.outFnames)):
-                    if SAmultiProc.outFnames[j]==curNm:
-                        SAmultiProc.outFnames[j] = outNm
-            #print '\nSAmultiProc.outFnames = '+repr(SAmultiProc.outFnames)
-            (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],killBadOnes=True,fillToNumProc=True)
+                worked=False
+                try:
+                    curNm = outFnms[i]
+                    outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter)+"-"+str(i)+".fits")
+                    rwTools.renameFits(curNm,outNm,killInput=True)
+                    worked=True
+                except:
+                    log.critical("\nfailed to rename file during iteration "+str(iter)+" of SA")
+                    s="\ncurNm = "+curNm+"\noutNm = "+outNm+"\nSAmultiProc.outFnames = "
+                    for n in SAmultiProc.outFnames:
+                        s+="\n"+n
+                    log.critical(s)
+                if worked:
+                    for j in range(len(SAmultiProc.outFnames)):
+                        if SAmultiProc.outFnames[j]==curNm:
+                            SAmultiProc.outFnames[j] = outNm
+                            if testing:
+                                print 'outfile renamed to '+SAmultiProc.outFnames[j]
+            (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
             strtPars = pars
             ## Calc 'uniform' STD and make final msgs for this iteration          
             log.debug(str(len(strtPars))+' sets of starting parameters being passed to next iteration.')
@@ -254,12 +315,17 @@ def iterativeSA(settings,Sim):
                 uSTD = genTools.unitlessSTD(chisForCalc)
             log.info("After iteration #"+str(iter+1)+" the top "+str(len(chisForCalc))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
             SAmultiProc.retStr +="The latest top "+str(len(chisForCalc))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
-    ############
-    ## wrap up #
-    ############
-    (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],killBadOnes=False)   
-    if False: 
-        print '\n1\nchis = '+repr(chis)+'\noutFnms = '+repr(outFnms)
+    #############
+    ## wrap up ##
+    #############
+    (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])   
+    #$$$$$$$$$$$ Debug $$$$$$$$$$$$$$$$
+    if testing:
+        (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
+        print '\nFINAL before renaming\nchis = '+repr(chis)+'\noutFnms = '
+        for n in SAmultiProc.outFnames:
+            print n
+    #$$$$$$$$$$$$$$$$$$$$$$$$$$$
     #rename final data files to standard SA convention
     if len(outFnms)>1:
         for i in range(len(outFnms)):
@@ -269,10 +335,13 @@ def iterativeSA(settings,Sim):
             for j in range(len(SAmultiProc.outFnames)):
                 if SAmultiProc.outFnames[j]==curNm:
                     SAmultiProc.outFnames[j] = outNm    
-    #Debug
-    if False:
-        (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],killBadOnes=False)
-        print '\n2\nchis = '+repr(chis)+'\noutFnms = '+repr(outFnms)
+    #$$$$$$$$$$$ Debug $$$$$$$$$$$$$$$$
+    if testing:
+        (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
+        print '\nFINAL after renaming\noutFnms = '
+        for n in SAmultiProc.outFnames:
+            print n
+    #$$$$$$$$$$$$$$$$$$$$$$$$$$$
         
     SAmultiProc.writeBest()
     toc=timeit.default_timer()
@@ -280,90 +349,3 @@ def iterativeSA(settings,Sim):
     SAmultiProc.retStr +=s+"\n"
     log.warning(s)
     return SAmultiProc            
-                        
-                        
-                                
-        
-#         if topProcs!=None:
-#             #print 'filtering'
-#             chisSorted = [] 
-#             goodParams = []           
-#             #Filter inputs if more than max num MCMC proc available to use the best ones
-#             chisSorted = np.sort(retAry[3])
-#             chisSorted = chisSorted[np.where(chisSorted<settings['chiMaxST'])]
-#             if len(chisSorted)==0:
-#                 strtPars = range(numProcs)
-#             elif (len(chisSorted)==1)and(numProcs==1):
-#                 bestRetAry=retAry
-#                 uSTD=1e-6
-#             else:
-#                 #first updated bestRetAry
-#                 for i in range(len(retAry[0])):
-#                     if retAry[3][i] in chisSorted:                       
-#                         if len(bestRetAry[0])<numProcs:
-#                             for j in range(6):
-#                                 bestRetAry[j].append(retAry[j][i])
-#                         else:
-#                             bestChis = np.sort(bestRetAry[3])
-#                             if retAry[3][i]<bestChis[-1]:
-#                                 for j in range(6):
-#                                     bestRetAry[j].append(retAry[j][i])
-#                 #now make list of best ones to use in next round
-#                 if len(bestRetAry[0])>numProcs:
-#                     bestChis = np.sort(bestRetAry[3])
-#                     log.debug("len best before filtering = "+str(len(bestRetAry[0]))+", worst was "+str(bestChis[-1]))
-#                     bestRetAry2 = [[],[],[],[],[],[]]
-#                     #trim best lists down to size
-#                     for i in range(0,len(bestChis)):
-#                         if bestRetAry[3][i] in bestChis[:numProcs]:
-#                             for j in range(6):
-#                                 bestRetAry2[j].append(bestRetAry[j][i])
-#                     bestRetAry = bestRetAry2
-#                 #copy resulting data files to new temp names.
-#                 for i in range(0,len(bestRetAry[0])):
-#                     curNm = bestRetAry[0][i]
-#                     outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter)+"-"+str(i)+".fits")
-#                     rwTools.renameFits(curNm,outNm,killInput=True)
-#                     bestRetAry[0][i] = outNm
-#                 #kill those that were not good enough
-#                 for i in range(len(retAry[0])):
-#                     if os.path.exists(retAry[0][i]):
-#                         rwTools.rmFiles([retAry[0][i]])
-#                 ## Now fill out an array of starting parameter sets from the best above.
-#                 ## first load up with one set of goodParams, then randomly from it till full.
-#                 log.debug('best chis:\n' +repr(np.sort(bestRetAry[3])))
-#                 goodParams = bestRetAry[1]
-#                 strtPars=[]
-#                 if len(goodParams)>0:
-#                     for i in range(0,len(goodParams)):
-#                         strtPars.append(goodParams[i])
-#                     while len(strtPars)<numProcs:
-#                         rndVal = np.random.randint(0,len(goodParams))
-#                         strtPars.append(goodParams[rndVal])
-#                 log.info(str(len(strtPars))+' sets of starting parameters being passed to next iteration.')
-#                 #print 'STD = '+str(np.std(bestRetAry[3]))
-#                 if len(bestRetAry[3])==numProcs:
-#                     uSTD = genTools.unitlessSTD(bestRetAry[3])
-#                 log.info("After iteration #"+str(iter+1)+" the top "+str(len(bestRetAry[3]))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
-#                 retStr2 +="The latest top "+str(len(bestRetAry[3]))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
-#     ## wrap up
-#     if len(bestRetAry[0])>1:
-#         #rename final data files to standard SA convention
-#         for i in range(0,len(bestRetAry[0])):
-#             curNm = bestRetAry[0][i]
-#             outNm = os.path.join(os.path.dirname(curNm),'outputDataSA'+str(i)+'.fits')
-#             rwTools.renameFits(curNm,outNm)
-#             bestRetAry[0][i] = outNm
-#     #Find best fit, write to file, maybe push into settings files if better than one in there already.
-#     if len(bestRetAry[0])>0:
-#         bstChiSqr = np.sort(bestRetAry[3])[0]
-#         for i in range(len(bestRetAry[0])):
-#             if bestRetAry[3][i] == bstChiSqr:
-#                 bestpars = bestRetAry[1][i]
-#                 bestsigs = bestRetAry[2][i]
-#         rwTools.writeBestsFile(settings,bestpars,bestsigs,bstChiSqr,'SA')
-#     toc=timeit.default_timer()
-#     s = "ALL "+str(iter+1)+" iterations of SA took a total of "+genTools.timeStrMaker(int(toc-tic))
-#     retStr2 +=s+"\n"
-#     log.warning(s)
-#     return (bestRetAry,retStr2)

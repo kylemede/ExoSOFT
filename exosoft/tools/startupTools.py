@@ -72,6 +72,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                     print '$ WARNING!! the folder:\n$ "'+settings['finalFolder']+'"\n$ ALREADY EXISTS!'
                     print '$ You can overwrite the data in it, or exit this simulation.'
                     YN = raw_input('$ OVERWRITE current folder (y/n): ')
+                    if settings['logLevel']<50:
+                        print '$'*50+'\n'
                 else:
                     YN = 'y'
                 if (('y' in YN) or ('Y' in YN)):
@@ -85,8 +87,6 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                         log.debug('seems copy to dropbox related settings keys are not there...')
                 else: #elif (('n' in YN) or ('N' in YN)):
                     sys.exit()
-                if settings['logLevel']<50:
-                    print '$'*50+'\n'
             else:
                 os.mkdir(settings['finalFolder'])
             if False:

@@ -293,7 +293,7 @@ def writeFits(baseFilename,data,settings,clob=False):
     """
     outFname=''
     errMsg = ''
-    noGo=False
+    notThere=False
     try:
         ##check if data is a .npy filename
         if type(data)==str:
@@ -303,8 +303,8 @@ def writeFits(baseFilename,data,settings,clob=False):
                 os.remove(dataFname)
                 log.debug("just removed data file from disk:\n"+dataFname)
             else:
-                noGo=True
-        if (len(data)>0)and(noGo==False):
+                notThere=True
+        if (len(data)>0)and(notThere==False):
             if '.fits' not in baseFilename:
                 baseFilename=baseFilename+'.fits'
             outFname = os.path.join(settings['finalFolder'],baseFilename)
@@ -330,10 +330,11 @@ def writeFits(baseFilename,data,settings,clob=False):
             errMsg = 'keys from commentsDict loaded into header, about to try to write hdu to disk at:\n'+outFname
             if os.path.exists(outFname):
                 if clob:
+                    log.debug("clob==True, but file exists, so deleting file:\n"+outFname)
                     rmFiles([outFname])
                 else:
                     log.error("That file already exists on disk!!\n")
-            else:
+            if os.path.exists(outFname)==False:
                 hdulist.writeto(outFname)
                 log.info("output file written to:below\n"+outFname)
                 hdulist.close()
@@ -415,15 +416,19 @@ def renameFits(filenameIn,filenameOut,killInput=True,overwrite=True):
             rmFiles([filenameIn])
     
 def rmFiles(files):
-    ##try to delete files
-    for fname in files:
-        try:
-            if os.path.exists(fname):
-                log.debug('Deleting file: '+os.path.basename(fname))
-                os.remove(fname) 
-        except:
-            log.error('Failed to delete file: '+os.path.basename(fname))
-    
+    if type(files)==str:
+        files = [files]
+    if type(files)==list:
+        ##try to delete files
+        for fname in files:
+            try:
+                if os.path.exists(fname):
+                    log.debug('Deleting file: '+os.path.basename(fname))
+                    os.remove(fname) 
+            except:
+                log.error('Failed to delete file: '+os.path.basename(fname))
+    else:
+        log.debug("files passed into rmFiles was not of list or str type")
     
 def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
     
