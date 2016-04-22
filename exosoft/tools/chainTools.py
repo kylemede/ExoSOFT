@@ -243,30 +243,35 @@ class multiProcObj(object):
         #import code; code.interact(local=locals())
         ############################################################   
 
-def iterativeSA(settings,Sim):
+def iterativeSA(settings,Sim,internalTemp=None):
     """
     Perform SA with multiProc nSAiters times, droping the starting temperature each time by strtTemp/nSAiters.
     """
     testing=False
     tic=timeit.default_timer()
     numProcs = settings['nChains']
-    nSAiters = 7.0
+    nSAiters = 7
+    nSAstrtIters = 3
+    chisForCalc = None
     strtPars = range(numProcs)
     strtsigmas = range(numProcs)
     SAmultiProc = multiProcObj(settings,Sim,'SA')
     uSTD = 1e6
     iter = -1
-    temp = settings['strtTemp']
+    if internalTemp==None:
+        internalTemp = settings['strtTemp']
+    temp = internalTemp
     while uSTD>settings['maxUstd']:
         iter+=1
         if iter>0:
-            if iter<=nSAiters:
-                temp -= settings['strtTemp']/nSAiters
-            elif iter>nSAiters:
+            if (iter>nSAstrtIters)and(chisForCalc==None):
                 ## Try SA again from the start
                 rwTools.rmFiles(SAmultiProc.outFnames)
-                log.critical("Nothing found on this round of iterativeSA, so trying again from the top.")
-                iterativeSA(settings,Sim)
+                log.critical("Nothing found on this round of iterativeSA, so trying again from the top with double the starting temperature, ie "+str(internalTemp*2.0))
+                iterativeSA(settings,Sim,internalTemp=internalTemp*2.0)
+            elif iter<=nSAiters:
+                temp -= internalTemp/nSAiters
+            
         log.info("\nIteration #"+str(iter+1))
         SAmultiProc.retStr +="Iteration #"+str(iter+1)+"\n"
         ## run multiProc for this temperature, kill bad chains 
@@ -275,6 +280,7 @@ def iterativeSA(settings,Sim):
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
         SAmultiProc.killBadOnes(settings['chiMaxST'])
         (pars,sigs,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
+        print 'so far top chis are: '+repr(chisForCalc) 
         if testing:
             print 'so far top chis are: '+repr(chisForCalc)   
             if outFnms!=None:     

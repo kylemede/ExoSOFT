@@ -26,13 +26,15 @@ public:
 	int dataModelAry_nx,dataModelAry_ny;
 	double* params;
 	int params_n;
-    //Declare all doubles used inside Orbit class.
+    //Declare all doubles calculated during Orbit class.
     double M, E, Eprime,EDI,K,theta,thetaPrime,thetaRV,A,B,F,G,X,Y,atot,RA,Dec,PA,SA;
+    //declare named version of the varying parameter array values for clarity in the code.
+    double m1,m2,parallax,Omega,ecc,To,Tc,P,inc,omega,atotAU;
     //Declare static global constants
     double Grav,pi,KGperMsun,daysPerYear,secPerYear,MperAU;
     //For sqrt(e)sin(omega),sqrt(e)cos(omega) case
     bool lowEcc,PASA;
-    double e,omega;
+
     bool warningsOn;
     
     //funcs
@@ -42,12 +44,16 @@ public:
     //For loading in the global constants
     void loadConstants(double Grav_in,double pi_in,double KGperMsun_in, double daysPerYear_in,double secPerYear_in,double MperAU_in);
     //to calculate the True and Eccentric anomalies
-    void anomalyCalc(double ecc, double T, double Tc,double P, double epoch);
+    void anomalyCalc(double epoch);
     //to convert sqrt(e)sin(omega),sqrt(e)cos(omega) to e & omega
     void convertParsToRaw(double *p, int p_n);
     void convertParsFromRaw(double *p, int p_n);
     //to turn on/off the warnings from Newton's method.
     void NewtonWarningsOn(bool warningsOn_in);
+    //to push parameter array into variables for use during calculations
+    void parsAryToVariables();
+    //to push calculated variables back into array
+    void variablesToParsAry();
     //to calculate the model data and load it into an empty 2d array and 1d params array (both inplace arrays)
     void calculate(double *yy, int yy_nx, int yy_ny, double *p, int p_n);
 };

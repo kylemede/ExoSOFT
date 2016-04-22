@@ -1,5 +1,5 @@
 # SWIG
-INTERFACES = orbit.i postctools.i
+INTERFACES = orbit.i postctools1d.i
 WRAPPERS   = $(INTERFACES:.i=_wrap.cxx)
 PROXIES    = $(INTERFACES:.i=.py      )
 # Default target: build the tests

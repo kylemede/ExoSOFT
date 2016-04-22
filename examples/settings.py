@@ -53,7 +53,7 @@ advancedSettingsDict = {
 ### General Settings ###
 ########################
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
-'chiMAX' : (1000.0,"Max reduced chiSquared during MC"),
+'chiMAX' : (500.0,"Max reduced chiSquared during MC"),
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
 'chiMaxST':(10,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
@@ -86,7 +86,7 @@ advancedSettingsDict = {
 # number of samples to draw for simulated annealing stage [int] 
 'nSAsamp' :(50000,"Num SA samples"),
 # Simulated Annealing starting temperature [double]
-'strtTemp' : (200.0,"SA start temp."),
+'strtTemp' : (100.0,"SA start temp."),
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : (50,"Num steps till temp drops in SA."),
