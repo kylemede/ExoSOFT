@@ -14,6 +14,32 @@ log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False)
 
 def startup(argv,ExoSOFTdir,rePlot=False):
     """
+    Ways to start ExoSOFT:
+    If shebang at top of ExoSOFT.py matches your system and location of ExoSOFT/exosoft
+    has been added to your PATH, then follow type 'a' below.  Else, use 'b' version.
+    
+    
+    1. Provide full path to settings file.
+        a: $ExoSOFT.py /path/you/want/settings.py
+        b: cd into /../ExoSOFT/exosoft/ first, then: 
+           $python ExoSOFT.py /path/you/want/settings.py
+    
+    2. From current directory where custom settings files exist.  
+       Replace 'settingsfilename' with name of file you want to run.
+        a: $ExoSOFT.py settingsfilename.py
+        b: $python /../ExoSOFT/exosoft/ExoSOFT.py settingsfilename.py
+        
+    3. Basic.  User will be prompted to select example 
+       ExoSOFT/examples/settings.py, or provide full path to specific settings 
+       file.
+        a:  $ExoSOFT.py
+        b: cd into /../ExoSOFT/exosoft/ first, then: $python ExoSOFT.py
+            For both 'a' and 'b':
+            To use example: type 'y' and press enter.
+            Else, type 'n' and press enter, then type 
+            '/path/you/want/settings.py' and press enter.
+        
+    
     Perform the following vital start up steps (and return filled out and cleaned up settings):
     -Figure out important directories
     -Copy settings files to temp directory to combine them into the master settings dict
@@ -28,34 +54,16 @@ def startup(argv,ExoSOFTdir,rePlot=False):
     -Check if start startParams and startSigmas in dictionary make sense.
     NOTE: have ExoSOFTdir handled with setup.py??
     """    
-    ## Pull in settings filename prepend from command line args, if provided
-    inArg = ''
-    if len(argv)>1:
-        try:
-            inArg = argv[1]
-        except:
-            print '\nWarning: Only able to handle a single argument on the cmd !!\n'    
-    ## Load up the required specific directory paths in dict
-    if '/' in inArg:
-        #assume full path
-        settFilePath = inArg
-    else:
-        examplesDir = os.path.join(ExoSOFTdir.split('exosoft')[0],'examples/')
-        if "settings.py" in inArg:
-            settFileNm = inArg
-        else:
-            settFileNm = inArg+"settings.py"
-        settFilePath = os.path.join(examplesDir,settFileNm)
-
+    settFilePath = getSettFilePath(argv,ExoSOFTdir)
+    # extra double check file exists
     if os.path.exists(settFilePath)==False:
         log.critical('Critical error occured while trying to load in the settings.  Quiting exosoft!!')
-        #***************************************************************************************************
-        s = "THAT SETTINGS FILE DOES NOT EXIST!!"
-        s+= "\nARGUMENT PROVIDED TO exosoft WAS: "+inArg
-        s+= "\nTHIS MUST BE A PREPEND TO A SETTINGS FILE IN THE STANDARD DIRECTORY, OR THE FULL PATH TO A SETTINGS FILE."
-        s+="\n\n!!EXITING exosoft!!"
+        #*********************************************************************
+        s = "\nSETTINGS FILE NOT FOUND!"
+        s+= "\nPLEASE DOUBLE CHECK RULES FOR THE 3 WAYS TO START ExoSOFT WITH "
+        s+="INPUT ARGUMENT --help\n\n!!EXITING ExoSOFT!!"
         sys.exit(s)
-        #***************************************************************************************************
+        #*********************************************************************
     else:
         settings = rwTools.loadSettings(ExoSOFTdir,settFilePath)
         log.setStreamLevel(settings['logLevel'])
@@ -400,5 +408,121 @@ def modePrep(settings,sigmas):
     settings['stageList'] = stageList
     
     return settings
+
+def getSettFilePath(argv,ExoSOFTdir):
+    ## Pull in settings filename prepend from command line args, if provided
+    inArg = ''
+    if len(argv)>1:
+        try:
+            inArg = argv[1]
+        except:
+            print '\nWarning: Only able to handle a single argument on the cmd !!\n'    
+    if inArg=='--help':
+        s ="\nWays to start ExoSOFT\n"+'-'*50
+        s+="\nIf shebang at top of ExoSOFT.py matches "
+        s+="\nyour system and location of ExoSOFT/exosoft has been added to your"
+        s+="\nPATH, then follow type 'a' below.  Else, use 'b' version.\n"+'-'*50
+        s+="\n1. Provide full path to settings file.\n      a: $ExoSOFT.py "
+        s+="/path/you/want/settings.py\n      b: cd into /../ExoSOFT/exosoft/ "
+        s+="first, then: \n      $python ExoSOFT.py /path/you/want/settings.py"
+        s+="\n\n2. From current directory where custom settings files exist.\n" 
+        s+="   Replace 'settingsfilename' with name of file you want to run.\n"
+        s+="      a: $ExoSOFT.py settingsfilename.py\n      b: $python "
+        s+="/../ExoSOFT/exosoft/ExoSOFT.py settingsfilename.py\n\n"
+        s+="3. Basic.  User will be prompted to select example ExoSOFT/"
+        s+="examples/settings.py, \n   or provide full path to specific settings "
+        s+="file.\n     a:  $ExoSOFT.py\n     b: cd into /../ExoSOFT/exosoft/ "
+        s+="first, then: $python ExoSOFT.py\n        For both 'a' and 'b':\n  "
+        s+=" To use example: type 'y' and press enter.\n   Else, type 'n' and "
+        s+="press enter, then type '/path/you/want/settings.py' and press "
+        s+="enter.\n"
+        s= '\n'+'*'*50+'\n'+s+'\n'+'*'*50+'\n'
+        sys.exit(s)
+            
+    else: 
+        ## Load up the required specific directory paths in dict
+        # Starting method #1, provide full path to settings file          
+        if '/' in inArg:
+            #assume full path
+            settFilePath = inArg
+            if os.path.exists(settFilePath)==False:
+                log.critical('Critical error occured while trying to load in the settings.  Exiting ExoSOFT!!')
+                #*****************************************************************
+                s = "\nTHAT SETTINGS FILE DOES NOT EXIST!!"
+                s+= "\nARGUMENT PROVIDED TO ExoSOFT WAS: '"+inArg+"'"
+                s+= "\nFOR METHOD #1 THE FULL PATH TO SETTINGS FILE IS EXPECTED\n"
+                s+= "ie. $python ExoSOFT.py /path/you/want/settings.py"
+                s+="\n\n!!EXITING ExoSOFT!!"
+                sys.exit(s)
+                #*****************************************************************
+            else:
+                log.debug("Starting ExoSOFT by method #1")
+        else:
+            gotIt = False
+            # Starting method #2, settings file in cwd.
+            if inArg!='':
+                gotIt=True
+                if os.path.exists(inArg):
+                    settFilePath=inArg
+                    log.debug("Starting ExoSOFT by method #2")
+                else:
+                    log.critical('Critical error occured while trying to load in the settings.  Exiting ExoSOFT!!')
+                    #********************************************************
+                    s = "\nTHAT SETTINGS FILE DOES NOT EXIST!!"
+                    s+= "\nARGUMENT PROVIDED TO ExoSOFT WAS: '"+inArg+"'"
+                    s+= "\nNO SETTINGS FILE WITHT THAT NAME EXISTS IN CWD."
+                    s+= "\nFOR METHOD #2 THE SETTINGS FILENAME IS EXPECTED.\n"
+                    s+= "ie. $python ExoSOFT.py settingsfilename.py"
+                    s+="\n\n!!EXITING ExoSOFT!!"
+                    sys.exit(s)
+                    #*********************************************************
+            elif os.path.exists('settings.py'):
+                print '*'*35
+                print '* A settings.py exists in your cwd.'
+                yn = raw_input('* Use it? (y/n): ')
+                if (('y' in yn) or ('Y' in yn)):
+                    gotIt=True
+                    settFilePath='settings.py'
+                    print '*'*35
+                    log.debug("Starting ExoSOFT by method #2")
+            if gotIt==False:
+                # Starting method #3, prompt user to use defaults or provide a 
+                # settings file path.
+                print '*'*50
+                print '* No settings file provided.  '
+                yn = raw_input('* Use the example one? (y/n): ')
+                if (('y' in yn) or ('Y' in yn)):
+                    examplesDir = os.path.join(ExoSOFTdir.split('exosoft')[0],'examples/')
+                    settFilePath = os.path.join(examplesDir,"settings.py")
+                    if os.path.exists(settFilePath)==False:
+                        log.critical('Critical error occured while trying to load in the settings.  Exiting ExoSOFT!!')
+                        s = "\nTHAT SETTINGS FILE DOES NOT EXIST!!"
+                        s+= "\nARGUMENT PROVIDED TO ExoSOFT WAS: '"+inArg+"'"
+                        s+= "\nMETHOD #3 IN EXAMPLE MODE BROKEN!!!\n"
+                        s+= 'PLEASE CHECK THAT DIRECTORY TO SEE IF FILE IS THERE.'
+                        s+="\n\n!!EXITING ExoSOFT!!"
+                        sys.exit(s)
+                    else:
+                        print '*'*50
+                        log.debug("Starting ExoSOFT by method #3 with defaults")
+                else:
+                    #prompt user to provide settings file with path
+                    print '* Please provide full path to settings file of your choice.'
+                    print '* ex: /path/you/want/settings.py'
+                    settFilePath = raw_input('* : ')
+                    if os.path.exists(settFilePath)==False:
+                        log.critical('Critical error occured while trying to load in the settings.  Exiting ExoSOFT!!')
+                        s = "\nTHAT SETTINGS FILE DOES NOT EXIST!!"
+                        s+= "\nARGUMENT PROVIDED TO ExoSOFT WAS: '"+inArg+"'"
+                        s+= "\nFOR METHOD #3 WITH USER SPECIFIED FILE."
+                        s+= "\nPLEASE PROVIDE FULL PATH WHEN PROMPTED\n"
+                        s+= "ie. /path/you/want/settings.py\n"
+                        s+= 'PLEASE DOUBLE CHECK PATH AND FILE NAME.'
+                        s+="\n\n!!EXITING ExoSOFT!!"
+                        sys.exit(s)
+                    else:
+                        print '*'*50
+                        log.debug("Starting ExoSOFT by method #3 with user provided file and path") 
+        return settFilePath
 
 #END OF FILE

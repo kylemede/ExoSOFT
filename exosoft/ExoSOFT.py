@@ -1,4 +1,4 @@
-#!/usr/bin/python python
+#!/usr/bin/env python
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import matplotlib
 # Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.

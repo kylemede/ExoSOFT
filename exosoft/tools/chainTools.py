@@ -267,7 +267,9 @@ def iterativeSA(settings,Sim,internalTemp=None):
             if (iter>nSAstrtIters)and(chisForCalc==None):
                 ## Try SA again from the start
                 rwTools.rmFiles(SAmultiProc.outFnames)
-                log.critical("Nothing found on this round of iterativeSA, so trying again from the top with double the starting temperature, ie "+str(internalTemp*2.0))
+                s = "3 itterations of SA failed to find a suitable starting point."
+                s+= " So starting it again at double the initial temperature."
+                log.critical(s)
                 iterativeSA(settings,Sim,internalTemp=internalTemp*2.0)
             elif iter<=nSAiters:
                 temp -= internalTemp/nSAiters
