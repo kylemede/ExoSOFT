@@ -8,6 +8,7 @@ import generalTools as genTools
 import readWriteTools as rwTools
 import constants as const
 import warnings
+from IPython.core.prompts import cwd_filt
 warnings.simplefilter("error")
 
 log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False) 
@@ -70,6 +71,22 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         settings['ExoSOFTdir']=ExoSOFTdir
         settings['settingsDir']=os.path.dirname(settFilePath)
         settings['settFilePath']= settFilePath
+        ## check if outDir is defined, else to write outputs in cwd
+        if settings['outDir']==None:
+            print '*'*35+"\n* 'outDir' parameter was None."
+            cwd = os.getenv('PWD')
+            print '* your current working directory is: '+cwd
+            yn = raw_input("* Do you want to write output files here? (y/n): ")
+            if (('y' in yn) or ('Y' in yn)):
+                settings['outDir'] = cwd
+                print '*'*35
+            else:
+                #*********************************************************************
+                s = "\nPlease change the value for the 'outDir' key in your\n"
+                s+="settings file to where you want to write the outputs to."
+                s+="\n\n!!EXITING ExoSOFT!!"
+                sys.exit(s)
+                #*********************************************************************
         ## Make a directory (folder) to place all the files from this simulation run
         settings['finalFolder'] = os.path.join(settings['outDir'],settings['outRoot'])
         ##if not doing a re-post analysis with customPost.py
@@ -79,12 +96,12 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                     print '$'*50
                     print '$ WARNING!! the folder:\n$ "'+settings['finalFolder']+'"\n$ ALREADY EXISTS!'
                     print '$ You can overwrite the data in it, or exit this simulation.'
-                    YN = raw_input('$ OVERWRITE current folder (y/n): ')
+                    yn = raw_input('$ OVERWRITE current folder (y/n): ')
                     if settings['logLevel']<50:
                         print '$'*50+'\n'
                 else:
-                    YN = 'y'
-                if (('y' in YN) or ('Y' in YN)):
+                    yn = 'y'
+                if (('y' in yn) or ('Y' in yn)):
                     shutil.rmtree(settings['finalFolder'])
                     os.mkdir(settings['finalFolder'])
                     try:

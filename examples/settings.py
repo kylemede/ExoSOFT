@@ -36,7 +36,7 @@ simpleSettingsDict={
 
 directoriesDict = {
 # Directory where you want the output data folder to go [string, at least 2 chars long]
-'outDir' : '/mnt/Data1/Todai_Work/Data/data_SMODT',
+'outDir' : None,#'/mnt/Data1/Todai_Work/Data/data_SMODT',
 # full path to input astrometry data file. [string]
 'DIdataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',                
 # full path to input radial velocity data file. [string]
