@@ -123,6 +123,14 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
             setFiles = [settings['settFilePath'],settings['RVdataFile'],settings['DIdataFile']]
             genTools.copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
+        ## push all comments from tuples into a sub dictionary to ensure all  
+        ## values for requested keys are just the value with no comments.
+        commentsDict = {}
+        for key in settings:
+            if type(settings[key])==tuple:
+                    commentsDict[key] = settings[key][1]
+                    settings[key] = settings[key][0]
+        settings['commentsDict'] = commentsDict
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
@@ -139,14 +147,6 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             s+="\n\n!!EXITING exosoft!!"
             sys.exit(s)
             #***************************************************************************************************
-        ## push all comments from tuples into a sub dictionary to ensure all  
-        ## values for requested keys are just the value with no comments.
-        commentsDict = {}
-        for key in settings:
-            if type(settings[key])==tuple:
-                    commentsDict[key] = settings[key][1]
-                    settings[key] = settings[key][0]
-        settings['commentsDict'] = commentsDict
         ##check there are matching number of RV datasets and provided min/max vals for offsets
         if np.min(realData[:,6])<1e6:
             numVmins=len(settings['vMINs'])

@@ -65,7 +65,7 @@ def exoSOFT():
             (startParams,startSigmas,chis,outFiles) = SAmpo.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
         else:
             log.critical("No SA results available to start the ST chains with.")
-        if len(chis)>0:
+        if len(startParams)>0:
             STmpo = tools.multiProcObj(settings,Sim,'ST')
             STmpo.run(params=startParams,sigmas=startSigmas)
             STmpo.writeBest()
@@ -86,7 +86,7 @@ def exoSOFT():
             (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
         else:
             log.critical("No ST results available to start the MCMC chains with.")
-        if len(chis)>0:
+        if len(startParams)>0:
             MCMCmpo = tools.multiProcObj(settings,Sim,'MCMC')
             MCMCmpo.run(params=startParams,sigmas=startSigmas)
             MCMCmpo.writeBest()

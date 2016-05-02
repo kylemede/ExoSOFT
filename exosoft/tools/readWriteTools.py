@@ -336,7 +336,7 @@ def writeFits(baseFilename,data,settings,clob=False):
                     log.error("That file already exists on disk!!\n")
             if os.path.exists(outFname)==False:
                 hdulist.writeto(outFname)
-                log.info("output file written to:below\n"+outFname)
+                log.debug("output file written to:below\n"+outFname)
                 hdulist.close()
                 errMsg=" all done, should be no errors after this."
             ## check resulting fits file header
