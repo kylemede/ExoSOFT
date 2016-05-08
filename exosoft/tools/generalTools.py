@@ -349,8 +349,11 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\nTheir name+units:\n'+repr(paramStrsCleaned))
     f.write('\nTheir file name postpends:\n'+repr(paramFileStrsCleaned))
     f.write("\n\nIntegers of those used in Astrometry/DI nu calc: ")
-    f.write(repr(settings['DIvars']))
-    f.write("\nIntegers of those used in RV nu calc: "+repr(settings['RVvars']))
+    try:
+        f.write(repr(settings['DIvars']))
+        f.write("\nIntegers of those used in RV nu calc: "+repr(settings['RVvars']))
+    except:
+        log.debug("no DIvars or RVvars it seems")
     try:
         ## try to make and write the more advanced summary strings to the file
         nusStr = "\nnu values were: [total,DI,RV] = ["+str(head['NU'])+", "+str(head['NUDI'])+", "+str(head['NURV'])+"]\n"

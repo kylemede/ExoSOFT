@@ -10,22 +10,9 @@ def customPost():
     settings = tools.startup(sys.argv,ExoSOFTdir,rePlot=True)
     log = tools.getLogger('main',dir=settings['finalFolder'],lvl=100)
     skipBurnInStrip=True
-    allFname = ''
-    if os.path.exists(os.path.join(settings['finalFolder'],\
-                                   "combined-BIstripped-MCMCdata.fits")):
-        allFname = os.path.join(settings['finalFolder'],\
-                                "combined-BIstripped-MCMCdata.fits")
-    elif os.path.exists(os.path.join(settings['finalFolder'],\
-                                     "combinedMCMCdata.fits")):
-        allFname = os.path.join(settings['finalFolder'],\
-                                "combinedMCMCdata.fits")
-        skipBurnInStrip=False
-    else:
-        skipBurnInStrip=True
-        log.critical("No combined MCMC file available.  Please check and/or "+\
-                     "modify the customPost.py script as needed.")
+    
     ## run make for swig if requested??
-    if settings['remake'] and False:
+    if False:
         cwd = os.getcwd()
         log.debug("-"*45+" Starting to remake CPP/SWIG tools "+45*"-")
         os.chdir(os.path.join(settings['ExoSOFTdir'],'tools/cppTools/'))
@@ -34,17 +21,47 @@ def customPost():
         os.chdir(cwd)
         log.debug("-"*45+" Done re-making CPP/SWIG tools "+45*"-")
 
-    ##make hack list of output files
+    ## make list of output files
     outFiles = []
-    if 'BIstripped' in allFname:
+    if settings['stageList'][-1]=='MCMC':
         outFiles = np.sort(glob.glob(os.path.join(settings['finalFolder'],\
                                               "outputDataMCMC*_BIstripped.fits")))
-    elif os.path.exists(allFname):
-        outFiles = np.sort(glob.glob(os.path.join(settings['finalFolder'],\
-                                              "outputDataMCMC*.fits")))
+        if len(outFiles)==0:
+            outFiles = np.sort(glob.glob(os.path.join(settings['finalFolder'],\
+                                                  "outputDataMCMC*.fits")))
     else:
-        log.error("No appropriate list of output non-combined outputs to "+\
-                  "perform burn-in stripping on.")
+        outFiles = np.sort(glob.glob(os.path.join(settings['finalFolder'],\
+                                              "outputData"+\
+                                              settings['stageList'][-1]+"*.fits")))
+    if len(outFiles)==0:
+        log.error("No appropriate list of individual chain outputs to "+\
+                  "perform burn-in stripping on, or combine.")
+    ## get name for combined output data file
+    allFname = ''
+    if os.path.exists(os.path.join(settings['finalFolder'],\
+                                   "combined-BIstripped-MCMCdata.fits")):
+        allFname = os.path.join(settings['finalFolder'],\
+                                "combined-BIstripped-MCMCdata.fits")
+        skipBurnInStrip=True
+    elif os.path.exists(os.path.join(settings['finalFolder'],\
+                                     "combined"+settings['stageList'][-1]+"data.fits")):
+        allFname = os.path.join(settings['finalFolder'],\
+                                "combined"+settings['stageList'][-1]+"data.fits")
+        skipBurnInStrip=False
+    else:
+        skipBurnInStrip=True
+        log.critical("No combined MCMC file available.  Please check and/or "+\
+                     "modify the customPost.py script as needed.")
+    ## combine the individual chain data files needed
+    if (len(outFiles)>0) and (allFname==''):
+        print 'about to combine data files together'
+        if 'BIstripped' in outFiles[0]:
+            allFname = os.path.join(os.path.dirname(outFiles[0]),\
+                                    "combined-BIstripped-MCMCdata.fits")
+        else:
+            allFname = os.path.join(os.path.dirname(outFiles[0]),\
+                                    "combined"+settings['stageList'][-1]+"data.fits")
+        tools.combineFits(outFiles,allFname)
     
     ## calc and strip burn-in?
     burnInStr = ''
@@ -107,7 +124,7 @@ def customPost():
     if False:
         print 'about to calc GR'
         if (len(outFiles)>1) and (settings['CalcGR'] and (settings['stageList'][-1]=='MCMC')):
-            (GRs,Ts,grStr) = tools.gelmanRubinCalc(outFiles,settings['nSamples'][0])
+            grStr = tools.gelmanRubinCalc(outFiles,settings['nSamples'])
         
     ## custom re check of the orbit fit     
     if False: 
@@ -129,7 +146,7 @@ def customPost():
     if False:
         if os.path.exists(allFname):
             print 'about to make summary file'
-            tools.summaryFile(settings,settings['stageList'],allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,1,1,'')
+            tools.summaryFile(settings,settings['stageList'],allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,1,1,'',None,None,None,None)
         
     ##clean up files (move to folders or delete them)
     if False:
