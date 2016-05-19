@@ -778,9 +778,12 @@ def unitlessSTD(ary):
     """
     Calculate the bias corrected standard deviation, then divide by the mean to make it unitless.
     """
-    if len(ary)<=1:
-        log.error('Less than 2 elements passed into unitlessSTD, so returning 1e6.')
+    if len(ary)<1:
+        log.error('no elements passed to unitlessSTD, so returning 1e6.')
         return 1e6
+    if len(ary)==1:
+        log.error('only 1 element passed into unitlessSTD, so returning 0.')
+        return 0
     else:
         if type(ary)!=np.ndarray:
             if type(ary)==list:

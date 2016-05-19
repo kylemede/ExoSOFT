@@ -53,18 +53,20 @@ def loadDIdata(filename):
     try:
         if filename[-4:]!='.dat':
             filename = filename+'.dat'
-        file = open(filename, 'r')
+        fl = open(filename, 'r')
         diData = []
-        lines = file.readlines()
-        file.close()
+        lines = fl.readlines()
+        fl.close()
         for line in lines:
+            #print "line was:'"+line+"'"
             #log.debug("line was:'"+line+"'")#$$$$$$$$$$$$$$$$$$$$$$$$
             if len(line.split())>2:
                 if line.split()[0].replace('.','',1).isdigit() and line.split()[3].replace('.','',1).replace('-','',1).isdigit():
                     diData.append([float(line.split()[0]),float(line.split()[1]),float(line.split()[2]),float(line.split()[3]),float(line.split()[4])])  
+                    #print repr([float(line.split()[0]),float(line.split()[1]),float(line.split()[2]),float(line.split()[3]),float(line.split()[4])])
         diData = np.array(diData)
     except:
-        log.critical("a problem occured while trying to load DI data. \nlease check it is formatted correctly.")
+        log.critical("a problem occured while trying to load DI data. \nPlease check it is formatted correctly.")
     return diData
     
 def loadRVdata(filename):
@@ -92,9 +94,9 @@ def loadRVdata(filename):
     try:
         if filename[-4:]!='.dat':
             filename = filename+'.dat'
-        file = open(filename, 'r')
-        lines = file.readlines()
-        file.close()
+        fl = open(filename, 'r')
+        lines = fl.readlines()
+        fl.close()
         rvData = []
         datasetNumLast = 0
         jitterLast = 0
@@ -113,7 +115,7 @@ def loadRVdata(filename):
                         try:
                             jitterLast = float(line.split()[3])
                         except:
-                             log.error("could not convert 4th element of split into jitter.  4th element was: "+str(line.split()[3]))
+                            log.error("could not convert 4th element of split into jitter.  4th element was: "+str(line.split()[3]))
                     curDataAry.append(np.sqrt(float(line.split()[2])**2+jitterLast**2))
                     #if datasetNum was provided on first line of data set
                     if len(line.split())>4:
@@ -156,6 +158,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         #print 'rvData = '+repr(rvData)
         #for i in range(0,rvData.shape[0]):
         #    print 'ORIG rv data = '+str(rvData[i,0])+', '+str(rvData[i,1])+", "+str(rvData[i,2])+", "+str(rvData[i,3])
+        #print repr(diData)
         ##load in epochs from both sets, sort and kill double entries
         epochsTemp = np.concatenate((diEpochs,rvEpochs))
         epochsTemp.sort()
@@ -165,16 +168,34 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
                 epochs.append(epoch)
         epochs = np.array(epochs)
         realData = np.zeros((epochs.shape[0],8))
+        #print 'ln171'
         ##set error values to 1e6 which signals not to calculate the predicted version in orbit.cc
-        realData[:,2]=realData[:,4]=realData[:,6]=1e6
+        realData[:,2]=1e6
+        realData[:,4]=1e6
+        realData[:,6]=1e6
         realData[:,0]=epochs[:]
+        #print 'ln177'
+        #print repr(diEpochs)
+        #print repr(diData[:,0])
+        #print repr(epochs)
         for i in range(epochs.shape[0]):
             if len(diEpochs)>0:
                 if epochs[i] in diData[:,0]:
-                    realData[i,1:5]=diData[np.where(diData[:,0]==epochs[i])[0],1:]
+                    pos = np.where(diData[:,0]==epochs[i])[0]
+                    if len(pos)>1:
+                        pos = [pos[0]]
+                        log.critical('More than 1 set of DI data for epoch '+\
+                                     str(epochs[i])+'.  Only using first!!')
+                    realData[i,1:5]=diData[pos,1:]
+            
             if len(rvEpochs)>0:
                 if epochs[i] in rvData[:,0]:
-                    realData[i,5:]=rvData[np.where(rvData[:,0]==epochs[i])[0],1:]
+                    pos = np.where(rvData[:,0]==epochs[i])[0]
+                    if len(pos)>1:
+                        pos = [pos[0]]
+                        log.critical('More than 1 set of RV data for epoch '+\
+                                     str(epochs[i])+'.  Only using first!!')
+                    realData[i,5:]=rvData[pos,1:]
         #print 'dataMode'+dataMode+'->realData = '+repr(realData)
         #for i in range(0,realData.shape[0]):
         #    print 'realData = '+str(realData[i,0])+', '+str(realData[i,5])+", "+str(realData[i,6])+", "+str(realData[i,7])

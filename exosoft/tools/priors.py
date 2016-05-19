@@ -88,14 +88,21 @@ class Priors(object):
     def mass1PriorRatio(self,MProposed,MLast):
         if (self.settings['mass1MAX']!=0):
             if MProposed!=MLast!=0:
-                prop=lst=1.0
+                gaussRatio = 1.0
+                if self.settings['mass1Est']!=self.settings['mass1Err']!=0:
+                    ## a Gaussian prior
+                    top = self.gaussian(MProposed, self.settings['mass1Est'], self.settings['mass1Err'])
+                    btm = self.gaussian(MLast, self.settings['mass1Est'], self.settings['mass1Err'])
+                    gaussRatio = top/btm
+                prop=1.0
+                lst=1.0
                 if (self.settings['M1Prior']=="PDMF")or(self.settings['M1Prior']==True):
                     prop = self.pdmfPrior(MProposed)
                     lst = self.pdmfPrior(MLast)
                 elif self.settings['M1Prior']=="IMF":
                     prop = self.imfPrior(MProposed)
                     lst = self.imfPrior(MLast)
-                return prop/lst
+                return (prop/lst)*gaussRatio
             else:
                 return 1.0
         else:
@@ -104,7 +111,14 @@ class Priors(object):
     def mass2PriorRatio(self,m2Prop,m2Last,m1Prop,m1Last):
         if (self.settings['mass2MAX']!=0):
             if 0.0 not in [m2Prop,m2Last,m1Prop,m1Last]:
-                prop=lst=1.0
+                gaussRatio = 1.0
+                if self.settings['mass2Est']!=self.settings['mass2Err']!=0:
+                    ## a Gaussian prior
+                    top = self.gaussian(m2Prop, self.settings['mass2Est'], self.settings['mass2Err'])
+                    btm = self.gaussian(m2Last, self.settings['mass2Est'], self.settings['mass2Err'])
+                    gaussRatio = top/btm
+                prop=1.0
+                lst=1.0
                 if (self.settings['M2Prior']=="CMF")or(self.settings['M2Prior']==True):
                     prop = self.cmfPrior(m2Prop,m1Prop)
                     lst = self.cmfPrior(m2Last,m1Last)
@@ -114,7 +128,7 @@ class Priors(object):
                 elif self.settings['M2Prior']=="IMF":
                     prop = self.imfPrior(m2Prop)
                     lst = self.imfPrior(m2Last)
-                return prop/lst
+                return (prop/lst)*gaussRatio
             else:
                 return 1.0
         else:
@@ -124,7 +138,7 @@ class Priors(object):
         if paraProposed!=paraLast!=self.settings['paraMAX']!=0:
             ratioA = (paraLast**4.0)/(paraProposed**4.0)
             ratioB = 1.0
-            if self.settings['paraEst']!=0:
+            if self.settings['paraEst']!=self.settings['paraErr']!=0:
                 ## a Gaussian prior centered on hipparcos and width of hipparcos estimated error
                 top = self.gaussian(paraProposed, self.settings['paraEst'], self.settings['paraErr'])
                 btm = self.gaussian(paraLast, self.settings['paraEst'], self.settings['paraErr'])
