@@ -115,17 +115,28 @@ class multiProcObj(object):
             self.avgAcceptRates = avgAcceptRates
             self.acceptStrs = acceptStrs
     
-    def getTopProcs(self,maxRedChiSqr,fillToNumProc=False,nProcs=None):
+    def getTopProcs(self,maxRedChiSqr,fillToNumProc=False,nProcs=None,allBest=False):
         if nProcs==None:
             nProcs = self.numProcs
         (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)=self.findGoodBadOnes(maxRedChiSqr) 
-        if chis!=None:           
-            if (len(params)<nProcs) and fillToNumProc:
+        if chis!=None:        
+            if allBest:
+                params = [params[0]]
+                sigmas = [sigmas[0]]
+                chis = [chis[0]]
+                outFnames = [outFnames[0]]
+                while len(params)<nProcs:
+                    params.append(params[0])
+                    sigmas.append(sigmas[0])
+                    chis.append(chis[0])
+                    outFnames.append(outFnames[0])
+            elif (len(params)<nProcs) and fillToNumProc:
                 while len(params)<nProcs:
                     rndVal = np.random.randint(0,len(params))
                     params.append(params[rndVal])
                     sigmas.append(sigmas[rndVal])
                     chis.append(chis[rndVal])
+                    outFnames.append(outFnames[rndVal])
             elif len(params)>nProcs:
                 params = params[:nProcs]
                 sigmas = sigmas[:nProcs]

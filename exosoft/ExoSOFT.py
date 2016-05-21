@@ -83,7 +83,10 @@ def exoSOFT():
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif STmpo!=None:
-            (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
+            try:
+                (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'],allBest=settings['strtMCMCatBest'])
+            except:
+                (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
         else:
             log.critical("No ST results available to start the MCMC chains with.")
         if len(startParams)>0:
