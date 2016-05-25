@@ -78,8 +78,11 @@ class Priors(object):
         
     def incPriorRatio(self,incProposed,incLast):
         if self.settings['incMAX']!=0:
-            if (incLast%90.0)!=0:
-                return np.sin(incProposed*(constants.pi/180.0))/np.sin(incLast*(constants.pi/180.0))
+            if incLast not in [0.0,90.0,180.0]:
+                if self.settings['incPrior'] is 'sin':
+                    return np.sin(incProposed*(constants.pi/180.0))/np.sin(incLast*(constants.pi/180.0))
+                elif self.settings['incPrior'] is 'cos':
+                    return np.cos(incProposed*(constants.pi/180.0))/np.cos(incLast*(constants.pi/180.0))
             else:
                 return 1.0
         else:

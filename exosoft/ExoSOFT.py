@@ -85,6 +85,8 @@ def exoSOFT():
         elif STmpo!=None:
             try:
                 (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'],allBest=settings['strtMCMCatBest'])
+                log.debug('Starting all MCMC chain at the same top fit '+\
+                          'found during the ST stage.')
             except:
                 (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
         else:

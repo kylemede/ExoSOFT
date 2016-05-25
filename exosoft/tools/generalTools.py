@@ -910,6 +910,7 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
     :returns: (E, E_error, N, N_error)
     """
     verbose = False
+    printForExcel = True
     N = SA*np.cos(np.radians(PA))
     E = SA*np.sin(np.radians(PA))
     
@@ -942,5 +943,11 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
             print 'E_error2-E_error = '+str(E_error2-E_error)
             print 'E_error2 = '+str(E_error2)+', E_error = '+str(E_error)
             print 'N_error2 = '+str(N_error2)+', N_error = '+str(N_error)+"\n"
-    
+    if printForExcel:
+        print 'E = '+str(E)
+        print 'E error= '+str(E_error)
+        print 'N = '+str(N)
+        print 'N error = '+str(N_error)
+        
+        
     return (E, E_error, N, N_error)

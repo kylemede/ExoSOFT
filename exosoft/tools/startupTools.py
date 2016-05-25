@@ -301,6 +301,13 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         settings['rangeMins'] = rangeMins
         settings['rangeMaxs'] = rangeMaxs
         settings['paramInts'] = np.array(paramInts)
+        ## map some prior keys to updated values
+        incDict = {True:'sin',False:False,None:False,'sin':'sin','cos':'cos'}
+        settings['incPrior']=incDict[settings['incPrior']]
+        m1Dict = {True:'PDMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF'}
+        settings['M1Prior']=m1Dict[settings['M1Prior']]
+        m2Dict = {True:'CMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF','CMF':'CMF'}
+        settings['M2Prior']=m2Dict[settings['M2Prior']]
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
         
