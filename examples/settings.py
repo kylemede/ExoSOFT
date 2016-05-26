@@ -201,7 +201,9 @@ priorsDict={
 # For ALL: False indicates a flat prior. True indicates to use defaults.
 'ePrior'    :(True,'Use prior for eccentricity?'),
 'pPrior'    :(True,'Use prior for period?'),
-'incPrior'  :(True,'Use prior for inclination?'),
+# For the inclination prior, use strings or booleans to inducate the specific 
+# function to use.  Either sin(i), cos(i) or flat.  True indicates sin(i).
+'incPrior'  :('cos',"inclination prior ['cos','sin',True or False]"),
 # For m1 and m2: use strings to indicate specific prior function.
 # m1 default is 'PDMF', m2 default is 'CMF'.
 'M1Prior':(True,"m1 prior ['PDMF', 'IMF', True or False]"),

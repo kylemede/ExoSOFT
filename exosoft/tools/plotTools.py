@@ -613,7 +613,10 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                     log.debug('Making hist file for parameter '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i]+", for file:\n"+outputDataFilename)
                     histDataBaseName = os.path.join(os.path.dirname(plotDataDir),'hist-'+stage+"-"+paramFileStrs[i]+'.dat')
                     #print 'histDataBaseName = '+histDataBaseName
-                    histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,weight=weightHists, normed=False, nu=1)
+                    if stage=='MC':
+                        histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=50,weight=weightHists, normed=False, nu=1)
+                    else:
+                        histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=100,weight=weightHists, normed=False, nu=1)
                     if (os.path.exists(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))==False)or forceRecalc:
                         np.savetxt(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'),CLevels)
                         log.debug('confidence levels data stored to:\n'+os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))
