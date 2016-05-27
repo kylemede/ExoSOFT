@@ -293,7 +293,7 @@ def iterativeSA(settings,Sim,internalTemp=None):
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
         SAmultiProc.killBadOnes(settings['chiMaxST'])
         (pars,sigs,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
-        print 'so far top chis are: '+repr(chisForCalc) 
+        #print 'so far top chis are: '+repr(chisForCalc) 
         if testing:
             print 'so far top chis are: '+repr(chisForCalc)   
             if outFnms!=None:     
@@ -332,7 +332,7 @@ def iterativeSA(settings,Sim,internalTemp=None):
             log.debug(str(len(strtPars))+' sets of starting parameters being passed to next iteration.')
             if len(chisForCalc)==numProcs:
                 uSTD = genTools.unitlessSTD(chisForCalc)
-            log.info("After iteration #"+str(iter+1)+" the top "+str(len(chisForCalc))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
+            log.importantinfo("After iteration #"+str(iter+1)+" the top "+str(len(chisForCalc))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
             SAmultiProc.retStr +="The latest top "+str(len(chisForCalc))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
     #############
     ## wrap up ##

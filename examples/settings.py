@@ -11,7 +11,7 @@ simpleSettingsDict={
 # NOTE: greater than numCores-1 causes system to slow down!
 'nMCMCcns' : (2,"Number MCMC of chains"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
-# choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'INFO'=20,'DEBUG'10,'ALL'=0)
+# choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'IMPORTANTINFO'=25,'INFO'=20,'DEBUG'10,'ALL'=0)
 'logLevel' : 30,
 # data mode, choices {'RV','DI','3D'} [string]
 'dataMode' : ('3D',"Data Mode (RV,DI,3D)"),

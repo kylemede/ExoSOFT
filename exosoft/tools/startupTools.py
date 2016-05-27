@@ -63,7 +63,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         s = "\nSETTINGS FILE NOT FOUND!"
         s+= "\nPLEASE DOUBLE CHECK RULES FOR THE 3 WAYS TO START ExoSOFT WITH "
         s+="INPUT ARGUMENT --help\n\n!!EXITING ExoSOFT!!"
-        sys.exit(s)
+        log.raisemsg(s)
+        raise IOError('\n\n'+s)
         #*********************************************************************
     else:
         settings = rwTools.loadSettings(ExoSOFTdir,settFilePath)
@@ -85,7 +86,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                 s = "\nPlease change the value for the 'outDir' key in your\n"
                 s+="settings file to where you want to write the outputs to."
                 s+="\n\n!!EXITING ExoSOFT!!"
-                sys.exit(s)
+                log.raisemsg(s)
+                raise IOError('\n\n'+s)
                 #*********************************************************************
         ## Make a directory (folder) to place all the files from this simulation run
         settings['finalFolder'] = os.path.join(settings['outDir'],settings['outRoot'])
@@ -111,7 +113,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                     except:
                         log.debug('seems copy to dropbox related settings keys are not there...')
                 else: #elif (('n' in YN) or ('N' in YN)):
-                    sys.exit()
+                    log.raisemsg("")
+                    raise IOError('\n\n'+s)
             else:
                 os.mkdir(settings['finalFolder'])
             if False:
@@ -145,7 +148,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             s+= "IF 3D OR RV DATA MODE RQUESTED: MAKE SURE A RV FILENAME IN SETTINGS FILES EXISTS."
             s+= "IF THEY EXIST, MAKE SURE THEIR FORMATS MATCH THAT DESCRIBED IN THE readWriteTools.loadDIdata AND loadRVdata FUNCTIONS."
             s+="\n\n!!EXITING exosoft!!"
-            sys.exit(s)
+            log.raisemsg(s)
+            raise IOError('\n\n'+s)
             #***************************************************************************************************
         ##check there are matching number of RV datasets and provided min/max vals for offsets
         if np.min(realData[:,6])<1e6:
@@ -220,7 +224,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             s="THE NUMBER OF vMINs NOT EQUAL TO NUMBER OF vMAXs!!!\n"
             s+="PLEASE CHECK THE ADVANCED SETTINGS FILES AND FIX THIS"
             s+="!\n\n!!EXITING exosoft!!"
-            sys.exit(s)
+            log.raisemsg(s)
+            raise ValueError('\n\n'+s)
             #***************************************************************************************************
         for i in range(0,len(settings['vMINs'])):
             rangeMins.append(settings['vMINs'][i])
@@ -372,7 +377,8 @@ def modePrep(settings,sigmas):
                 s="MUST PROVIDE USEFUL STARTPARAMS IN SIMPLE SETTINGS DICT FOR ST or MCMC MODE, ELSE NOTHING TO START CHAINS WITH"
                 s+="\n\nRUN IN AUTO MODE, OR PERFORM A ROUND OF SA OR SAST TO GET USEFUL VALUES TO STARTING VALUES."
                 s+="!\n\n!!EXITING exosoft!!"
-                sys.exit(s)
+                log.raisemsg(s)
+                raise IOError('\n\n'+s)
                 #***************************************************************************************************
         else:
             if settings['stages']!='SASTMCMC':
@@ -389,7 +395,8 @@ def modePrep(settings,sigmas):
                 #***************************************************************************************************
                 s = "MUST PROVIDE USEFUL STARTSIGMAS IN SIMPLE SETTINGS DICT FOR MCMC MODE, ELSE NOTHING TO START CHAINS WITH."
                 s+="\n\nRUN IN AUTO MODE OR PERFORM ST TO GET STARTING VALUES.\n\n!!EXITING exosoft!!"
-                sys.exit(s)
+                log.raisemsg(s)
+                raise IOError('\n\n'+s)
                 #***************************************************************************************************
         else:
             if type(startParams)!=np.ndarray:
@@ -461,7 +468,8 @@ def getSettFilePath(argv,ExoSOFTdir):
         s+="press enter, then type '/path/you/want/settings.py' and press "
         s+="enter.\n"
         s= '\n'+'*'*50+'\n'+s+'\n'+'*'*50+'\n'
-        sys.exit(s)
+        log.raisemsg(s)
+        raise IOError('\n\n'+s)
             
     else: 
         ## Load up the required specific directory paths in dict
@@ -477,7 +485,8 @@ def getSettFilePath(argv,ExoSOFTdir):
                 s+= "\nFOR METHOD #1 THE FULL PATH TO SETTINGS FILE IS EXPECTED\n"
                 s+= "ie. $python ExoSOFT.py /path/you/want/settings.py"
                 s+="\n\n!!EXITING ExoSOFT!!"
-                sys.exit(s)
+                log.raisemsg(s)
+                raise IOError('\n\n'+s)
                 #*****************************************************************
             else:
                 log.debug("Starting ExoSOFT by method #1")
@@ -498,7 +507,8 @@ def getSettFilePath(argv,ExoSOFTdir):
                     s+= "\nFOR METHOD #2 THE SETTINGS FILENAME IS EXPECTED.\n"
                     s+= "ie. $python ExoSOFT.py settingsfilename.py"
                     s+="\n\n!!EXITING ExoSOFT!!"
-                    sys.exit(s)
+                    log.raisemsg(s)
+                    raise IOError('\n\n'+s)
                     #*********************************************************
             elif os.path.exists('settings.py'):
                 print '*'*35
@@ -525,7 +535,8 @@ def getSettFilePath(argv,ExoSOFTdir):
                         s+= "\nMETHOD #3 IN EXAMPLE MODE BROKEN!!!\n"
                         s+= 'PLEASE CHECK THAT DIRECTORY TO SEE IF FILE IS THERE.'
                         s+="\n\n!!EXITING ExoSOFT!!"
-                        sys.exit(s)
+                        log.raisemsg(s)
+                        raise IOError('\n\n'+s)
                     else:
                         print '*'*50
                         log.debug("Starting ExoSOFT by method #3 with defaults")
@@ -543,7 +554,8 @@ def getSettFilePath(argv,ExoSOFTdir):
                         s+= "ie. /path/you/want/settings.py\n"
                         s+= 'PLEASE DOUBLE CHECK PATH AND FILE NAME.'
                         s+="\n\n!!EXITING ExoSOFT!!"
-                        sys.exit(s)
+                        log.raisemsg(s)
+                        raise IOError('\n\n'+s)
                     else:
                         print '*'*50
                         log.debug("Starting ExoSOFT by method #3 with user provided file and path") 

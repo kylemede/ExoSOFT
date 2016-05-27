@@ -320,6 +320,8 @@ class Simulator(object):
                             sigmasOut[i]+=self.settings['sigMins'][i]
                         elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMins'][i]):
                             sigmasOut[i]-=self.settings['sigMins'][i]
+                        if sigs[i]<self.settings['sigMins'][i]:
+                            sigs[i]=self.settings['sigMins'][i]
                         self.shiftStr+=str(sigmasOut[i])+"\n"
                 self.acceptBoolAry = []
                 self.parIntVaryAry = []

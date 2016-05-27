@@ -29,24 +29,48 @@ class ExoSOFTlogger(logging.getLoggerClass()):
             lvl (int): The severity level of messages printed to the screen with 
                     the stream handler, default = 20.
         
-        +---------------------+
-        |    Standard Levels  |
-        +---------------+-----+
-        |    Name       |Level|
-        +===============+=====+
-        |CRITICAL       |  50 | 
-        +---------------+-----+
-        |ERROR          |  40 | 
-        +---------------+-----+
-        |WARNING        |  30 |
-        +---------------+-----+
-        |INFO           |  20 | 
-        +---------------+-----+
-        |DEBUG          |  10 |
-        +---------------+-----+
-        |NOTSET         |  0  |
-        +---------------+-----+
+        +---------------------+----------------------+
+        |    Standard Levels  |        New Levels    |
+        +---------------+-----+----------------+-----+
+        |    Name       |Level|  Name          |Level|
+        +===============+=====+================+=====+
+        |               |     |RAISEMSG        | 99  |
+        +---------------+-----+----------------+-----+
+        |CRITICAL       |  50 |                |     | 
+        +---------------+-----+----------------+-----+
+        |ERROR          |  40 |                |     |
+        +---------------+-----+----------------+-----+
+        |WARNING        |  30 |                |     |
+        +---------------+-----+----------------+-----+
+        |               |     |IMPORTANTINFO   | 25  |
+        +---------------+-----+----------------+-----+
+        |INFO           |  20 |                |     |
+        +---------------+-----+----------------+-----+
+        |DEBUG          |  10 |                |     |
+        +---------------+-----+----------------+-----+
+        |NOTSET         |  0  |                |     |
+        +---------------+-----+----------------+-----+
+        |               |     | FILEONLY       |  1  |
+        +---------------+-----+----------------+-----+
         """
+        # Level for raise message to print to file 
+        RAISEMSG = 99
+        logging.addLevelName(RAISEMSG, 'RAISEMSG')
+        def raisemsg(self,msg,lvl=RAISEMSG, *args, **kws):
+            self.log(1,msg, *args, **kws)
+        logging.Logger.raisemsg = raisemsg
+        # Level for minimal info more important than standard INFO level
+        IMPORTANTINFO = 25
+        logging.addLevelName(IMPORTANTINFO, 'IMPORTANTINFO')
+        def importantinfo(self,msg,lvl=IMPORTANTINFO, *args, **kws):
+            self.log(lvl,msg, *args, **kws)
+        logging.Logger.importantinfo = importantinfo
+        # Level for message to ONLY be written to file and not the screen
+        FILEONLY = 1
+        logging.addLevelName(FILEONLY, 'FILEONLY')
+        def fileonly(self,msg,lvl=FILEONLY, *args, **kws):
+            self.log(lvl,msg, *args, **kws)
+        logging.Logger.fileonly = fileonly
         # Kill off the old handlers and reset them with the setHandlers func
         for i in range(0,len(self.handlers)):
             h = self.handlers[i]
@@ -223,7 +247,7 @@ def logSystemInfo(log):
         infoStr+="\n A problem with psutil occurred while investigating available RAM."
     infoStr+="\n"+'Python Version = '+repr(platform.python_version())
     infoStr+="\n"+'='*50
-    log.debug(infoStr)
+    log.fileonly(infoStr)
     
 def logDict(log,d):
     """
@@ -234,6 +258,5 @@ def logDict(log,d):
     s = "\n"+"-"*78+"\n"+" "*20+"settings dictionary currently contains:\n"+"-"*78+"\n"
     for key in keys:
         s+=key+" = "+repr(d[key])+"\n"
-    log.debug(s+"-"*78+"\n")
-    
+    log.fileonly(s+"-"*78+"\n")
 # END OF FILE    
