@@ -133,6 +133,8 @@ class Simulator(object):
             sigMins[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*self.settings['sigMin']
         self.settings['sigMaxs'] = sigMaxs
         self.settings['sigMins'] = sigMins
+        print 'sigMaxs = '+repr(sigMaxs)
+        print 'sigMins = '+repr(sigMins)
         ## check priors are ok with range mins
         Priors = tools.priors.Priors(self.settings,self.log)
         Priors.testPriors(rangeMins,rangeMins)
@@ -320,8 +322,13 @@ class Simulator(object):
                             sigmasOut[i]+=self.settings['sigMins'][i]
                         elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMins'][i]):
                             sigmasOut[i]-=self.settings['sigMins'][i]
-                        if sigs[i]<self.settings['sigMins'][i]:
-                            sigs[i]=self.settings['sigMins'][i]
+                        #fix chances that sigs can get out of their allowed range
+                        if sigmasOut[i]<self.settings['sigMins'][i]:
+                            sigmasOut[i]=self.settings['sigMins'][i]
+                            self.log.debug('chain# '+str(self.chainNum)+', sigma for par # '+str(i)+' went below allowed range, so setting to max '+str(sigmasOut[i]))
+                        if sigmasOut[i]>self.settings['sigMaxs'][i]:
+                            sigmasOut[i]=self.settings['sigMaxs'][i]
+                            self.log.debug('chain# '+str(self.chainNum)+', sigma for par # '+str(i)+' went above allowed range, so setting to max '+str(sigmasOut[i]))
                         self.shiftStr+=str(sigmasOut[i])+"\n"
                 self.acceptBoolAry = []
                 self.parIntVaryAry = []
