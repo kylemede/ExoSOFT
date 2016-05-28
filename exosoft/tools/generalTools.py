@@ -14,6 +14,7 @@ import sys
 import pyfits
 import warnings
 import readWriteTools as rwTools
+import jdcal
 
 warnings.simplefilter("error")
 log = exoSOFTlogger.getLogger('main.genTools',lvl=100,addFH=False)  
@@ -212,7 +213,11 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
         return grStr
     else:
         return (GRs,Ts,grStr)
-
+def jdToGcal(jd):
+    "Convert standard Julian Date to a double representing its Gregorian date."
+    (y,m,d) = jdcal.jd2gcal(2400000.5, jd-2400000.5)
+    return y+12*m+29*d
+    
 def timeStrMaker(deltaT):
     """
     Convert a time in seconds into a nicer string.

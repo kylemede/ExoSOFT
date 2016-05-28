@@ -81,25 +81,43 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
             xLabel='m2 [Mjupiter]'
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
-    if False:
-        if (np.max(histData[:,0])>100000) or (valRange<(np.min(histData[:,0])/100.0)):
-            #must be the To or Tc, so subtract int(min) and add to x-axis label
-            #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise
-            minSub = int(np.min(histData[:,0]))
-            histData[:,0]-=minSub
+    
+    if ('[JD]' in xLabel) and (valRange>(np.min(histData[:,0])/1000.0)):
+        #a wide spanning T or Tc hist, so convert to gregorian doubles.
+        jdDates = histData[:,0]
+        xlabelOrig = xLabel
+        try:
+            for i in range(len(histData[:,0])):
+                histData[i,0] = genTools.jdToGcal(histData[i,0])
             if latex:
-                if xLabel not in [r'$e$',r'$\chi^2$']:
-                    xLabel = xLabel[:-3]+"+"+str(minSub)+"]}$"
-                elif xLabel== r'$m_2$ [$M_{J}$]':
-                    xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
-                else:            
-                    xLabel = xLabel[:-1]+"+"+str(minSub)+"$"
+                xLabel=xLabel[:-5]+'year]}$'
             else:
-                if xLabel not in ['e','chiSquared']:
-                    xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
-                else:
-                    xLabel = xLabel+"+"+str(minSub)
-            
+                xLabel = xLabel[:-3]+'year]'   
+            valRange = np.max(histData[:,0])-np.min(histData[:,0])
+        except:
+            #reset to original values and continue
+            xLabel=xlabelOrig
+            for i in range(len(histData[:,0])):
+                histData[i,0] = jdDates[i]
+                
+    if ('[JD]' in xLabel) or (valRange<(np.min(histData[:,0])/100.0)):
+        #must be the To or Tc, so subtract int(min) and add to x-axis label
+        #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise                
+        minSub = int(np.min(histData[:,0]))
+        histData[:,0]-=minSub
+        if latex:
+            if xLabel not in [r'$e$',r'$\chi^2$']:
+                xLabel = xLabel[:-3]+"+"+str(minSub)+"]}$"
+            elif xLabel== r'$m_2$ [$M_{J}$]':
+                xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
+            else:            
+                xLabel = xLabel[:-1]+"+"+str(minSub)+"$"
+        else:
+            if xLabel not in ['e','chiSquared']:
+                xLabel = xLabel[:-1]+"+"+str(minSub)+"]"
+            else:
+                xLabel = xLabel+"+"+str(minSub)
+        
     halfBinWidth = (histData[1][0]-histData[0][0])/2.0
     # load up list of x,y values for tops of bins
     for i in range(0,histData.shape[0]):
@@ -171,9 +189,26 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
             confLevels=confLevels*(const.KGperMsun/const.KGperMjupiter)
-    if (np.max(histData[:,0])>100000) or (valRange<(np.min(histData[:,0])/100.0)):
+    if ('[JD]' in xLabel) and (valRange>(np.min(histData[:,0])/1000.0)):
+        #a wide spanning T or Tc hist, so convert to gregorian doubles.
+        jdDates = histData[:,0]
+        xlabelOrig = xLabel
+        try:
+            for i in range(len(histData[:,0])):
+                histData[i,0] = genTools.jdToGcal(histData[i,0])
+            if latex:
+                xLabel=xLabel[:-5]+'year]}$'
+            else:
+                xLabel = xLabel[:-3]+'year]'   
+            valRange = np.max(histData[:,0])-np.min(histData[:,0])
+        except:
+            #reset to original values and continue
+            xLabel=xlabelOrig
+            for i in range(len(histData[:,0])):
+                histData[i,0] = jdDates[i]
+    if ('[JD]' in xLabel) or (valRange<(np.min(histData[:,0])/100.0)):
         #must be the To or Tc, so subtract int(min) and add to x-axis label
-        #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise
+        #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise                
         minSub = int(np.min(histData[:,0]))
         histData[:,0]-=minSub
         if latex:

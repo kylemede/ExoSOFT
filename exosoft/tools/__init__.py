@@ -37,6 +37,7 @@ from generalTools import recheckFit3D
 from generalTools import predictLocation
 from generalTools import nparyTolistStr
 from generalTools import unitlessSTD
+from generalTools import jdToGcal
 
 from chainTools import multiProcObj
 from chainTools import iterativeSA
