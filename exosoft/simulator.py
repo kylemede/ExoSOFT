@@ -133,6 +133,8 @@ class Simulator(object):
             sigMins[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*self.settings['sigMin']
         self.settings['sigMaxs'] = sigMaxs
         self.settings['sigMins'] = sigMins
+        self.log.debug('sigMaxs = '+repr(sigMaxs))
+        self.log.debug('sigMins = '+repr(sigMins))
         ## check priors are ok with range mins
         Priors = tools.priors.Priors(self.settings,self.log)
         Priors.testPriors(rangeMins,rangeMins)

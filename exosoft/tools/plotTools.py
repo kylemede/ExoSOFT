@@ -189,7 +189,7 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
             confLevels=confLevels*(const.KGperMsun/const.KGperMjupiter)
-    if ('[JD]' in xLabel) and (valRange>(np.min(histData[:,0])/1000.0)):
+    if ('[JD]' in xLabel) and (valRange>5000):
         #a wide spanning T or Tc hist, so convert to gregorian doubles.
         jdDates = histData[:,0]
         xlabelOrig = xLabel
