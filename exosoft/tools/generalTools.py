@@ -215,8 +215,9 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
         return (GRs,Ts,grStr)
 def jdToGcal(jd):
     "Convert standard Julian Date to a double representing its Gregorian date."
-    (y,m,d) = jdcal.jd2gcal(2400000.5, jd-2400000.5)
-    return y+12*m+29*d
+    (y,m,d,s) = jdcal.jd2gcal(2400000.5, jd-2400000.5)
+    yrs = float('%.2f'%(y+(m/12.0)+(d/const.daysPerYear)+(s/const.secPerYear)))
+    return yrs
     
 def timeStrMaker(deltaT):
     """
@@ -709,7 +710,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             s+='\n'+"~"*55
         outStr+=s
         s=s+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
-        log.debug(s)
+        log.debug('\n'+s)
         
         if verboseInternal:
             print 'returnData = '+repr(returnData)+', returnChiSquareds = '+repr(returnChiSquareds)+', returnBestDataVal = '+repr(returnBestDataVal)
@@ -915,7 +916,7 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
     :returns: (E, E_error, N, N_error)
     """
     verbose = False
-    printForExcel = True
+    printForExcel = False
     N = SA*np.cos(np.radians(PA))
     E = SA*np.sin(np.radians(PA))
     

@@ -2,6 +2,7 @@
 import numpy as np
 import os
 import matplotlib
+from math import fabs
 #matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
 matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 import pylab
@@ -171,6 +172,7 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     
     It is foreseen that many versions of this function will exist for different specific publication ready plots.
     """
+    convertJDover10yrs=True
     if outFilename[-4:]!='.dat':
         outFilename=outFilename+'.dat'
     histData = np.loadtxt(outFilename)
@@ -179,6 +181,9 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     maxN = np.max(histData[:,1])
     minSub = 0
     valRange = np.max(histData[:,0])-np.min(histData[:,0])
+    toOrtc=False
+    if ('[JD]' in xLabel):
+        toOrtc=True
     ## check if M2 and if it should be in jupiter masses
     if parInt==1:
         if np.max(histData[:,0])<0.02:
@@ -189,26 +194,43 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
             confLevels=confLevels*(const.KGperMsun/const.KGperMjupiter)
-    if ('[JD]' in xLabel) and (valRange>5000):
-        #a wide spanning T or Tc hist, so convert to gregorian doubles.
-        jdDates = histData[:,0]
-        xlabelOrig = xLabel
-        try:
-            for i in range(len(histData[:,0])):
-                histData[i,0] = genTools.jdToGcal(histData[i,0])
-            if latex:
-                xLabel=xLabel[:-5]+'year]}$'
-            else:
-                xLabel = xLabel[:-3]+'year]'   
-            valRange = np.max(histData[:,0])-np.min(histData[:,0])
-        except:
-            #reset to original values and continue
-            xLabel=xlabelOrig
-            for i in range(len(histData[:,0])):
-                histData[i,0] = jdDates[i]
-    if ('[JD]' in xLabel) or (valRange<(np.min(histData[:,0])/100.0)):
+    
+    if convertJDover10yrs:
+        #print "\n\n'[JD]' in xLabel = "+repr('[JD]' in xLabel)
+        #print 'valRange = '+repr(valRange)+'\n\n'
+        if toOrtc and (valRange>3650):
+            #a wide spanning T or Tc hist, so convert to gregorian doubles.
+            #print 'about to try and convert to years'
+            jdDates = histData[:,0]
+            xlabelOrig = xLabel
+            bestValOrig = bestVal
+            try:
+                for i in range(len(histData[:,0])):
+                    histData[i,0] = genTools.jdToGcal(histData[i,0])
+                bestVal = genTools.jdToGcal(bestVal)
+                for i in range(2):
+                    for j in range(2):
+                        confLevels[i][j] = genTools.jdToGcal(confLevels[i][j])
+                if latex:
+                    xLabel=xLabel[:-5]+'year]}$'
+                else:
+                    xLabel = xLabel[:-3]+'year]'   
+                valRange = np.max(histData[:,0])-np.min(histData[:,0])
+            except:
+                #reset to original values and continue
+                xLabel=xlabelOrig
+                bestVal = bestValOrig
+                for i in range(len(histData[:,0])):
+                    histData[i,0] = jdDates[i]
+            #print 'made it to end of convertJDover10yrs block'
+            ##print 'xLabel = '+xLabel
+            #print 'new vals :\n'+repr(histData[:,0])
+            #print 'valRange = '+str(valRange)
+    if ('[JD]' in xLabel) or (valRange<(np.min(histData[:,0])/200.0)):
         #must be the To or Tc, so subtract int(min) and add to x-axis label
         #doing this as it doesn't go well allowing matplotlib to do it itself formatting wise                
+       # print "\n\n'[JD]' in xLabel = "+repr('[JD]' in xLabel)
+       # print 'np.min(histData[:,0])/100.0 = '+repr(np.min(histData[:,0])/100.0)+'\n\n'
         minSub = int(np.min(histData[:,0]))
         histData[:,0]-=minSub
         if latex:
@@ -231,6 +253,7 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
         ys.append(histData[i][1]/maxN)
         xs.append(histData[i][0]-halfBinWidth)
         xs.append(histData[i][0]+halfBinWidth)
+    #print 'xs = '+repr(xs)
     # load up list of shaded rectangle objects if confidence levels were provided
     recs = []
     if (type(confLevels)==list)or(type(confLevels)==np.ndarray):
@@ -281,11 +304,11 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     fsize=23
     if xLabel in ['e', r'$e$']:
         fsize=fsize+10
-    if 'JD' in xLabel:
+    if toOrtc:
         fsize=fsize-3
     log.debug('xlabel = '+repr(xLabel)+", fsize = "+str(fsize))
     plot.axes.set_xlabel(xLabel,fontsize=fsize)
-        
+    
     return plot
 
 def addRVdataToPlot(subPlot,epochsORphases,RVs,RVerrs,datasetInts=[],alf=1.0,markersize=9,plotErrorBars=False):
@@ -763,6 +786,10 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     DIlims=[[[xMin,xMax],[yMin,yMax]],[[xCropMin,xCropMax],[yCropMin,yCropMax]]]
     RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
     """
+    # There is some custom code to place 'zoom-in' inserts that some could 
+    # modify to use with their work.  Review current code and tweak to match 
+    # your situaiton accordingly.
+    plotCustomInsets = False
     latex=True
     plt.rcParams['ps.useafm']= True
     plt.rcParams['pdf.use14corefonts'] = True
@@ -956,7 +983,11 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         main.spines['top'].set_linewidth(1.0)
         main.spines['left'].set_linewidth(1.0)
         #[left,btm,width,height]
-        main.set_position([0.18,0.124,0.75,0.82])
+        limsList = [yLimsCrop[0],yLimsCrop[1],yLimsFull[0],yLimsFull[1]]
+        if (-99>np.min(limsList))or(999<np.max(limsList)):
+            main.set_position([0.19,0.129,0.76,0.76*10./9])
+        else:
+            main.set_position([0.17,0.129,0.76,0.76*10./9])
         xLabel = 'Relative RA  '+unitStr
         yLabel = 'Relative Dec  '+unitStr
         if latex:
@@ -975,6 +1006,66 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         main.axes.set_xlim((xLimsFull[1],xLimsFull[0]))
         main.axes.set_ylim(yLimsFull)
         plotFilenameFull = plotFnameBase+'-DI.'+format
+        
+        if plotCustomInsets:
+            #######################################################
+            # Locations of the subplots.  Notice that I explicitly multiply by 9/10
+            # rather than approximating 0.8444 as 0.84.
+            #######################################################
+            xloc = [0.249, 0.28, 0.24]
+            yloc = [0.48, 0.67, 0.817]
+            dx = [7, 7, 7]
+            dy = [15, 7, 7]
+            dxfull = np.abs(xLimsFull[1] - xLimsFull[0])/0.76
+            dyfull = np.abs(yLimsFull[1] - yLimsFull[0])/0.76*9/10
+            
+            for i in range(len(xloc)):
+                if i > 0:
+                    xx = -1*predictedDataDI[i + 1,0]*asConversion
+                    yy = predictedDataDI[i + 1,1]*asConversion
+                else:
+                    xx = np.mean(-1*predictedDataDI[:2,0]*asConversion)
+                    yy = np.mean(predictedDataDI[:2,1]*asConversion)
+    
+                expand = 2
+                # Actual x and y positions we're blowing up as insets.
+                realxloc = 0.19 + (xx - dx[i]*expand/2. + np.amax(xLimsFull))/dxfull
+                realyloc = 0.129 + (yy - dy[i]*expand/2. - np.amin(yLimsFull))/dyfull
+                a = diFig.add_axes([realxloc, realyloc, expand*dx[i]/dxfull, expand*dy[i]/dyfull])
+                # Draw clear boxes around these areas, expand:1 scale.
+                a.patch.set_visible(False)
+                plt.xticks([])
+                plt.yticks([])
+    
+                # Now draw the opaque insets at 10:1 scale.  Draw the orbit.
+                a = diFig.add_axes([xloc[i], yloc[i], 10*dx[i]/dxfull, 10*dy[i]/dyfull],alpha=0.5)
+                a.patch.set_visible(True)
+                plt.plot(-1*fitDataDI[:,0]*asConversion,fitDataDI[:,1]*asConversion,linewidth=diLnThk,color='Blue') 
+    
+                # Draw thicker dots in the insets
+                for j in range(len(predictedDataDI)):
+                    xval = -1*predictedDataDI[j,0]*asConversion
+                    yval = predictedDataDI[j,1]*asConversion
+    
+                    plt.plot(xval, yval,c='red',marker='.',markersize=1.5*dotsize)#$$$$$$$$ Place for custimiz
+    
+                # Now draw the actual astrometric measurements.
+    
+                data_DI = realDataDI.copy()
+                data_DI[:, 3] *= -1
+                data_DI[:, 1::2] *= -1
+                (a,[xmin,xmax,ymin,ymax]) =  addDIdataToPlot(a,data_DI,asConversion,errMult=1,thkns=diLnThk,pasa=pasa)
+    
+                # Set the limits and don't label the axes.
+                plt.xlim(xx - 0.5*dx[i], xx + 0.5*dx[i])
+                plt.ylim(yy - 0.5*dy[i], yy + 0.5*dy[i])
+                
+                plt.xticks([])
+                plt.yticks([])
+        
+        
+        
+        
         if plotFilenameFull!='':
             plt.savefig(plotFilenameFull, dpi=800, orientation=orientStr)
             log.info("DI orbit plot (Full) saved to:\n"+plotFilenameFull)
@@ -1057,9 +1148,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             ## start making figure for residual and fit plots
             figRV = plt.figure(3,figsize=(10,5))
             residualsPlot = figRV.add_subplot(212)
-            residualsPlot.set_position([0.13,0.17,0.84,0.23])
             fitPlot = figRV.add_subplot(211)
-            fitPlot.set_position([0.13,0.39,0.84,0.57])
             xLabel = "Orbital Phase"
             fitYlabel = 'v '+unitStr
             residYlabel = 'O-C '
@@ -1104,6 +1193,14 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             #RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
             fitPlot.axes.set_xlim(xLims)
             fitPlot.axes.set_ylim(fitYlims)
+            ## adjust plot locations to account for longer numbers
+            #[left,btm,width,height]
+            if (1000<abs(fitYlims[0])) or (1000<abs(fitYlims[1])):
+                residualsPlot.set_position([0.17,0.17,0.81,0.23])
+                fitPlot.set_position([0.17,0.39,0.81,0.57])
+            else:
+                residualsPlot.set_position([0.13,0.17,0.84,0.23])
+                fitPlot.set_position([0.13,0.39,0.84,0.57])
             
             
             ##load resulting data to file for re-plotting by others
