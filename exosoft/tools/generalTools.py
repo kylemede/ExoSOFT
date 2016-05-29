@@ -957,3 +957,47 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
         
         
     return (E, E_error, N, N_error)
+
+def m2siniCalc(K,p,m1,e):
+    """To calculate the commonly quoted m2sin(i) value assuming m2<<m1.
+    follows:
+    m2sin(i) = K*m1^(2/3)*sqrt(1-e^2)*[P/2piG]^(1/3)
+    units:
+    K [m/s]
+    m1 [Msun]
+    p [yrs]
+    """
+    pSecs = p*const.secPerYear
+    m1KG = m1*const.KGperMsun
+    A = K*((pSecs/(2*np.pi*const.Grav))**(1.0/3.0))
+    B = (m1KG**(2.0/3.0))*np.sqrt(1-e**2)
+    C = (1.0/const.KGperMjupiter)
+    m2sini=A*B*C
+    return m2sini
+
+def m2siniRangeCalc():
+    """
+    A basic custom tool to find the ranges of m2sin(i) values from RV only 
+    runs.  Need to go into code below to update e, p, and K values along with 
+    fixed m1.
+    """
+    m1 = 1.09 #Msun
+    es = [0.1036,0.1556]
+    ps = [10.501,13.096] #yrs
+    ks = [705.328,721.005] #m/s
+    mn = 1e6
+    mx = 0
+    for e in es:
+        for p in ps:
+            for k in ks:
+                m2sini = m2siniCalc(k, p,m1 , e)
+                if m2sini>mx:
+                    mx = m2sini
+                if m2sini<mn:
+                    mn = m2sini
+    print 'min = '+str(mn)+", max = "+str(mx)               
+    
+                    
+    
+    
+    
