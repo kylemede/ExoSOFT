@@ -308,8 +308,12 @@ def cleanUp(settings,stageList,allFname):
     """
     #os.mkdir(settings['finalFolder'])
     
-    delFiles = []
+    ## write best orbit to a fits file for minimal customPost.py plotting
+    bst = findBestOrbit(allFname, bestToFile=False, findAgain=False)
+    outFname = os.path.join(settings['finalFolder'],'bestFit.fits')
+    rwTools.writeFits(outFname,bst,settings,clob=False)
     
+    delFiles = []
     fnames = glob.glob(os.path.join(settings['finalFolder'],"pklTemp-*"))
     for i in range(0,len(fnames)):
         delFiles.append(fnames[i])
@@ -757,7 +761,8 @@ def findBestOrbit(filename,bestToFile=True,findAgain=False):
     """
     Find the orbital elements for the best fit in a exosoft format fits file.
     """             
-    bestFname = os.path.join(os.path.dirname(filename),'bestOrbitParams.txt')  
+    bestFname = os.path.join(os.path.dirname(filename),'bestOrbitParams.txt')
+    #print   bestFname
     gotIt = False
     if os.path.exists(bestFname)and(findAgain==False):
         try:
