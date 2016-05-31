@@ -126,6 +126,11 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
             setFiles = [settings['settFilePath'],settings['RVdataFile'],settings['DIdataFile']]
             genTools.copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
+            ## make folder for later copying pickle files for recovery if error
+            ## or customPost work needs them.
+            pklDir = os.path.join(settings['finalFolder'],'pklDir')
+            os.mkdir(pklDir)
+            settings['pklDir'] = pklDir
         ## push all comments from tuples into a sub dictionary to ensure all  
         ## values for requested keys are just the value with no comments.
         commentsDict = {}

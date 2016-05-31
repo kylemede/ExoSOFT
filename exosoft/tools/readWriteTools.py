@@ -5,6 +5,7 @@ import generalTools as genTools
 import pyfits
 import os
 import sys
+import pickle
 import shutil
 import warnings
 warnings.simplefilter("error")
@@ -388,6 +389,25 @@ def periodicDataDump(filename,d):
             np.save(filename,np.concatenate((d0,d)))
         else:
             np.save(filename,d)
+
+def pklIt(settings,dataObj, rootFnm):
+    """
+    Pickle something to a file and truncate file if it already exists.
+    """
+    pklFname = os.path.join(settings["pklDir"],rootFnm+".pkl")
+    with open(pklFname,'w+') as f:
+        pickle.dump(dataObj, f)
+
+def unPklIt(settings,rootFnm):
+    """
+    To load back in pickled objects during post-processing of ExoSOFT.
+    Useful for customPost work.
+    """
+    pklFname = os.path.join(settings["pklDir"],rootFnm+".pkl")
+    # if rootFnm=='finalSummaryStrs':
+    #     [allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings] = pickle.load(pklFname)
+    return pickle.load(pklFname)
+    
 
 def combineFits(filenames,outFname):
     """

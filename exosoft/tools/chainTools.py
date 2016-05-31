@@ -45,6 +45,15 @@ class singleProc(Process):
     def loadResult(self):
         return pickle.load(open(self.pklFilename,'rb'))
 
+class multiProcObjResults(object):
+    def __init__(self,bestRedChiSqrs,avgAcceptRates,acceptStrs,stage,retStr,latestRetStr):
+        self.bestRedChiSqrs = bestRedChiSqrs
+        self.avgAcceptRates = avgAcceptRates
+        self.acceptStrs = acceptStrs
+        self.stage = stage
+        self.retStr = retStr
+        self.latestRetStr = latestRetStr
+        
 class multiProcObj(object):
     def __init__(self,settings,Sim,stage):
         self.outFnames = []
@@ -77,6 +86,16 @@ class multiProcObj(object):
                 log.error("Resulting file from MPO.run does not exist:\n"+\
                           ret[0]+'\nit had a reduced chi of '+str(ret[3])+'\n')
         self.sortResults()
+        
+    def resultsOnly(self):
+        accRts = self.avgAcceptRates
+        stg = self.stage
+        chis = self.bestRedChiSqrs
+        accStrs = self.acceptStrs
+        retStr = self.retStr
+        latRetStr = self.latestRetStr 
+        resObj = multiProcObjResults(chis,accRts,accStrs,stg,retStr,latRetStr)
+        return resObj
         
     def sortResults(self):
         """

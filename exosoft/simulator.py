@@ -424,6 +424,7 @@ class Simulator(object):
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         strtTemp = temp      
+        endDatetime = ''
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.
         if (type(startSigmas)==list)or(type(startSigmas)==np.ndarray):
@@ -486,13 +487,16 @@ class Simulator(object):
             if sample%(self.settings[self.stgNsampDict[stage]]//100)==0:
                 timesAry.append(timeit.default_timer()-lastTic)
                 lastTic = timeit.default_timer()
-            if (self.settings['logLevel']<30)and(sample%(self.settings[self.stgNsampDict[stage]]//100)==0):
+            if (sample%(self.settings[self.stgNsampDict[stage]]//100)==0):
                 timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.settings[self.stgNsampDict[stage]]))
                 #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
                 endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
                 perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
                 #print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
-                bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
+                if self.settings['logLevel']<30:
+                    bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
+                else:
+                    self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
         if self.settings['logLevel']<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))

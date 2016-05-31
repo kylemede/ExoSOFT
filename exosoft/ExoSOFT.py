@@ -108,28 +108,44 @@ def exoSOFT():
     # Post-processing # 
     ###################
     log.warning("Starting Post-Processing")  
+    
     FINALmpo = None
     if MCMCmpo!=None:
         FINALmpo = MCMCmpo
+        tools.pklIt(settings,MCMCmpo.resultsOnly(),'MCMCmpoRO')
+        tools.pklIt(settings, FINALmpo.resultsOnly(),'FINALmpoRO')
     elif STmpo!=None:
         FINALmpo = STmpo
+        tools.pklIt(settings,STmpo.resultsOnly(),'STmpoRO')
+        tools.pklIt(settings, FINALmpo.resultsOnly(),'FINALmpoRO')
     elif SAmpo!=None:
         FINALmpo = SAmpo
+        tools.pklIt(settings,SAmpo.resultsOnly(),'SAmpoRO')
+        tools.pklIt(settings, FINALmpo.resultsOnly(),'FINALmpoRO')
     elif MCmpo!=None:
         FINALmpo = MCmpo
+        tools.pklIt(settings, MCmpo.resultsOnly(),'MCmpoRO')
+        tools.pklIt(settings, FINALmpo.resultsOnly(),'FINALmpoRO')
     else:
         log.critical("\nNo FINALmpo exists!!! \nExoSOFT failed to complete any of the requested stages!!")
     
     if FINALmpo!=None:
         outFiles = FINALmpo.outFnames
-        ## combine the data files
         allFname = ''
+        bestFit = []
+        burnInStr = ''
+        clStr = ''
+        grStr = ''
+        effPtsStr = ''
+        postTime = ''
+        allTime = ''
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
+        ## combine the data files
         if len(outFiles)>0:
             allFname = os.path.join(os.path.dirname(outFiles[0]),"combined"+FINALmpo.stage+"data.fits")
             tools.combineFits(outFiles,allFname)
-        
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         ## calc and strip burn-in?
-        burnInStr = ''
         if (len(outFiles)>1)and(settings['CalcBurn'] and (FINALmpo.stage=='MCMC')):
             (burnInStr,burnInLengths) = tools.burnInCalc(outFiles,allFname)    
             if settings['rmBurn']:
@@ -141,44 +157,40 @@ def exoSOFT():
                     tools.combineFits(strippedFnames,strippedAllFname)
                     ## replace final combined filename with new stripped version
                     allFname = strippedAllFname
-                    
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         ## find best fit
         if os.path.exists(allFname):
             bestFit = tools.findBestOrbit(allFname)
-                
         ## orbit plots?
         if settings['pltOrbit'] and os.path.exists(allFname):
             plotFnameBase = os.path.join(os.path.dirname(allFname),'orbitPlot'+FINALmpo.stage)
             tools.orbitPlotter(bestFit,settings,plotFnameBase,format='eps')
-        
         ## plot posteriors?
-        clStr = ''
         if settings['pltDists'] and os.path.exists(allFname):
             plotFilename = os.path.join(os.path.dirname(allFname),'summaryPlot'+FINALmpo.stage)
             clStr = tools.summaryPlotter(allFname,plotFilename,bestVals=bestFit,stage=FINALmpo.stage,shadeConfLevels=True,plotALLpars=True)
-        
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         ##calc Gelman-Rubin convergence statistics?
-        grStr = ''
         if (len(outFiles)>1) and (settings['CalcGR'] and (FINALmpo.stage=='MCMC')):
             grStr = tools.gelmanRubinCalc(outFiles,settings['nSamples'])
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         
         ## progress plots?  INCLUDE?? maybe kill this one. Function exists, but not decided how to use it here.
         
         ## calc correlation length & number effective points? 
-        effPtsStr = ''
         if ((len(outFiles)>1)and(FINALmpo.stage=='MCMC'))and (settings['calcCL'] and os.path.exists(allFname)):
             effPtsStr = tools.mcmcEffPtsCalc(allFname)
-    
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
+        
         ## Make a summary file of results 
         toc=timeit.default_timer()
         postTime = toc-tic2
         allTime = toc-tic
         if os.path.exists(allFname):
-            #MCmpo= None
-            #SAmpo = None
-            #STmpo = None
-            #MCMCmpo = None
             tools.summaryFile(settings,stageList,allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings,MCmpo,SAmpo,STmpo,MCMCmpo)
+        ## pickle final versions of all the results
+        tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
+        tools.pklIt(settings,settings,'settings')
         
         ##clean up files (move to folders or delete them)
         tools.cleanUp(settings,stageList,allFname)

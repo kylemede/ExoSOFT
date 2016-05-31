@@ -303,9 +303,9 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
         plot.axes.set_yticklabels(['','',''])
     fsize=23
     if xLabel in ['e', r'$e$']:
-        fsize=fsize+10
-    if toOrtc:
-        fsize=fsize-3
+        fsize=fsize+5
+    #if toOrtc:
+    #    fsize=fsize
     log.debug('xlabel = '+repr(xLabel)+", fsize = "+str(fsize))
     plot.axes.set_xlabel(xLabel,fontsize=fsize)
     
@@ -540,7 +540,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
             except:
                 log.warning("Seems epstopdf failed.  Check if it is installed properly.")
         
-def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],bestVals=[],stage='MCMC',shadeConfLevels=True,forceRecalc=True,plotALLpars=False):
+def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],bestVals=[],stage='MCMC',shadeConfLevels=True,forceRecalc=True,plotALLpars=False,nbins=None):
     """
     This advanced plotting function will plot all the data in a grid on a single figure.  The data will be plotted
     in histograms that will be normalized to a max of 1.0.  The 
@@ -671,10 +671,13 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                     log.debug('Making hist file for parameter '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i]+", for file:\n"+outputDataFilename)
                     histDataBaseName = os.path.join(os.path.dirname(plotDataDir),'hist-'+stage+"-"+paramFileStrs[i]+'.dat')
                     #print 'histDataBaseName = '+histDataBaseName
-                    if stage=='MC':
-                        histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=50,weight=weightHists, normed=False, nu=1)
-                    else:
-                        histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=100,weight=weightHists, normed=False, nu=1)
+                    if nbins is None:
+                        if stage=='MC':
+                            nbins = 50
+                        else:
+                            nbins = 100
+                    histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=nbins,weight=weightHists, normed=False, nu=1)
+                    
                     if (os.path.exists(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))==False)or forceRecalc:
                         np.savetxt(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'),CLevels)
                         log.debug('confidence levels data stored to:\n'+os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))
