@@ -448,6 +448,12 @@ class Simulator(object):
         self.Orbit.convertParsFromRaw(paramsLast)
         self.paramsLast = paramsLast
         self.startSummary(paramsLast,sigmas,stage)
+        if stage =='MCMC':
+            #load starting point to make accepted numbers match perfect to requested samples
+            acceptedParams.append(self.paramsLast)
+            self.nSaved += 1 
+            self.nSavedPeriodic+=1
+    
         ##loop through each sample 
         ##Follows these steps: in Range?,calc model,accept?,Store?,increment,lower temp?,tune sigmas? dump data to disk? DONE ->write output data
         sample=0
@@ -464,13 +470,13 @@ class Simulator(object):
                     if ('MCMC' not in stage)and(stage=='MC'):
                         acceptedParams.append(params)
                         self.nSaved+=1
-                        self.nSavedPeriodic+=1  
-                    elif (self.acceptCount%self.settings['saveInt'])==0:
-                        acceptedParams.append(params)  
-                        self.nSaved+=1   
-                        self.nSavedPeriodic+=1                
+                        self.nSavedPeriodic+=1                 
             else:
                 self.acceptBoolAry.append(0)
+            if (stage in ['MCMC','SA','ST']) and (sample%self.settings['saveInt']) == 0:
+                acceptedParams.append(self.paramsLast)
+                self.nSaved += 1 
+                self.nSavedPeriodic+=1
             proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
             temp = self.tempDrop(sample,strtTemp,temp,stage)
             sigmas = self.sigTune(sample,sigmas,stage)
@@ -485,18 +491,18 @@ class Simulator(object):
                 self.log.debug('about to collect the garbage')
                 gc.collect()
             if sample%(self.settings[self.stgNsampDict[stage]]//100)==0:
+                #update predicted completion time every 1%
                 timesAry.append(timeit.default_timer()-lastTic)
                 lastTic = timeit.default_timer()
-            if (sample%(self.settings[self.stgNsampDict[stage]]//100)==0):
                 timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.settings[self.stgNsampDict[stage]]))
                 #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
                 endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
-                perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
-                #print str(perc)+" % "+stage+str(chainNum)+' Completed,'+endDatetime
                 if self.settings['logLevel']<30:
+                    perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
                     bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
-                else:
-                    self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
+            if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
+                #push predicted completion time log file
+                self.log.fileonly(stage+str(chainNum)+' '+endDatetime)            
         if self.settings['logLevel']<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))

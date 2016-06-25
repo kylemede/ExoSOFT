@@ -2,8 +2,9 @@
 import numpy as np
 import exoSOFTlogger
 import generalTools as genTools
-import pyfits
+from astropy.io import fits as pyfits
 import os
+import re
 import sys
 import pickle
 import shutil
@@ -321,12 +322,30 @@ def writeFits(baseFilename,data,settings,clob=False):
         if type(data)==str:
             if os.path.exists(data):
                 dataFname = data
-                data = np.load(dataFname)
+                errMsg='about to try to load data from input filename'
+                #print "input datafile was: "+dataFname
+                if '.npy' in dataFname:
+                    data = np.load(dataFname)
+                elif ('.dat' in dataFname)or('.txt' in dataFname):
+                    print '.dat or .txt file recognised and will try to use loadtxt'
+                    try:
+                        data = np.loadtxt(dataFname)
+                    except:
+                        print "about to try and load as normal file"
+                        print os.fstat(dataFname)
+                        f = open(dataFname,'r')
+                        for line in f.readlines:
+                            print line
+                    #print 'successfully loaded with loadtxt'
+                    #print repr(data.shape())
+                else:
+                    log.critical("input data type was a filename, but type was not .npy .txt or .dat")
                 os.remove(dataFname)
                 log.debug("just removed data file from disk:\n"+dataFname)
             else:
                 notThere=True
         if (len(data)>0)and(notThere==False):
+            errMsg="got data and about to make outFname"
             if '.fits' not in baseFilename:
                 baseFilename=baseFilename+'.fits'
             outFname = os.path.join(settings['finalFolder'],baseFilename)
@@ -383,12 +402,37 @@ def periodicDataDump(filename,d):
     dump a ndarray to disk.  If first time, just dump it.
     Else, load current ary and cat d to it before dumping.
     """
+    old=True
     if len(d)!=0:
         if os.path.exists(filename):
-            d0 = np.load(filename)
-            np.save(filename,np.concatenate((d0,d)))
+            if old:
+                d0 = np.load(filename)
+                np.save(filename,np.concatenate((d0,d)))
+            else:
+                with open(filename,'a') as outfile:
+                    for i in range(0,d.shape[0]):
+                        outstr = ''
+                        for val in d[i]:
+                            outstr+='%.14g  ' % (val)
+                        outstr += '\n'
+                        outfile.write(outstr)#genTools.nparyTolistStr(d[i],brackets=False,dmtr=' ')+'\n')
+                        #outfile.write(re.sub("\n ","\n",re.sub("[\\[\\]]","",np.array2string(d,precision=16))))
         else:
-            np.save(filename,d)
+            if old:
+                np.save(filename,d)
+            else:
+                with open(filename,'w') as outfile:
+                    for i in range(0,d.shape[0]):
+                        outstr = ''
+                        for val in d[i]:
+                            outstr+='%.14g  ' % (val)
+                        outstr += '\n'
+                        outfile.write(outstr)#genTools.nparyTolistStr(d[i],brackets=False,dmtr=' '))
+                        #outfile.write(re.sub("\n ","\n",re.sub("[\\[\\]]","",np.array2string(d))))
+                        #print genTools.nparyTolistStr(d[i],brackets=False,dmtr=' ')
+                    #raise IOError('\n\n'+s)
+                
+
 
 def pklIt(settings,dataObj, rootFnm):
     """
@@ -404,10 +448,18 @@ def unPklIt(settings,rootFnm):
     Useful for customPost work.
     """
     pklFname = os.path.join(settings["pklDir"],rootFnm+".pkl")
-    # if rootFnm=='finalSummaryStrs':
-    #     [allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings] = pickle.load(pklFname)
-    return pickle.load(pklFname)
-    
+    #print pklFname
+    with open(pklFname,'r') as f:
+        o = pickle.load(f)
+    return o
+
+def reloadMpoROs(settings):
+    pklDir = settings["pklDir"]
+    pklDict = {'MCMC':None,'MC':None,'SA':None,'ST':None}
+    for key in pklDict:
+        if os.path.exists(os.path.join(pklDir,key+"mpoRO.pkl")):
+            pklDict[key]=unPklIt(settings, key+'mpoRO')
+    return [pklDict['MC'],pklDict['SA'],pklDict['ST'],pklDict['MCMC']]
 
 def combineFits(filenames,outFname):
     """
@@ -416,7 +468,7 @@ def combineFits(filenames,outFname):
     """
     nFiles = len(filenames)
     (head0,dataALL) = loadFits(filenames[0])
-    for filename in filenames:
+    for filename in filenames[1:]:
         (head,data) = loadFits(filename)
         dataALL = np.concatenate((dataALL,data))
     hdu = pyfits.PrimaryHDU(dataALL)

@@ -34,10 +34,7 @@ def exoSOFT():
     tic=timeit.default_timer()
     stageList = settings['stageList']
     durationStrings = ''
-    MCmpo= None
-    SAmpo = None
-    STmpo = None
-    MCMCmpo = None
+    [MCMCmpo,SAmpo,STmpo,MCmpo] = [None,None,None,None]
     log.warning("Starting requested stages")
     if 'MC' in stageList:
         log.warning("Starting MC stage")
@@ -107,8 +104,7 @@ def exoSOFT():
     ###################
     # Post-processing # 
     ###################
-    log.warning("Starting Post-Processing")  
-    
+    log.warning("Starting Post-Processing")
     FINALmpo = None
     if MCMCmpo!=None:
         FINALmpo = MCMCmpo
@@ -131,14 +127,8 @@ def exoSOFT():
     
     if FINALmpo!=None:
         outFiles = FINALmpo.outFnames
-        allFname = ''
+        [allFname,burnInStr,clStr,grStr,effPtsStr,postTime,allTime] = ['','','','','','','']
         bestFit = []
-        burnInStr = ''
-        clStr = ''
-        grStr = ''
-        effPtsStr = ''
-        postTime = ''
-        allTime = ''
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         ## combine the data files
         if len(outFiles)>0:

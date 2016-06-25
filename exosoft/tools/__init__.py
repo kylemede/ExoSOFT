@@ -21,6 +21,7 @@ from readWriteTools import renameFits
 from readWriteTools import rmFiles
 from readWriteTools import pklIt
 from readWriteTools import unPklIt
+from readWriteTools import reloadMpoROs
 
 from generalTools import findBestOrbit
 from generalTools import mcmcEffPtsCalc
@@ -40,6 +41,7 @@ from generalTools import predictLocation
 from generalTools import nparyTolistStr
 from generalTools import unitlessSTD
 from generalTools import jdToGcal
+from generalTools import fileSizeHR
 
 from chainTools import multiProcObj
 from chainTools import iterativeSA

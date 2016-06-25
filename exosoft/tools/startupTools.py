@@ -8,7 +8,7 @@ import generalTools as genTools
 import readWriteTools as rwTools
 import constants as const
 import warnings
-from IPython.core.prompts import cwd_filt
+#from IPython.core.prompts import cwd_filt
 warnings.simplefilter("error")
 
 log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False) 
@@ -91,6 +91,8 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                 #*********************************************************************
         ## Make a directory (folder) to place all the files from this simulation run
         settings['finalFolder'] = os.path.join(settings['outDir'],settings['outRoot'])
+        pklDir = os.path.join(settings['finalFolder'],'pklDir')
+        settings['pklDir'] = pklDir
         ##if not doing a re-post analysis with customPost.py
         if rePlot==False:
             if os.path.exists(settings['finalFolder']):
@@ -128,9 +130,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             genTools.copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
             ## make folder for later copying pickle files for recovery if error
             ## or customPost work needs them.
-            pklDir = os.path.join(settings['finalFolder'],'pklDir')
             os.mkdir(pklDir)
-            settings['pklDir'] = pklDir
         ## push all comments from tuples into a sub dictionary to ensure all  
         ## values for requested keys are just the value with no comments.
         commentsDict = {}

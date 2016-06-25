@@ -11,7 +11,7 @@ import datetime
 import glob
 import numpy as np
 import sys
-import pyfits
+from astropy.io import fits as pyfits
 import warnings
 import readWriteTools as rwTools
 import jdcal
@@ -38,7 +38,8 @@ def mcmcEffPtsCalc(outputDataFilename):
         ## Make post tools cpp obj, the 1D version.  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ kill other version?
         PostCTools1D = cppTools.PostCtools1D()
         
-        completeStr+= '\n'+'-'*47+'\nThe mean correlation lengths of all params are:\n'+'-'*47+'\nparam #, param name, mean correlation length'
+        completeStr+= '\n'+'-'*47+'\nThe mean correlation lengths of all params are:\n'+'-'*47
+        completeStr+='\nTotal # of steps stored '+str(numSteps)+'\nparam #, param name, mean correlation length'
         completeStr+= ' -> total # of steps/mean correlation length = number of effective points\n'
         for i in range(0,len(paramList)):
             log.debug( "*"*60+"\n"+'starting to mean calculate corr length for '+paramStrs[i]+' with CPP')
@@ -119,10 +120,12 @@ def burnInStripper(mcmcFnames,burnInLengths):
         burnIn = burnInLengths[i]
         if os.path.exists(filename):
             (head,data) = rwTools.loadFits(filename)
-            ##strip burn-in and write to new fits             
+            ##strip burn-in and write to new fits     
+            log.debug("Before stripping burn-in, file had "+str(len(data[:,0]))+" samples")        
             hdu = pyfits.PrimaryHDU(data[burnIn:,:])
             hdulist = pyfits.HDUList([hdu])
             newHead = hdulist[0].header
+            log.debug("Before stripping burn-in, file had "+str(len(hdulist[0].data[:,0]))+" samples")
             for key in head:
                 newHead[key]=(head[key],head.comments[key])
             n = os.path.splitext(os.path.basename(filename))
@@ -224,16 +227,17 @@ def timeStrMaker(deltaT):
     Convert a time in seconds into a nicer string.
     """
     timeStr = ''
-    if deltaT>60:
-        if deltaT>(60*60):
-            hr = int(deltaT//(60*60))
-            minutes = int((deltaT-hr*60*60)/60.0)
-            timeStr = str(hr)+" hours and "+str(minutes)+" minutes"
+    if type(deltaT) is not str:
+        if deltaT>60:
+            if deltaT>(60*60):
+                hr = int(deltaT//(60*60))
+                minutes = int((deltaT-hr*60*60)/60.0)
+                timeStr = str(hr)+" hours and "+str(minutes)+" minutes"
+            else:
+                minutes = int(deltaT//(60))
+                timeStr = str(minutes)+" minutes and "+str(int(deltaT-minutes*60))+" seconds"
         else:
-            minutes = int(deltaT//(60))
-            timeStr = str(minutes)+" minutes and "+str(int(deltaT-minutes*60))+" seconds"
-    else:
-        timeStr = str(int(deltaT))+' seconds'
+            timeStr = str(int(deltaT))+' seconds'
     return timeStr
 
 def dateStrMaker(now,numberSecondsLater,militaryTime=False):
@@ -372,8 +376,14 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         numEpochsStr+="["+str(settings['n3Depoch'])+", "+str(settings['nDIepoch'])+", "+str(settings['nRVepoch'])+", "+str(settings['nRVdsets'])+"]\n"
         f.write(numEpochsStr)
         stgNsampStrDict = {"MC":"nSamples","SA":"nSAsamp","ST":"nSTsamp","MCMC":"nSamples"}
+        try:
+            totSampStored = int(effPtsStr.split("Total # of steps stored ")[1].split('\n')[0])
+        except:
+            log.debug('didt work yet')
+            totSampStored=1
         numFilesStr = '\nTotal # of files that finished each stage were:\n'
         chiSquaredsStr = '\nBest Reduced Chi Squareds for each stage were:\n'
+        flSzStr='\nFile sizes for each stage were:\n'
         for stage in stageList:
             fnames = np.sort(glob.glob(os.path.join(settings['finalFolder'],"outputData"+stage+"*.fits")))
             if (stage=="MCMC")and settings["rmBurn"]:
@@ -381,17 +391,26 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
             numFilesStr+=stage+' = '+str(len(fnames))+", each with "+str(settings[stgNsampStrDict[stage]])+" samples\n"
             if len(fnames)>0:
                 chiSquaredsStr+=stage+" = ["
+                flSzStr+=stage+" = ["
                 for fname in fnames: 
                     try:
                         bestFit2 = findBestOrbit(fname,bestToFile=False,findAgain=True)
                         chiSquaredsStr+=str(bestFit2[11]/float(head['NU']))+', '
+                        flSzStr+=fileSizeHR(fname)+', '
                         #print fname
                         #print str(bestFit2[11])+"/"+str(float(head['NU']))
                     except:
                         log.error("A problem occurred while trying to find best fit of:\n"+fname)
                 chiSquaredsStr = chiSquaredsStr[:-2]+']\n'
-        numFilesStr+="\n"+"*"*61+"\nThe final combined file was for a total of "+str(totalSamps)+" samples\n"+"*"*61+'\n'
+                flSzStr = flSzStr[:-2]+']\n'
+        numFilesStr+="\n"+"*"*61
+        numFilesStr+="\nThe final combined file was for a total of "+str(totalSamps)+" samples"
+        numFilesStr+="\nThe 'saveInt' was "+str(settings['saveInt'])+" ie. every "+str(settings['saveInt']-1)+" was skipped. And burn-in stripped if requested."
+        numFilesStr+="\n i.e. "+str(len(fnames))+"*"+str(settings[stgNsampStrDict[stage]])+"*(1/"+str(settings['saveInt'])+")-(burn-in) = "
+        numFilesStr+=str(totSampStored)+" final stored samples.\n"+"*"*61+'\n'
+        flSzStr+="Final fits data file was "+fileSizeHR(finalFits)+'\n'
         f.write(numFilesStr)
+        f.write(flSzStr)
         f.write(chiSquaredsStr)
         bestStr = '\n'+'-'*21+"\nBest fit values were:\n"+'-'*21+'\n'
         ############################################
@@ -483,7 +502,23 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\n\nEND OF RESULTS :-D')
     f.close()
     log.info("Summary file written to:\n"+summaryFname)  
-    
+
+def fileSizeHR(filename):
+    """
+    convert number of bytes to human readable form.
+    code modified from post at:
+    http://stackoverflow.com/questions/14996453/python-libraries-to-calculate-human-readable-filesize-from-bytes
+    """
+    nbytes = os.path.getsize(filename)
+    suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+    if nbytes == 0: return '0 B'
+    i = 0
+    while nbytes >= 1024 and i < len(suffixes)-1:
+        nbytes /= 1024.
+        i += 1
+    f = ('%.2f' % nbytes).rstrip('0').rstrip('.')
+    return '%s %s' % (f, suffixes[i])
+
 def keplersThird(p=0,atot=0,mtot=0):
     """
     Kepler's Third rule.  
@@ -602,7 +637,10 @@ def copyToDB(settings):
         for name in fnames:
             fnamesALL.append(name)
     dbDir = os.path.join(settings['dbFolder'],settings['outRoot'])
-    os.mkdir(dbDir)
+    if os.path.exists(dbDir):
+        log.critical("drobpox directory already exists, so just copying into it.  Please remove manually if you want.")
+    else:
+        os.mkdir(dbDir)
     log.debug('DB dir is:\n'+repr(dbDir))
     for f in fnamesALL:
         try:
@@ -804,12 +842,12 @@ def unitlessSTD(ary):
         bcstd = np.sqrt((1.0/(len(ary)-1.0))*np.sum(abs(ary-ary.mean())**2))
         return bcstd/np.mean(ary)
 
-def nparyTolistStr(ary,brackets=True):
+def nparyTolistStr(ary,brackets=True,dmtr=','):
     s=''
     if brackets:
         s+='['
     for val in ary:
-        s+=str(val)+","
+        s+=str(val)+dmtr
     s=s[:-1]
     if brackets:
         s+=']'
