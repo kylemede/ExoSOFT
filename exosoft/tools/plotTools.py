@@ -30,7 +30,7 @@ log = exoSOFTlogger.getLogger('main.plotTools',lvl=100,addFH=False)
 colorsList =['Red','Orange','Purple','Fuchsia','Crimson','Green','Aqua','DarkGreen','Gold','DarkCyan','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown','Blue']
 
 
-def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, nu=1,range=[]):
+def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, nu=1,range=False):
     """
     This will make a matplotlib histogram using the input settings, then writing the resulting  
     centers of the bins and number of data points in said bin values to disk, with '.dat' extension
@@ -45,7 +45,7 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
         theWeights = np.exp(-chiSquareds/2.0)
     else:
         theWeights = np.ones(len(data))      
-    if len(range)==0:
+    if range==False:
         (hst,bin_edges) = np.histogram(data,bins=nbins,normed=False,weights=theWeights,density=None)
     elif len(range)==2:
         (hst,bin_edges) = np.histogram(data,bins=nbins,range=(range[0],range[1]),normed=False,weights=theWeights,density=None)
@@ -419,7 +419,8 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         outputDataFilenames = [outputDataFilenames]
     
     colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
-    colorsList = ['Blue','Chocolate','Purple','Fuchsia']
+    colorsList = ['blue','magenta','sandybrown','lime']
+    
     #colorsList =['Blue','#ff751a']
     #colorsList =['Green','Blue','Red']
     colorsList2 = []
@@ -543,9 +544,10 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
                         combinedLbl = 'combined'
                         if (colorInt==4) and (paramStrs[i]=='$i{\\rm  [deg]}$'):
                             histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/CombinedNormalized-IncHist'
-                            print 'about to try and add combined hist with file '+histDataBaseName
+                            #histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/chiOne/incHist'
+                            #print 'about to try and add combined hist with file '+histDataBaseName
                             subPlot = histLoadAndPlot_StackedPosteriors(subPlot,outFilename=histDataBaseName,xLabel=paramStrs[i],lineColor='black',xLims=xLim,latex=latex,showYlabel=showYlabel,parInt=par,centersOnly=centersOnly,trueVal=trueVal,lgndStr=combinedLbl)
-                            print 'special combined posterior plotted it seems'
+                            #print 'special combined posterior plotted it seems'
                         elif colorInt==4:
                             subPlot.plot([-100,-90],[-100,-90],color='k',lineWidth=2,label=combinedLbl)
         subPlot.legend()
@@ -558,7 +560,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
             log.info(s)
         plt.close()
         #print 'figure written to: '+plotFilename
-        if (plotFormat=='eps') and True:
+        if plotFormat=='eps':
             log.debug('converting to PDF as well')
             try:
                 os.system("epstopdf "+plotFilename+'.'+plotFormat)
@@ -594,7 +596,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
         os.mkdir(plotDataDir)
     plotDataDir+='/'
     
-    print 'about to load fits file'
+    #print 'about to load fits file'
     (head,data) = rwTools.loadFits(outputDataFilename)
     if head!=False:  
         log.debug(' Inside summaryPlotter')
@@ -608,19 +610,19 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
             log.debug('updating plotFilename to:\n'+plotFilename)
         else:
             plotFilename = plotFilename
-        print "about to try and extract parstrs from header"  #$$$$$$$$$$$$$$$$$$$$$$$$   
+        #print "about to try and extract parstrs from header"  #$$$$$$$$$$$$$$$$$$$$$$$$   
         ## get parameter lists and filter accordingly
         (paramList,paramStrs,paramFileStrs) = genTools.getParStrs(head,latex=latex,getALLpars=plotALLpars)
         (paramList2,paramStrs2,paramFileStrs2) = genTools.getParStrs(head,latex=False,getALLpars=plotALLpars)
-        print "got extract parstrs from header"  #$$$$$$$$$$$$$$$$$$
-        print repr((paramList,paramStrs,paramFileStrs))#$$$$$$$$$$$$$$$$$$
-        print repr((paramList2,paramStrs2,paramFileStrs2))#$$$$$$$$$$$$$$$$$$
+        #print "got extract parstrs from header"  #$$$$$$$$$$$$$$$$$$
+        #print repr((paramList,paramStrs,paramFileStrs))#$$$$$$$$$$$$$$$$$$
+        #print repr((paramList2,paramStrs2,paramFileStrs2))#$$$$$$$$$$$$$$$$$$
         # modify x labels to account for DI only situations where M1=Mtotal
         if (np.var(data[:,1])==0)and (0 in paramList):
             paramStrs2[0] = 'm total [Msun]'
             paramStrs[0] = r'$m_{\rm total}$ [$M_{\odot}$]'
             paramFileStrs[0] = 'm-total'
-        print 'updated m1 to mtotal'
+        #print 'updated m1 to mtotal'
         # check if a subset is to be plotted or the whole set
         # remake lists of params to match subset.
         if len(paramsToPlot)!=0:
@@ -648,7 +650,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 s+="\nPlease set it to False if you do not want to plot ALL params."
                 s+="\nALL params will be plotted."
                 log.critical(s)
-            print 'cleaned up par and str lists'
+            #print 'cleaned up par and str lists'
         # just the varying params are to be plotted, so clean the bestVals list to match
         elif len(bestVals)>len(paramList):
             bestValsUse = []
@@ -687,7 +689,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
 #         gs.update(wspace=0.1,hspace=0)
         
         ## run through all the data files and parameters requested and make histogram files
-        print 'about to try and make hists'#$$$$$$$$$$$$$$$$$$$$$$$$
+        #print 'about to try and make hists'#$$$$$$$$$$$$$$$$$$$$$$$$
         completeCLstr = '-'*22+'\nConfidence Levels are:\n'+'-'*80+'\n'
         for i in range(0,len(paramList)):
             if (os.path.exists(os.path.join(os.path.dirname(plotDataDir),'hist-'+stage+"-"+paramFileStrs[i]+'.dat'))==False)or forceRecalc:
@@ -719,7 +721,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                         log.debug('confidence levels data stored to:\n'+os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))
                 else:
                     log.debug("Nope! no useful data for "+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i])#+", in file:\n"+outputDataFilename)
-        print 'done making hists files'  #$$$$$$$$$$$$$$$$$$$$$$$$
+        #print 'done making hists files'  #$$$$$$$$$$$$$$$$$$$$$$$$
         ## Create empty figure to be filled up with plots
         sumFig = plt.figure(figsize=figSizes[sz],tight_layout=True)       
         ## make shaded posterior for each param
@@ -760,7 +762,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 log.debug('Done to plot shaded hist for '+paramStrs2[i])
             else:
                 log.debug("Not plotting shaded hist for "+paramStrs2[i]+" as its hist file doesn't exist:\n"+histDataBaseName)
-        print 'done making posterior plots files'  #$$$$$$$$$$$$$$$$$$$$$$$$
+        #print 'done making posterior plots files'  #$$$$$$$$$$$$$$$$$$$$$$$$
         #plt.tight_layout()
         ## Save file if requested.
         log.debug('\nStarting to save param hist figure:')
@@ -829,11 +831,11 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     # There is some custom code to place 'zoom-in' inserts that some could 
     # modify to use with their work.  Review current code and tweak to match 
     # your situaiton accordingly.
-    plotCustomInsets = False
+    plotCustomInsets = True
     savePlotDataToFile = False
-    autoUnits = False
+    autoUnits = True
     latex=True
-    colorsList = ['Blue','Chocolate','Purple','Fuchsia']
+    colorsList = ['blue','magenta','sandybrown','lime']
     matplotlib.rcParams['ps.useafm']= True
     matplotlib.rcParams['pdf.use14corefonts'] = True
     matplotlib.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
@@ -868,11 +870,11 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         pasa = settings[0]["pasa"]
     except:
         pasa = False
-    Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],pasa)
+    Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],False)
     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
     
     if len(settings)==len(orbParams):
-        print 'all good, both settings and orbParams have length '+str(len(settings))
+        log.debug( 'all good, both settings and orbParams have length '+str(len(settings)))
     else:
         print 'PROBLEM! number of settings files were '+str(len(settings))+', while number of orbParam sets were '+str(len(orbParams))
         #print repr(orbParams)
@@ -887,13 +889,13 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         diFig = plt.figure(2,figsize=(10,9))
         diMain = diFig.add_subplot(111)
         for settInt in range(0,len(settings)):
-            print 'plotting for settings file # '+str(settInt)
+            #print 'plotting for settings file # '+str(settInt)
             settingsDI = settings[settInt]
             orbParamsDI = orbParams[settInt]
             ##get the real data
             realData = rwTools.loadRealData(diFilename=settingsDI['DIdataFile'],rvFilename=settingsDI['RVdataFile'],dataMode=settingsDI['dataMode'])
             for parSetInt in range(0,len(orbParamsDI)):
-                print 'plotting orbit parameter set # '+str(parSetInt)
+                #print 'plotting orbit parameter set # '+str(parSetInt)
                 ## ensure orbParams are in required format for Orbit
                 params = []
                 for par in orbParamsDI[parSetInt]:
@@ -913,10 +915,12 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 #print 'fakeRealData= '+repr(fakeRealData)
                 Orbit.loadRealData(fakeRealData)
                 fitDataDI = np.ones((nPts,3),dtype=np.dtype('d'),order='C')
+                #Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],False)
                 Orbit.calculate(fitDataDI,paramsDI)
                 ## calculate the fit locations for the DI epochs to calculate 0-C
                 Orbit.loadRealData(realDataDI)
                 predictedDataDI = np.ones((realDataDI.shape[0],3),dtype=np.dtype('d'),order='C')
+                #Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],False)
                 Orbit.calculate(predictedDataDI,paramsDI)
                 ## Get locations of start/end for semi-major axis or COM, and AN/DN for line-of-nodes
                 ## Get 1/4 locations (useful for drawing semi-major axis, and finding loc of COM)
@@ -925,6 +929,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     fakeRealDataQuarter[i,0] = paramsDI[5]+(const.daysPerYear*paramsDI[7]*(i/4.0))
                 Orbit.loadRealData(fakeRealDataQuarter)
                 fitDataQuarter = np.zeros((4,3),dtype=np.dtype('d'),order='C')
+                #Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],False)
                 Orbit.calculate(fitDataQuarter,paramsDI)
                 ## make semi-major locs
                 semiMajorLocs = np.array([[fitDataQuarter[0,0],fitDataQuarter[0,1]],[fitDataQuarter[2,0],fitDataQuarter[2,1]]])
@@ -939,6 +944,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 lonData[:,0]=nodeEpochs
                 Orbit.loadRealData(lonData)
                 tmpData = np.ones((2,3),dtype=np.dtype('d'),order='C')
+                #Orbit.loadStaticVars(settings[0]['omegaFdi'],settings[0]['omegaFrv'],settings[0]['lowEcc'],False)
                 Orbit.calculate(tmpData,paramsDI)
                 lonXYs = tmpData[:,:2]#[[tmpData[0,0],tmpData[0,1]]]
                 
@@ -970,9 +976,10 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 if savePlotDataToFile:
                     np.savetxt(fnameBase+'-real'+str(parSetInt)+'.dat',outDIdataReal,header=hReal)
                     np.savetxt(fnameBase+'-predicted'+str(parSetInt)+'.dat',outPredictedDIdata,header=hPredicted)
-                    np.savetxt(fnameBase+'-fit'+str(parSetInt)+'t',outDIdataFit,header=hFit)
+                    np.savetxt(fnameBase+'-fit'+str(parSetInt)+'.dat',outDIdataFit,header=hFit)
                     #O-C [RAo-c,DECo-c]
                     np.savetxt(fnameBase+'-O-C'+str(parSetInt)+'.dat',residualDIdata,header="[RAo-c,DECo-c]")
+                #np.savetxt(fnameBase+'-fit'+str(parSetInt)+'-2.dat',outDIdataFit,header=hFit)
                     
                 #determine if to plot [mas] or ["]
                 asConversion=1.0
@@ -989,7 +996,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 except:
                     log.debug('legendStrs param passed in was not cool')
                 diMain.plot(fitDataDI[:,0]*asConversion,fitDataDI[:,1]*asConversion,linewidth=diLnThk,color=clr,label=lgndStr)
-                if len(orbParamsDI)<1: 
+                if len(orbParamsDI)==1: 
                     ## Draw line-of-nodes
                     diMain.plot(lonXYs[:,0]*asConversion,lonXYs[:,1]*asConversion,'-.',linewidth=diLnThk,color='Green')
                     #print 'lonXYs*asConversion = '+repr(lonXYs*asConversion)
@@ -1023,6 +1030,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 else:
                     xLimsF = (np.min([xmin,np.min(fitDataDI[:,0]*asConversion)]),np.max([xmax,np.max(fitDataDI[:,0]*asConversion)]))
                     yLimsF = (np.min([ymin,np.min(fitDataDI[:,1]*asConversion)]),np.max([ymax,np.max(fitDataDI[:,1]*asConversion)]))
+                    #print 'xLimsF = '+repr(xLimsF)
+                    #print 'yLimsF = '+repr(yLimsF)
                     xLimsC = (xmin,xmax)
                     yLimsC = (ymin,ymax)
                 ##fix FULL limits
@@ -1062,7 +1071,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         diMain.spines['left'].set_linewidth(1.0)
         #[left,btm,width,height]
         limsList = [yLimsCrop[0],yLimsCrop[1],yLimsFull[0],yLimsFull[1]]
-        if (-99>np.min(limsList))or(999<np.max(limsList)):
+        if (-999>np.min(limsList))or(999<np.max(limsList)):
             diMain.set_position([0.19,0.129,0.76,0.76*10./9])
         else:
             diMain.set_position([0.17,0.129,0.76,0.76*10./9])
@@ -1070,9 +1079,9 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         yLabel = 'Relative Dec  '+unitStr
         if latex:
             if asConversion==1.0:
-                unitStr = '$[^{\prime\prime}]$'
+                unitStr = ' $[^{\prime\prime}]$'
             else:
-                unitStr = '${\rm [mas] }$'
+                unitStr = ' [mas]'
             xLabel = r'$\Delta\alpha$ '+unitStr
             yLabel = r'$\Delta\delta$ '+unitStr
         diMain.set_xlabel(xLabel, fontsize=35)
@@ -1096,8 +1105,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             # Locations of the subplots.  Notice that I explicitly multiply by 9/10
             # rather than approximating 0.8444 as 0.84.
             #######################################################
-            xloc = [0.249, 0.28, 0.24]
-            yloc = [0.48, 0.67, 0.817]
+            xloc = [0.25, 0.28, 0.22]
+            yloc = [0.48, 0.69, 0.819]
             dx = [7, 7, 7]
             dy = [15, 7, 7]
             dxfull = np.abs(xLimsFull[1] - xLimsFull[0])/0.76
@@ -1110,11 +1119,10 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 else:
                     xx = np.mean(-1*predictedDataDI[:2,0]*asConversion)
                     yy = np.mean(predictedDataDI[:2,1]*asConversion)
-    
-                expand = 2
+                expand = 2.25
                 # Actual x and y positions we're blowing up as insets.
-                realxloc = 0.19 + (xx - dx[i]*expand/2. + np.amax(xLimsFull))/dxfull
-                realyloc = 0.129 + (yy - dy[i]*expand/2. - np.amin(yLimsFull))/dyfull
+                realxloc = 0.171 + (xx - dx[i]*expand/2. + np.amax(xLimsFull))/dxfull
+                realyloc = 0.13 + (yy - dy[i]*expand/2. - np.amin(yLimsFull))/dyfull
                 a = diFig.add_axes([realxloc, realyloc, expand*dx[i]/dxfull, expand*dy[i]/dyfull])
                 # Draw clear boxes around these areas, expand:1 scale.
                 a.patch.set_visible(False)
@@ -1131,10 +1139,9 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     xval = -1*predictedDataDI[j,0]*asConversion
                     yval = predictedDataDI[j,1]*asConversion
                     dotsize = diLnThk
-                    plt.plot(xval, yval,c='red',marker='.',markersize=1.5*dotsize)#$$$$$$$$ Place for custimiz
+                    plt.plot(xval, yval,c='red',marker='.',markersize=10*dotsize)#$$$$$$$$ Place for custimization
     
                 # Now draw the actual astrometric measurements.
-    
                 data_DI = realDataDI.copy()
                 data_DI[:, 3] *= -1
                 data_DI[:, 1::2] *= -1
@@ -1143,7 +1150,6 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 # Set the limits and don't label the axes.
                 plt.xlim(xx - 0.5*dx[i], xx + 0.5*dx[i])
                 plt.ylim(yy - 0.5*dy[i], yy + 0.5*dy[i])
-                
                 plt.xticks([])
                 plt.yticks([])
 

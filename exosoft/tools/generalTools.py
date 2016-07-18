@@ -10,6 +10,7 @@ import timeit
 import datetime
 import glob
 import numpy as np
+from scipy import interpolate
 import sys
 from astropy.io import fits as pyfits
 import warnings
@@ -794,7 +795,63 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         
     else:
         log.critical( "confLevelFinder: ERROR!!!! file doesn't exist")            
-                                         
+         
+def histConfLevels(histAry):
+    """
+    Calculates the locations on the x-axis where 68.5% and 95.4% of the data
+    lie above a certain probability.  
+    x-axis points need to be centered on the middle of the bins, rather than
+    the edges.
+    
+    Returns the min and max of the data points for both percentages.
+    [range68,range95,range100]
+    """
+    ##avoid float comparison errors for near identicle numbers by rounding all
+    if True:
+        for i in range(0,len(histAry[:,0])):
+            histAry[i,0] = round(histAry[i,0],12)
+    #print repr(histAry)
+    halfStepSize = round((histAry[1,0]-histAry[0,0])*0.5,12)
+    res = abs(histAry[1,0]-histAry[0,0])/100.0
+    xs=np.arange(histAry[0,0],histAry[-1,0],res)
+    #print str(res)
+    #print repr([histAry[0,0],histAry[-1,0]])
+    #print repr([np.min(xs),np.max(xs)])
+    ## interpolate
+    f = interpolate.interp1d(histAry[:,0], histAry[:,1],kind='cubic')
+    ys=f(xs)
+    ysorted=np.sort(ys)
+    ysorted=ysorted[::-1]
+    [got68,got95,got99,vls68,vls95,vls99]=[False,False,False,[],[],[]]
+    for i in range(0,len(xs)):
+        vls = ys[np.where(ys>ysorted[i])]
+        perc = np.sum(vls)/np.sum(ysorted)
+        if (perc>0.683) and (got68==False):
+            got68=True
+            vls68=xs[np.where(ys>ysorted[i])]
+        if (perc>0.954) and (got95==False):
+            got95=True
+            vls95=xs[np.where(ys>ysorted[i])]
+        if (perc>0.99) and (got99==False):
+            got99=True
+            vls99=xs[np.where(ys>ysorted[i])]
+    range68=[np.min(vls68),np.max(vls68)]
+    range95=[np.min(vls95),np.max(vls95)]
+    range99=[np.min(vls99),np.max(vls99)]
+    range100 = [np.min(xs),np.max(xs)]
+    retAry = [range68,range95,range99,range100]
+    for i in range(0,4):
+        retAry[i][0] = round(retAry[i][0],12)
+        retAry[i][1] = round(retAry[i][1],12)
+        #print repr(retAry[i][1])
+        #print repr(round(histAry[-1,0],12))
+        if round(retAry[i][0],12)==round(np.min(xs),12):
+            retAry[i][0]=histAry[0,0]-halfStepSize
+        if round(retAry[i][1],12)==round(np.max(xs),12):
+            #print 'rounding up '+str(retAry[i][1])+' to '+str(retAry[i][1]+halfStepSize)
+            retAry[i][1]=halfStepSize+histAry[-1,0]
+    return retAry
+             
 def findBestOrbit(filename,bestToFile=True,findAgain=False):        
     """
     Find the orbital elements for the best fit in a exosoft format fits file.
@@ -1040,6 +1097,23 @@ def m2siniRangeCalc():
                     mn = m2sini
     print 'min = '+str(mn)+", max = "+str(mx)               
     
+def semiMajAmp(m1,m2,inc,ecc,p):
+    """
+    K = [(2*pi*G)/p]^(1/3) [m2*sin(i)/m2^(2/3)*sqrt(1-e^2)]
+    units:
+    K [m/s]
+    m1 [Msun]
+    m2 [Mj]
+    p [yrs]
+    inc [deg]
+    """
+    pSecs = p*const.secPerYear
+    m1KG = m1*const.KGperMsun
+    A = ((2.0*np.pi*const.Grav)/pSecs)**(1.0/3.0)
+    B = (m2*const.KGperMjupiter*np.sin(np.radians(inc)))
+    C = m1KG**(2.0/3.0)*np.sqrt(1.0-ecc**2.0)
+    print 'Resulting K is '+repr(A*(B/C))
+    #return A*(B/C)
                     
     
     

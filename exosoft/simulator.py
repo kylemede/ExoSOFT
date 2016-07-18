@@ -448,11 +448,11 @@ class Simulator(object):
         self.Orbit.convertParsFromRaw(paramsLast)
         self.paramsLast = paramsLast
         self.startSummary(paramsLast,sigmas,stage)
-        if stage =='MCMC':
-            #load starting point to make accepted numbers match perfect to requested samples
-            acceptedParams.append(self.paramsLast)
-            self.nSaved += 1 
-            self.nSavedPeriodic+=1
+        #if stage =='MCMC':
+        #    #load starting point to make accepted numbers match perfect to requested samples
+        #    acceptedParams.append(self.paramsLast)
+        #    self.nSaved += 1 
+        #    self.nSavedPeriodic+=1
     
         ##loop through each sample 
         ##Follows these steps: in Range?,calc model,accept?,Store?,increment,lower temp?,tune sigmas? dump data to disk? DONE ->write output data

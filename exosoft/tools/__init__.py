@@ -42,6 +42,8 @@ from generalTools import nparyTolistStr
 from generalTools import unitlessSTD
 from generalTools import jdToGcal
 from generalTools import fileSizeHR
+from generalTools import histConfLevels
+from generalTools import confLevelFinder
 
 from chainTools import multiProcObj
 from chainTools import iterativeSA
