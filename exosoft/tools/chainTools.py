@@ -218,8 +218,13 @@ class multiProcObj(object):
             self.acceptStrs = []
             
     def writeBest(self):
-        (bstChi,bstInt) = self._best()
-        rwTools.writeBestsFile(self.settings,self.params[bstInt],self.sigmas[bstInt],bstChi,self.stage)
+        try:
+            (bstChi,bstInt) = self._best()
+            rwTools.writeBestsFile(self.settings,self.params[bstInt],self.sigmas[bstInt],bstChi,self.stage)
+            return True
+        except:
+            log.critical("No parameters were accepted!!!")
+            return False
         
     def _best(self):
         if len(self.acceptStrs)>0:

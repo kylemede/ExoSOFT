@@ -34,17 +34,19 @@ def exoSOFT():
     tic=timeit.default_timer()
     stageList = settings['stageList']
     durationStrings = ''
+    stgsPassed = True
     [MCMCmpo,SAmpo,STmpo,MCmpo] = [None,None,None,None]
     log.warning("Starting requested stages")
     if 'MC' in stageList:
         log.warning("Starting MC stage")
         MCmpo = tools.multiProcObj(settings,Sim,'MC')
         MCmpo.run()
-        MCmpo.writeBest()
-        (pars,sigs,chis,outFiles) = MCmpo.getTopProcs(settings['chiMAX'])
-        durationStrings+='** MC stage **\n'+MCmpo.latestRetStr
-        toc=timeit.default_timer()
-        log.warning(MCmpo.latestRetStr)
+        stgsPassed = MCmpo.writeBest()
+        if stgsPassed:
+            (pars,sigs,chis,outFiles) = MCmpo.getTopProcs(settings['chiMAX'])
+            durationStrings+='** MC stage **\n'+MCmpo.latestRetStr
+            toc=timeit.default_timer()
+            log.warning(MCmpo.latestRetStr)
     if 'SA' in stageList:
         log.warning("Starting SA stage")
         SAmpo = tools.iterativeSA(settings,Sim)
@@ -65,8 +67,9 @@ def exoSOFT():
         if len(startParams)>0:
             STmpo = tools.multiProcObj(settings,Sim,'ST')
             STmpo.run(params=startParams,sigmas=startSigmas)
-            STmpo.writeBest()
-            durationStrings+='** ST stage **\n'+STmpo.latestRetStr
+            stgsPassed = STmpo.writeBest()
+            if stgsPassed:
+                durationStrings+='** ST stage **\n'+STmpo.latestRetStr
         toc=timeit.default_timer()
         s = "ST took a total of "+tools.timeStrMaker(int(toc-tic))
         log.warning(s)
@@ -91,9 +94,10 @@ def exoSOFT():
         if len(startParams)>0:
             MCMCmpo = tools.multiProcObj(settings,Sim,'MCMC')
             MCMCmpo.run(params=startParams,sigmas=startSigmas)
-            MCMCmpo.writeBest()
-            durationStrings+='** MCMC stage **\n'+MCMCmpo.latestRetStr
-        log.warning(MCMCmpo.latestRetStr)
+            stgsPassed = MCMCmpo.writeBest()
+            if stgsPassed:
+                durationStrings+='** MCMC stage **\n'+MCMCmpo.latestRetStr
+            log.warning(MCMCmpo.latestRetStr)
     
     ## Done all stages 
     toc=tic2=timeit.default_timer()

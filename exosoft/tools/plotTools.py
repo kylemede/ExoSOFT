@@ -831,8 +831,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     # There is some custom code to place 'zoom-in' inserts that some could 
     # modify to use with their work.  Review current code and tweak to match 
     # your situaiton accordingly.
-    plotCustomInsets = True
-    savePlotDataToFile = False
+    plotCustomInsets = False
+    savePlotDataToFile = True
     autoUnits = True
     latex=True
     colorsList = ['blue','magenta','sandybrown','lime']
@@ -1736,11 +1736,15 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
             except:
                 log.warning("Seems epstopdf failed.  Check if it is installed properly.")
     
-def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],bestVals=[]):
+def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims = [],expectedVal=None):
     """
     Plots progress of a single parameter's chain over one stage of simulation, AND the 
     reduced chi squared as a time series.
     """
+    downSample = True # down sample the data to clean up plot
+    cutDownBy = 1000 # down sample by using ever #th data point
+    scatter = True
+    bigFig = True
     latex=True
     plotFormat='eps'
     matplotlib.rcParams['ps.useafm']= True
@@ -1754,6 +1758,13 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],bestVal
         matplotlib.rc('font',family='serif')
         matplotlib.rc('text', usetex=False)
         
+    lblSz = 20
+    fntSz = 25
+    lnWdth = 2
+    if bigFig:
+        lblSz = 50
+        fntSz = 60
+        lnWdth = 6
     (head,data) = rwTools.loadFits(outputDataFilename)
     
     if head!=False:  
@@ -1762,6 +1773,9 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],bestVal
         s=s+ '\nInput plotfilename:\n'+plotFilename
         log.info(s)
         
+        #Find best orbit params
+        bestPars = genTools.findBestOrbit(outputDataFilename,bestToFile=False)
+        #print 'back from findBestOrbit'
         
         ## check if the passed in value for plotFilename includes format extension
         if '.'+plotFormat not in plotFilename:
@@ -1770,8 +1784,8 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],bestVal
         else:
             plotFilename = plotFilename
                 
-        (paramList,paramStrs,paramFileStrs) = genTools.getParStrs(head,latex=latex)
-        (paramList2,paramStrs2,paramFileStrs2) = genTools.getParStrs(head,latex=False)
+        (paramList,paramStrs,paramFileStrs) = genTools.getParStrs(head,latex=latex,getALLpars=True)
+        (paramList2,paramStrs2,paramFileStrs2) = genTools.getParStrs(head,latex=False,getALLpars=True)
         nu =  head['NU']
         
         ## modify y labels to account for DI only situations where M1=Mtotal
@@ -1779,46 +1793,92 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],bestVal
             paramStrs2[0] = 'm total [Msun]'
             paramStrs[0] = '$m_{total}$ [$M_{\odot}$]'
             paramFileStrs[0] = 'm-total'
+        ## check if m2 and if it should be in jupiter masses
+        elif paramToPlot==1:
+            if np.max(data[:,1])<0.02:
+                data[:,1]=data[:,paramToPlot]*(const.KGperMsun/const.KGperMjupiter)
+                bestPars[1] = bestPars[1]*(const.KGperMsun/const.KGperMjupiter)
+                valRange = np.max(data[:,1])-np.min(data[:,1])
+                paramStrs2[1]='m2 [Mjupiter]'
+                paramStrs[1]='$m_2$ [$M_{J}$]'
 
         ##make progress plots for parameter requested and reduced chi squared
         saveInt = int(head['SAVEINT'])
-        samples = range(0,len(data[:,11])-1)*saveInt
-        
-        #Find best orbit params
-        bestPars = genTools.findBestOrbit(outputDataFilename,bestToFile=False)
-        #print 'back from findBestOrbit'
-        
+        #samples = range(0,len(data[:,11])-1)*saveInt
+                
         ## Create empty figure to be filled up with plots
-        fig = plt.figure(figsize=(8,5))  
+        if bigFig:
+            fig = plt.figure(figsize=(16,10),dpi=200)
+        else:
+            fig = plt.figure(figsize=(8,5),dpi=100)  
         #print 'made fig'
         #plot requested param  
         subPlot = fig.add_subplot(2,1,1)
         #print 'len(data[:,paramToPlot]) = '+repr(len(data[:,paramToPlot]))
         samples = np.arange(0,len(data[:,paramToPlot])*saveInt,saveInt)
         #print 'len(samples) = '+repr(len(samples))
-        subPlot.plot(samples,data[:,paramToPlot],color='k',linewidth=1)
+        if downSample:
+            d = data[::cutDownBy,paramToPlot]
+            samples = samples[::cutDownBy]
+        else:
+            d = data[:,paramToPlot]
+        if scatter:
+            subPlot.scatter(samples,d,c='green',edgecolors='green')
+        else:
+            subPlot.plot(samples,d,color='blue',linewidth=1)
         #print '##plotted data##'
         #print repr([samples[0],samples[-1]])+', '+repr([bestPars[paramToPlot],bestPars[paramToPlot]])
-        subPlot.plot([samples[0],samples[-1]],[bestPars[paramToPlot],bestPars[paramToPlot]],color='blue',linewidth=2)
+        
+        # plot line for best fit
+        if len(bestPars)>1:
+            subPlot.plot([samples[0],samples[-1]],[bestPars[paramToPlot],bestPars[paramToPlot]],color='k',linewidth=lnWdth)
+        # plot line for expected value if provided
+        if expectedVal is not None:
+            subPlot.plot([samples[0],samples[-1]],[expectedVal,expectedVal],color='blue',linewidth=lnWdth)
         #print '##plotted best##'
         if latex:
-            subPlot.axes.set_ylabel(r''+paramStrs[paramToPlot],fontsize=20)
+            subPlot.axes.set_ylabel(r''+paramStrs[paramToPlot],fontsize=fntSz)
         else:
-            subPlot.axes.set_ylabel(paramStrs2[paramToPlot],fontsize=20)
+            subPlot.axes.set_ylabel(paramStrs2[paramToPlot],fontsize=fntSz)           
+        #place limits on y axis if provided
+        if len(yLims)>0:
+            subPlot.axes.set_ylim((yLims[0][0],yLims[0][1]))
+        #place limits on x axis if provided
+        if len(xLims)>0:
+            subPlot.axes.set_xlim((xLims[0],xLims[1]))
+        # change label sizes
+        subPlot.tick_params(axis='both',labelsize=lblSz)
         #plot chi squareds
         subPlot = fig.add_subplot(2,1,2)
         #print 'len(data[:,11]*(1.0/nu)) = '+repr(len(data[:,11]*(1.0/nu)))
-        samples = np.arange(0,len(data[:,11])*saveInt,saveInt)
+        #samples = np.arange(0,len(data[:,11])*saveInt,saveInt)
         #print 'len(samples) = '+repr(len(samples))
-        subPlot.plot(samples,data[:,11]*(1.0/nu),color='k',linewidth=1)
-        if latex:
-            subPlot.axes.set_xlabel(r''+'$Sample$',fontsize=20)
-            #subPlot.axes.set_ylabel(r''+'$\chi^2_{\nu}$',fontsize=20)
-            subPlot.axes.set_ylabel(r''+'$reduced$ $chi$ $sqr$',fontsize=20)
+        #subPlot.plot(samples,data[:,11]*(1.0/nu),color='k',linewidth=1)
+        if downSample:
+            d = data[::cutDownBy,11]*(1.0/nu)
         else:
-            subPlot.axes.set_xlabel('Sample',fontsize=20)
-            subPlot.axes.set_ylabel('reduced chi sqr',fontsize=20)
-        
+            d = data[:,11]*(1.0/nu)
+        if scatter:
+            subPlot.scatter(samples,d,c='green',edgecolors='green')
+        else:
+            subPlot.plot(samples,d,color='k',linewidth=1)
+        #print 'made subplot'
+        if latex:
+            subPlot.axes.set_xlabel(r''+'$Sample$',fontsize=fntSz)
+            #subPlot.axes.set_ylabel(r''+'$\chi^2_{\nu}$',fontsize=20)
+            subPlot.axes.set_ylabel(r''+'$reduced$ $\chi^2$',fontsize=fntSz)
+        else:
+            subPlot.axes.set_xlabel('Sample',fontsize=fntSz)
+            subPlot.axes.set_ylabel('reduced chi sqr',fontsize=fntSz)
+        #print 'labeled plot'          
+        #place limits on y axis if provided
+        if len(yLims)>0:
+            subPlot.axes.set_ylim((yLims[1][0],yLims[1][1]))
+        #place limits on x axis if provided
+        if len(xLims)>0:
+            subPlot.axes.set_xlim((xLims[0],xLims[1]))
+        # change label sizes
+        subPlot.tick_params(axis='both',labelsize=lblSz)
         plt.tight_layout()
         ## Save file if requested.
         log.debug('\nStarting to save param progress figure:')

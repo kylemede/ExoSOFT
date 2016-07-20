@@ -442,7 +442,6 @@ class Simulator(object):
         ## load up starting params as 'latest' and perform first increment from these to start loop with.
         latestParsRaw = copy.deepcopy(paramsLast)
         proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
-        self.acceptBoolAry.append(0)
         #print 'proposed pars have reduced chi sqr of '+str(proposedParsRaw[11]/self.nu)#$$$$$$$$$$$$$$$$$$$$$$$$$$$
         ## convert from Raw form if in lowEcc mode
         self.Orbit.convertParsFromRaw(paramsLast)
@@ -453,6 +452,7 @@ class Simulator(object):
         #    acceptedParams.append(self.paramsLast)
         #    self.nSaved += 1 
         #    self.nSavedPeriodic+=1
+        #    self.acceptBoolAry.append(0)
     
         ##loop through each sample 
         ##Follows these steps: in Range?,calc model,accept?,Store?,increment,lower temp?,tune sigmas? dump data to disk? DONE ->write output data
