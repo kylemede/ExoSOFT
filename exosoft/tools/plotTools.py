@@ -831,7 +831,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     # There is some custom code to place 'zoom-in' inserts that some could 
     # modify to use with their work.  Review current code and tweak to match 
     # your situaiton accordingly.
-    plotCustomInsets = False
+    plotCustomInsets = True
     savePlotDataToFile = True
     autoUnits = True
     latex=True
@@ -1559,6 +1559,12 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                         y=(yR/xR)*y
                     elif xR<yR:
                         x=(xR/yR)*x
+                    ########## Hack to get bottom axis label to show properly #$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                    ########## when y range is small
+                    if True:
+                        y=1.05*y
+                        hgt=0.8/1.05
+                        btm=0.17+(0.8-hgt)
                 #print 'Figure size is ('+str(x)+', '+str(y)+")"
                 fig = plt.figure(figsize=(x,y))
                 subPlot = fig.add_subplot(111)
@@ -1575,7 +1581,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                 subPlot.spines['left'].set_linewidth(0.7)                        
                 if rectanglePlot and (sqBool==False): 
                     #[left,btm,width,height]
-                    subPlot.set_position([0.17,0.18,0.80,0.80])
+                    subPlot.set_position([0.17,btm,0.80,hgt])
                 else:
                     #[left,btm,width,height]
                     subPlot.set_position([0.17,0.14,0.80,0.80])

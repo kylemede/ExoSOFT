@@ -447,6 +447,7 @@ class Simulator(object):
         self.Orbit.convertParsFromRaw(paramsLast)
         self.paramsLast = paramsLast
         self.startSummary(paramsLast,sigmas,stage)
+        self.acceptBoolAry.append(0)
         #if stage =='MCMC':
         #    #load starting point to make accepted numbers match perfect to requested samples
         #    acceptedParams.append(self.paramsLast)
