@@ -1,6 +1,7 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import logging
 import platform
+import datetime
 import sys
 import os
 #import traceback
@@ -224,7 +225,8 @@ def logSystemInfo(log):
     | Python Version = '2.7.3'
 
     """
-    infoStr = ''
+    t = datetime.date.today()
+    infoStr = 'Date ExoSOFT started this run: '+t.strftime('%b %d, %Y')+'\n\n'
     infoStr+="\n"+"="*11+' System Information Summary '+'='*11
     infoStr+="\n"+'OS type = '+platform.uname()[0]
     infoStr+="\n"+'OS Version = '+platform.uname()[2]

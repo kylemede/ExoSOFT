@@ -357,6 +357,8 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     totalSamps = head['NSAMPLES']
     (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
+    t = datetime.date.today()
+    f.write("Date ExoSOFT completed: "+t.strftime('%b %d, %Y')+'\n')
     f.write("\n"+"*"*80+"\noutRoot:  "+settings['outRoot']+"\n"+"*"*80+"\n")
     f.write('\n'+'-'*7+'\nBasics:\n'+'-'*7)
     f.write("\nComplete set of parameters that varied directly:\n"+'-'*48)
