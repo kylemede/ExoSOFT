@@ -26,130 +26,111 @@ class Priors(object):
               -Also, remember that non of the range values are allowed to be zero
               as it breaks this and a few other functions.
         """
-        priorsRatio = 1.0
+        try:
+            priorsRatio = self.combinedPriorsSingle(parsCurr)/self.combinedPriorsSingle(parsLast)
+            return priorsRatio
+        except:
+            self.log.critical("An error occured while trying to calculate the priors ratio.")
+            sys.exit(0)
+        
+    def combinedPriorsSingle(self,pars):
+        """
+        Combined priors for a single step in the chain.  This can be called 
+        to form the priors ratio OR when accounting for the priors when 
+        producing the posteriors during post-processing.
+        """
+        comboPriors = 1.0
         try:
             if self.settings['ePrior']:
                 #print 'ePrior'
-                priorsRatio*=self.ePriorRatio(parsCurr[4],parsLast[4])
+                comboPriors*=self.ePrior(pars[4])
             if self.settings['pPrior']:
                 #print 'pPrior'
-                priorsRatio*=self.pPriorRatio(parsCurr[7],parsLast[7])
+                comboPriors*=self.pPrior(pars[7])
             if self.settings['incPrior']:
                 #print 'incPrior'
-                priorsRatio*=self.incPriorRatio(parsCurr[8],parsLast[8])
+                comboPriors*=self.incPrior(pars[8])
             if self.settings['M1Prior']:
                 #print 'M1Prior'
-                priorsRatio*=self.mass1PriorRatio(parsCurr[0],parsLast[0])
+                comboPriors*=self.mass1Prior(pars[0])
                 #print 'M1Prior'
             if self.settings['M2Prior']:
                 #print 'M2Prior'
-                priorsRatio*=self.mass2PriorRatio(parsCurr[1],parsLast[1],parsCurr[0],parsLast[0])
+                comboPriors*=self.mass2(pars[1],pars[0])
                 #print 'M2Prior'
             if self.settings['parPrior']:
                 #print 'parPrior'
-                priorsRatio*=self.paraPriorRatio(parsCurr[2],parsLast[2])
+                comboPriors*=self.paraPrior(pars[2])
                 #print 'parPrior out'
-            return priorsRatio
+            return comboPriors
         except:
-            self.log.critical("An error occured while trying to calculate the priors.")
+            self.log.critical("An error occured while trying to calculate the combined sigle priors.")
             sys.exit(0)
         
-    #NOTE: only change the code and not the name of the functions or their inputs.
-    def ePriorRatio(self,eProposed,eLast):
-        if (self.settings['lowEcc']==False)and(self.settings['eMAX']!=0):
-            if eProposed!=eLast!=0:
+    #NOTE: only change the code and not the name of the functions or their inputs.            
+    def ePrior(self,ecc):
+        ## UPGRADE TO INCLUDE STRING INDICATED ECC PRIOR OPTIONS FROM KEPLER AND OTHER SURVEY RESULTS
+        ret = 1.0
+        if ecc!=0:
+            if (self.settings['lowEcc']==False)and(self.settings['eMAX']!=0):
                 if (self.settings['PMIN']*constants.daysPerYear)>1000.0:
-                    return eProposed/eLast
-                else:
-                    return 1.0
-            else:
-                return 1.0
-        else:
-            return 1.0
-        
-    def pPriorRatio(self,Pproposed,Plast):
+                    ret = 2.0*ecc
+        return ret
+                  
+    def pPrior(self,p):
+        ret = 1.0
         if self.settings['PMAX']!=0:
-            if Pproposed!=0:
-                return Plast/Pproposed
-            else:
-                return 1.0
-        else:
-            return 1.0
+            if p!=0.0:
+                ret = 1.0/(p*(np.log(self.settings['PMAX']/self.settings['PMIN'])))
+        return ret
         
-    def incPriorRatio(self,incProposed,incLast):
+    def incPrior(self,inc):
+        ret = 1.0
         if self.settings['incMAX']!=0:
-            if incLast not in [0.0,90.0,180.0]:
+            if inc not in [0.0,90.0,180.0]:
+                mn = self.settings['incMIN']*(constants.pi/180.0)
+                mx = self.settings['incMAX']*(constants.pi/180.0)
                 if self.settings['incPrior'] is 'sin':
-                    return np.sin(incProposed*(constants.pi/180.0))/np.sin(incLast*(constants.pi/180.0))
+                    ret = np.sin(inc*(constants.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
                 elif self.settings['incPrior'] is 'cos':
-                    return np.cos(incProposed*(constants.pi/180.0))/np.cos(incLast*(constants.pi/180.0))
-            else:
-                return 1.0
-        else:
-            return 1.0
+                    ret =  np.cos(inc*(constants.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
+        return ret
         
-    def mass1PriorRatio(self,MProposed,MLast):
+    def mass1Prior(self,mass):
+        ret = 1.0
         if (self.settings['mass1MAX']!=0):
-            if MProposed!=MLast!=0:
-                gaussRatio = 1.0
+            if mass!=0:
                 if self.settings['mass1Est']!=self.settings['mass1Err']!=0:
-                    ## a Gaussian prior
-                    top = self.gaussian(MProposed, self.settings['mass1Est'], self.settings['mass1Err'])
-                    btm = self.gaussian(MLast, self.settings['mass1Est'], self.settings['mass1Err'])
-                    gaussRatio = top/btm
-                prop=1.0
-                lst=1.0
+                    ret*=self.gaussian(mass, self.settings['mass1Est'], self.settings['mass1Err'])
                 if (self.settings['M1Prior']=="PDMF")or(self.settings['M1Prior']==True):
-                    prop = self.pdmfPrior(MProposed)
-                    lst = self.pdmfPrior(MLast)
+                    ret*=self.pdmfPrior(mass)
                 elif self.settings['M1Prior']=="IMF":
-                    prop = self.imfPrior(MProposed)
-                    lst = self.imfPrior(MLast)
-                return (prop/lst)*gaussRatio
-            else:
-                return 1.0
-        else:
-            return 1.0
+                    ret*=self.imfPrior(mass)
+        return ret
         
-    def mass2PriorRatio(self,m2Prop,m2Last,m1Prop,m1Last):
+    def mass2Prior(self,m2,m1):
+        ret = 1.0
         if (self.settings['mass2MAX']!=0):
-            if 0.0 not in [m2Prop,m2Last,m1Prop,m1Last]:
-                gaussRatio = 1.0
+            if 0.0 not in [m2,m1]:
                 if self.settings['mass2Est']!=self.settings['mass2Err']!=0:
-                    ## a Gaussian prior
-                    top = self.gaussian(m2Prop, self.settings['mass2Est'], self.settings['mass2Err'])
-                    btm = self.gaussian(m2Last, self.settings['mass2Est'], self.settings['mass2Err'])
-                    gaussRatio = top/btm
-                prop=1.0
-                lst=1.0
+                    ret*=self.gaussian(m2, self.settings['mass2Est'], self.settings['mass2Err'])
                 if (self.settings['M2Prior']=="CMF")or(self.settings['M2Prior']==True):
-                    prop = self.cmfPrior(m2Prop,m1Prop)
-                    lst = self.cmfPrior(m2Last,m1Last)
+                    ret*=self.cmfPrior(m2,m1)
                 elif self.settings['M2Prior']=="PDMF":
-                    prop = self.pdmfPrior(m2Prop)
-                    lst = self.pdmfPrior(m2Last)
+                    ret*=self.pdmfPrior(m2)
                 elif self.settings['M2Prior']=="IMF":
-                    prop = self.imfPrior(m2Prop)
-                    lst = self.imfPrior(m2Last)
-                return (prop/lst)*gaussRatio
-            else:
-                return 1.0
-        else:
-            return 1.0
-        
-    def paraPriorRatio(self,paraProposed,paraLast):
-        if paraProposed!=paraLast!=self.settings['paraMAX']!=0:
-            ratioA = (paraLast**4.0)/(paraProposed**4.0)
-            ratioB = 1.0
+                    ret*=self.imfPrior(m2)
+        return ret
+            
+    def paraPrior(self,para):
+        ret = 1.0
+        if 0.0 not in [para,self.settings['paraMAX']]:
+            ret = 1.0/(para**4.0)
             if self.settings['paraEst']!=self.settings['paraErr']!=0:
                 ## a Gaussian prior centered on hipparcos and width of hipparcos estimated error
-                top = self.gaussian(paraProposed, self.settings['paraEst'], self.settings['paraErr'])
-                btm = self.gaussian(paraLast, self.settings['paraEst'], self.settings['paraErr'])
-                ratioB = top/btm
-            return ratioA*ratioB
-        else:
-            return 1.0
-        
+                ret*=self.gaussian(para, self.settings['paraEst'], self.settings['paraErr'])
+        return ret
+            
     def imfPrior(self,m):
         if m<1.0:
             d = (0.068618528140713786/m)*np.exp((-(np.log10(m)+1.1023729087095586)**2)/0.9521999999999998)
