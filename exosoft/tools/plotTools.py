@@ -30,7 +30,7 @@ log = exoSOFTlogger.getLogger('main.plotTools',lvl=100,addFH=False)
 colorsList =['Red','Orange','Purple','Fuchsia','Crimson','Green','Aqua','DarkGreen','Gold','DarkCyan','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown','Blue']
 
 
-def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, nu=1,range=False):
+def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, parRange=False,retHist=False):
     """
     This will make a matplotlib histogram using the input settings, then writing the resulting  
     centers of the bins and number of data points in said bin values to disk, with '.dat' extension
@@ -38,17 +38,15 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
     
     This function is designed to work with a follow up like histLoadAndPlot_** to produce publication worthy plots.
     """
-    if outFilename[-4:]!='.dat':
-        outFilename=outFilename+'.dat'
     if weight:
         ## use the likelihoods as the weights
         theWeights = np.exp(-chiSquareds/2.0)
     else:
         theWeights = np.ones(len(data))      
-    if range==False:
+    if parRange==False:
         (hst,bin_edges) = np.histogram(data,bins=nbins,normed=False,weights=theWeights,density=None)
-    elif len(range)==2:
-        (hst,bin_edges) = np.histogram(data,bins=nbins,range=(range[0],range[1]),normed=False,weights=theWeights,density=None)
+    elif len(parRange)==2:
+        (hst,bin_edges) = np.histogram(data,bins=nbins,range=(parRange[0],parRange[1]),normed=False,weights=theWeights,density=None)
     else:
         log.critical('the range value provided to histMakeAndDump did not have required length of zero or 2.')
     #find center of bins
@@ -58,9 +56,12 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
     histData=np.zeros((len(hst),2))
     histData[:,0]=binCenters
     histData[:,1]=hst
-    np.savetxt(outFilename,histData)
-    if False:
-        print "output dat file:\n"+outFilename
+    if outFilename!='':
+        if outFilename[-4:]!='.dat':
+            outFilename=outFilename+'.dat'
+        np.savetxt(outFilename,histData)
+    if retHist:
+        return histData
 
 
 def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='k',xLims=False,latex=False,showYlabel=False,parInt=0,centersOnly=False,trueVal=None,lgndStr=''):
@@ -678,20 +679,12 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
             sz = 2
         elif len(paramStrs2)>1:
             sz = 1
-#         wRatios = []
-#         hRatios = []
-#         for i in range(0,len(paramStrs2)):
-#             wRatios.append(1)
-#             hRatios.append(3)
-#         print 'gridsize = '+repr(gridSizes[sz])
-#         print 'figSize = '+repr(figSizes[sz])
-#         gs = gridspec.GridSpec(gridSizes[sz][0],gridSizes[sz][1])#,width_ratios=wRatios,height_ratios=hRatios)    
-#         gs.update(wspace=0.1,hspace=0)
         
         ## run through all the data files and parameters requested and make histogram files
-        #print 'about to try and make hists'#$$$$$$$$$$$$$$$$$$$$$$$$
+        print 'about to try and make hists'#$$$$$$$$$$$$$$$$$$$$$$$$
         completeCLstr = '-'*22+'\nConfidence Levels are:\n'+'-'*80+'\n'
         for i in range(0,len(paramList)):
+            #print paramStrs2[i]
             if (os.path.exists(os.path.join(os.path.dirname(plotDataDir),'hist-'+stage+"-"+paramFileStrs[i]+'.dat'))==False)or forceRecalc:
                 log.debug('Checking parameter has useful data '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i]+", for file:\n"+outputDataFilename)
                 weightHists = False
@@ -701,6 +694,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 else:
                     (CLevels,data,bestDataVal,clStr) = genTools.confLevelFinder(outputDataFilename,paramList[i], returnData=True, returnChiSquareds=False, returnBestDataVal=True)
                     chiSquareds = []
+                #print 'ln704'
                 if bestDataVal!=0:
                     completeCLstr+=paramStrs2[i]+clStr+'\n'+'-'*80+'\n'
                     log.debug('Making hist file for parameter '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i]+", for file:\n"+outputDataFilename)
@@ -714,8 +708,9 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                     xLim=False
                     if len(xLims)>0:
                         xLim = xLims[i] 
-                    histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=nbins,weight=weightHists, normed=False, nu=1,range=xLim)
-                    
+                    #print 'ln715'
+                    histMakeAndDump(chiSquareds,data,outFilename=histDataBaseName,nbins=nbins,weight=weightHists, normed=False,parRange=xLim)
+                    #print 'ln721'
                     if (os.path.exists(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))==False)or forceRecalc:
                         np.savetxt(os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'),CLevels)
                         log.debug('confidence levels data stored to:\n'+os.path.join(os.path.dirname(plotDataDir),'confLevels-'+stage+"-"+paramFileStrs[i]+'.dat'))
@@ -732,7 +727,6 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 histDataBaseName = os.path.join(os.path.dirname(plotDataDir),'hist-'+stage+"-"+paramFileStrs[i]+'.dat')
             if os.path.exists(histDataBaseName):
                 log.debug('Starting to plot shaded hist for '+paramStrs2[i])
-                #print 'gs[i] = '+repr(gs[0,i])+'\n\n'
                 subPlot = sumFig.add_subplot(gridSizes[sz][0],gridSizes[sz][1],i+1)#gs[i])
                 #print '\nLoading and re-plotting parameter '+str(i+1)+"/"+str(len(paramStrs2))+": "+paramStrs2[i]
                 log.debug('Loading and re-plotting parameter '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i])#+" for file:\n"+outputDataFilename)

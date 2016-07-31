@@ -15,6 +15,7 @@ import sys
 from astropy.io import fits as pyfits
 import warnings
 import readWriteTools as rwTools
+import plotTools
 import jdcal
 
 warnings.simplefilter("error")
@@ -684,48 +685,54 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
     if os.path.exists(filename):
         (dataAry,chiSquareds,[bestDataVal,dataMedian,dataValueStart,dataValueMid,dataValueEnd]) = rwTools.dataReader(filename, colNum)
         if len(dataAry>0) or (dataValueStart!=dataValueMid!=dataValueEnd):
-            #Convert data array to a sorted numpy array
-            dataAry = np.sort(dataAry)
-            size = dataAry.size
-            mid=size//2
-            minVal = np.min(dataAry)
-            maxVal = np.max(dataAry)
-                
-            minLoc68=mid-int(float(size)*0.683)//2
-            if minLoc68<0:
-                minLoc68 = 0
-            maxLoc68 = mid+int(float(size)*0.683)//2
-            if maxLoc68>(size-1):
-                maxLoc68 = size
-            minLoc95=mid-int(float(size)*0.958)//2
-            if minLoc95<0:
-                minLoc95 = 0
-            maxLoc95= mid+int(float(size)*0.958)//2
-            if maxLoc95>(size-1):
-                maxLoc95 = size
+            #print 'ln688:confLevelFinder'
+            histAry = plotTools.histMakeAndDump(chiSquareds,dataAry,weight=False,retHist=True)
+            #print 'ln690:confLevelFinder'
+            [conf68Vals,conf95Vals,range99,range100] = histConfLevels(histAry)
+            #print 'ln692:confLevelFinder'
             
-            conf68Vals = [dataAry[minLoc68],dataAry[maxLoc68]]
-            conf95Vals = [dataAry[minLoc95],dataAry[maxLoc95]]
-            conf68ValsRough=[]
-            conf95ValsRough=[]
-            
-            if ((len(conf68Vals)==0) or (len(conf95Vals)==0)):
-                if (len(conf68Vals)==0):
-                    log.error('confLevelFinder: ERROR!!! No FINE 68.3% confidence levels were found')
-                    if (len(conf68ValsRough)==0):
-                        log.error('confLevelFinder: ERROR!!! No ROUGH 68% confidence levels were found, so returning [0,0]')
-                        conf68Vals = [0,0]
-                    else:
-                        conf68Vals = conf68ValsRough
-                        log.error("confLevelFinder: Had to use ROUGH 68% [68,69] as no FINE 68.3% was found. So, using range "+repr(conf68Vals))                
-                if (len(conf95Vals)==0):
-                    log.error('confLevelFinder: ERROR!!! No FINE 95.4% confidence levels were found')
-                    if (len(conf95ValsRough)==0):
-                        log.error('confLevelFinder: ERROR!!! No ROUGH 95% confidence levels were found, so returning [0,0]')
-                        conf95Vals = [0,0]
-                    else:
-                        conf95Vals = conf95ValsRough
-                        log.error("confLevelFinder: Had to use ROUGH 95% [95,96] as no FINE 95.4% was found. So, using range "+repr(conf95Vals))
+#             #Convert data array to a sorted numpy array
+#             dataAry = np.sort(dataAry)
+#             size = dataAry.size
+#             mid=size//2
+#             minVal = np.min(dataAry)
+#             maxVal = np.max(dataAry)
+#                 
+#             minLoc68=mid-int(float(size)*0.683)//2
+#             if minLoc68<0:
+#                 minLoc68 = 0
+#             maxLoc68 = mid+int(float(size)*0.683)//2
+#             if maxLoc68>(size-1):
+#                 maxLoc68 = size
+#             minLoc95=mid-int(float(size)*0.958)//2
+#             if minLoc95<0:
+#                 minLoc95 = 0
+#             maxLoc95= mid+int(float(size)*0.958)//2
+#             if maxLoc95>(size-1):
+#                 maxLoc95 = size
+#             
+#             conf68Vals = [dataAry[minLoc68],dataAry[maxLoc68]]
+#             conf95Vals = [dataAry[minLoc95],dataAry[maxLoc95]]
+#             conf68ValsRough=[]
+#             conf95ValsRough=[]
+#             
+#             if ((len(conf68Vals)==0) or (len(conf95Vals)==0)):
+#                 if (len(conf68Vals)==0):
+#                     log.error('confLevelFinder: ERROR!!! No FINE 68.3% confidence levels were found')
+#                     if (len(conf68ValsRough)==0):
+#                         log.error('confLevelFinder: ERROR!!! No ROUGH 68% confidence levels were found, so returning [0,0]')
+#                         conf68Vals = [0,0]
+#                     else:
+#                         conf68Vals = conf68ValsRough
+#                         log.error("confLevelFinder: Had to use ROUGH 68% [68,69] as no FINE 68.3% was found. So, using range "+repr(conf68Vals))                
+#                 if (len(conf95Vals)==0):
+#                     log.error('confLevelFinder: ERROR!!! No FINE 95.4% confidence levels were found')
+#                     if (len(conf95ValsRough)==0):
+#                         log.error('confLevelFinder: ERROR!!! No ROUGH 95% confidence levels were found, so returning [0,0]')
+#                         conf95Vals = [0,0]
+#                     else:
+#                         conf95Vals = conf95ValsRough
+#                         log.error("confLevelFinder: Had to use ROUGH 95% [95,96] as no FINE 95.4% was found. So, using range "+repr(conf95Vals))
         else:
             ## There was no useful data, so return values indicating that
             dataAry=bestDataVal=dataMedian=dataValueStart
@@ -733,9 +740,9 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             conf95Vals = [dataValueStart,dataValueStart]
             chiSquareds = 0
             log.error("confLevelFinder: Entire column had a constant value of "+str(dataValueStart))
-            
+        #print 'ln741:confLevelFinder'
         mJupMult=(const.KGperMsun/const.KGperMjupiter)
-        s = "\nFinal Range values:\nTOTAL "+repr([dataAry[0],dataAry[-1]])
+        s = "\nFinal Range values:\nTOTAL "+repr([range100[0],range100[1]])
         s+= "\n68%   "+repr(conf68Vals)+'\n95%   '+repr(conf95Vals)+'\n'
         s+= "   median,      68.3% error above,   68.3% error below\n"
         s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)
@@ -743,7 +750,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         if False:
             s+= "\nWidth Estimates:\n((68.3% error range)/median)x100% = "+str(((conf68Vals[1]-conf68Vals[0])/abs(dataMedian))*100.0)+"%"
             s+= "\n((68.3% error range)/(95.4% error range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(conf95Vals[1]-conf95Vals[0]))*100.0)+"%"
-            s+= "\n((68.3% error range)/(Total range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(maxVal-minVal))*100.0)+"%"
+            s+= "\n((68.3% error range)/(Total range))x100% = "+str(((conf68Vals[1]-conf68Vals[0])/(range100[1]-range100[0]))*100.0)+"%"
         if (colNum==1) and (dataMedian<0.1):
             s+='\n'+"~"*55+'\nOR in units of Mjupiter:\n'
             s+=str(dataMedian*mJupMult)+',  +'+str(mJupMult*(conf68Vals[1]-dataMedian))+',   '+str(mJupMult*(conf68Vals[0]-dataMedian))
@@ -756,7 +763,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         outStr+=s
         s=s+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
         log.debug('\n'+s)
-        
+        #print 'ln764:confLevelFinder'
         if verboseInternal:
             print 'returnData = '+repr(returnData)+', returnChiSquareds = '+repr(returnChiSquareds)+', returnBestDataVal = '+repr(returnBestDataVal)
         ## return requested form of results
@@ -792,7 +799,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             if verboseInternal:
                 print 'returning only CLevels'
             returnList =   [conf68Vals,conf95Vals]
-        
+        #print 'ln800:confLevelFinder'
         return returnList 
         
     else:
@@ -809,22 +816,26 @@ def histConfLevels(histAry):
     [range68,range95,range100]
     """
     ##avoid float comparison errors for near identicle numbers by rounding all
+    #print 'ln819:histConfLevels'
     if True:
         for i in range(0,len(histAry[:,0])):
             histAry[i,0] = round(histAry[i,0],12)
-    #print repr(histAry)
     halfStepSize = round((histAry[1,0]-histAry[0,0])*0.5,12)
     res = abs(histAry[1,0]-histAry[0,0])/100.0
     xs=np.arange(histAry[0,0],histAry[-1,0],res)
-    #print str(res)
-    #print repr([histAry[0,0],histAry[-1,0]])
-    #print repr([np.min(xs),np.max(xs)])
+    #print 'ln826:histConfLevels'
     ## interpolate
     f = interpolate.interp1d(histAry[:,0], histAry[:,1],kind='cubic')
+    if xs[-1]>np.max(histAry[:,0]):
+        xs[-1]=np.max(histAry[:,0])
+        #print 'new xs[-1] = '+str(xs[-1])
     ys=f(xs)
+    #print 'ln831:histConfLevels'
     ysorted=np.sort(ys)
+    #print 'ln832:histConfLevels'
     ysorted=ysorted[::-1]
     [got68,got95,got99,vls68,vls95,vls99]=[False,False,False,[],[],[]]
+    #print 'ln833:histConfLevels'
     for i in range(0,len(xs)):
         vls = ys[np.where(ys>ysorted[i])]
         perc = np.sum(vls)/np.sum(ysorted)
@@ -837,21 +848,23 @@ def histConfLevels(histAry):
         if (perc>0.99) and (got99==False):
             got99=True
             vls99=xs[np.where(ys>ysorted[i])]
+    #print 'ln846:histConfLevels'
     range68=[np.min(vls68),np.max(vls68)]
     range95=[np.min(vls95),np.max(vls95)]
     range99=[np.min(vls99),np.max(vls99)]
     range100 = [np.min(xs),np.max(xs)]
     retAry = [range68,range95,range99,range100]
+    #print 'ln852:histConfLevels'
+    ##round to top or bottom value if confidence levels are next to them
     for i in range(0,4):
         retAry[i][0] = round(retAry[i][0],12)
         retAry[i][1] = round(retAry[i][1],12)
-        #print repr(retAry[i][1])
-        #print repr(round(histAry[-1,0],12))
         if round(retAry[i][0],12)==round(np.min(xs),12):
             retAry[i][0]=histAry[0,0]-halfStepSize
         if round(retAry[i][1],12)==round(np.max(xs),12):
             #print 'rounding up '+str(retAry[i][1])+' to '+str(retAry[i][1]+halfStepSize)
             retAry[i][1]=halfStepSize+histAry[-1,0]
+    #print 'ln862:histConfLevels'
     return retAry
              
 def findBestOrbit(filename,bestToFile=True,findAgain=False):        

@@ -102,6 +102,8 @@ advancedSettingsDict = {
 'sigInt': (200,"Num steps/par till calc acc rate/tune sigs."),
 # Minimum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
 'sigMin' :(0.001,'Min ratio of params range,for step size.'),
+# Minimum and maximum allowed acceptance rates to tune parameter step sizes to meet.  [double,double]
+'accRates' :([0.25,0.35],'[min,max] acceptance rates for ST/MCMC.'),
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC) [int]
 # Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
 'saveInt' : (10,"Int between saving params, for all but MC."),
