@@ -358,8 +358,13 @@ def writeFits(baseFilename,data,settings,clob=False):
             ##load up header with tuples from settings
             commentsDict = settings['commentsDict']
             for key in settings:
-                if key in commentsDict:                
-                    header[key]=settings[key]
+                if key in commentsDict:  
+                    #try to store key as is, else store as a string          
+                    try:    
+                        header[key]=settings[key]
+                    except:
+                        header[key]=repr(settings[key])
+                        log.debug("Key '"+key+"' had a value that could not be stored as is, into the fits header, so it was converted to a string.")
                     com = commentsDict[key]
                     if len(com)>47:
                         s = "comment too long for pyfits headers:"+com

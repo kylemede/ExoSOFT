@@ -30,6 +30,7 @@ class Simulator(object):
         self.shiftStr = ''
         self.acceptBoolAry = []
         self.parIntVaryAry = []
+        self.sigmasInRangeCounter = 0
         self.chainNum =0
         self.settings = settings
         self.log = tools.getLogger('main.simulator',lvl=100,addFH=False)
@@ -310,11 +311,13 @@ class Simulator(object):
                 self.parIntVaryAry = np.array(self.parIntVaryAry)
                 self.acceptBoolAry = np.array(self.acceptBoolAry)
                 self.acceptStr+="Number of steps used to calculate acceptance rate = "+repr(len(self.acceptBoolAry))+'\n'
+                acceptArray = []
                 for i in self.paramInts:
                     ##calculate acceptance rate for each param
                     nAcc = np.sum(np.where(self.parIntVaryAry==i,self.acceptBoolAry,0))
                     nTot = len(np.where(self.parIntVaryAry==i)[0])
                     self.acceptStr+= 'parameter # '+str(i)+' acceptance = '+str(float(nAcc)/float(nTot))+'\n'
+                    acceptArray.append(float(nAcc)/float(nTot))
                     if stage=='ST':
                         ##check each rate to choose up/down shift and do so and update shiftStr
                         self.shiftStr+= '\n'+stage+" chain #"+str(self.chainNum)+'\nparameter # '+str(i)+" shifting sigma "+str(sigs[i])+" -> "
@@ -336,6 +339,18 @@ class Simulator(object):
                 if self.settings['nSumry']>0:
                     if sample%(self.settings[self.stgNsampDict[stage]]//self.settings['nSumry'])==0:
                         self.log.debug(self.acceptStr+self.shiftStr)
+                ## check if sigmas are same as last time and update tracker
+                accRatesInRange = True
+                accMin = 0.9*self.settings["accRates"][0]
+                accMax = 1.1*self.settings["accRates"][1]
+                for acRt in acceptArray:
+                    if (acRt<accMin) or (acRt>accMax):
+                        accRatesInRange = False
+                if accRatesInRange:
+                    self.sigmasInRangeCounter+=1
+                    #print 'sigmas were the same '+str(self.sigmasInRangeCounter)+" times"
+                else:
+                    self.sigmasInRangeCounter=0                
         else:
             #No need to track these, so reset them to empty to save any RAM they are using
             self.acceptBoolAry = []
@@ -468,13 +483,13 @@ class Simulator(object):
                     latestParsRaw = copy.deepcopy(params)
                     ## convert back to sqrt(e)sin(omega), sqrt(e)cos(omega) if in lowEcc mode
                     self.Orbit.convertParsToRaw(latestParsRaw)
-                    if ('MCMC' not in stage)and(stage=='MC'):
+                    if ('MCMC' not in stage)and(stage in ['MC','SA','ST']):
                         acceptedParams.append(params)
                         self.nSaved+=1
                         self.nSavedPeriodic+=1                 
             else:
                 self.acceptBoolAry.append(0)
-            if (stage in ['MCMC','SA','ST']) and (sample%self.settings['saveInt']) == 0:
+            if (stage in ['MCMC']) and (sample%self.settings['saveInt']) == 0:
                 acceptedParams.append(self.paramsLast)
                 self.nSaved += 1 
                 self.nSavedPeriodic+=1
@@ -504,10 +519,14 @@ class Simulator(object):
             if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
                 #push predicted completion time log file
                 self.log.fileonly(stage+str(chainNum)+' '+endDatetime)            
+            if (stage=='ST') and ((self.sigmasInRangeCounter>10)and(self.nSaved>1)):
+                self.log.debug("sigmasInRangeCounter>10 so breaking sample loop.")
+                break
         if self.settings['logLevel']<30:
             bar.render(100,stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
         avgAcceptRate = self.endSummary(temp,sigmas,stage)
+        print str(avgAcceptRate)+'\n'
         tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
         clobber = False
         if self.settings['curStg']=="SA":
