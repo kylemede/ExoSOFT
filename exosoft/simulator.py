@@ -321,9 +321,9 @@ class Simulator(object):
                     if stage=='ST':
                         ##check each rate to choose up/down shift and do so and update shiftStr
                         self.shiftStr+= '\n'+stage+" chain #"+str(self.chainNum)+'\nparameter # '+str(i)+" shifting sigma "+str(sigs[i])+" -> "
-                        if ((float(nAcc)/float(nTot))>0.35)and(sigs[i]<self.settings['sigMaxs'][i]):
+                        if ((float(nAcc)/float(nTot))>self.settings["accRates"][1])and(sigs[i]<self.settings['sigMaxs'][i]):
                             sigmasOut[i]+=self.settings['sigMins'][i]
-                        elif ((float(nAcc)/float(nTot))<0.25)and(sigs[i]>self.settings['sigMins'][i]):
+                        elif ((float(nAcc)/float(nTot))<self.settings["accRates"][0])and(sigs[i]>self.settings['sigMins'][i]):
                             sigmasOut[i]-=self.settings['sigMins'][i]
                         #fix chances that sigs can get out of their allowed range
                         if sigmasOut[i]<self.settings['sigMins'][i]:
