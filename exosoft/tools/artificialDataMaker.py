@@ -28,26 +28,26 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     quiet = False
     #Computer Directory
     if outDir=='':
-        outDir='/mnt/Data1/Todai_Work/Data/data_SMODT/'#$$$$$$$$$$$$$$$$$$$$ MAKE SURE THIS IS SET TO MACH YOUR COMPUTER!!! 
+        outDir='/mnt/Data1/Todai_Work/Data/data_ExoSOFT/'#$$$$$$$$$$$$$$$$$$$$ MAKE SURE THIS IS SET TO MACH YOUR COMPUTER!!! 
     #baseSaveDir = '/run/media/kmede/SharedData/Data/data_SMODT/'
+    #Note: You might want to mimick the fact that there is usually more much RV data than DI data
     NumDataPointsOutRV = 25 #must be much less than 10000.  values between 10-500 are suitable.
     NumDataPointsOutDI = 10 #must be much less than 10000.  values between 10-500 are suitable.
     storePrimaryRVs = True
     percentError = 5 #error is set to a percentage of the median
     realizeErrors = True
     percentCoverage = 100.00 #percent of total orbit for data to span.  Over 100% is ok if you want overlapping data.
-    overlapEnds = False # will ensure some points near end overlap the beginning of the orbit.
 
     #System settings
-    M_secondary =  1.0*(const.KGperMjupiter/const.KGperMsun)    #Solar masses
+    M_secondary =  1.0*(const.KGperMjupiter/const.KGperMsun) #Solar masses
     M_primary = 1.00 #Solar masses
     distance = 20.0 #parsecs
     #Orbital Elements
-    TimeLastPeri =2450639.5  #JD  #2450817.5
-    e =0.3#0.017  #
-    period = 11.9#1.0000697145834374#0.99997862 # years  #11.9#
-    Omega =100.6*const.pi/180# Longitude of ascending node#348.73936 100.6
-    omega = 14.8*const.pi/180 # Argument of periastron$ 102.94719    14.8
+    TimeLastPeri =2450639.5  #JD  
+    e = 0.017  
+    period = 11.9 # years  
+    Omega =100.6*const.pi/180# Longitude of ascending node
+    omega = 14.8*const.pi/180 # Argument of periastron
     i = 45.0*const.pi/180 # Inclination
     
     km_to_arcsec = 1/(const.MperAU/1000.0)/distance # convert km to arcsecond
@@ -139,7 +139,10 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     tnew = []
     i=0
     js=[]
-    while i<NumDataPointsOutRV:
+    numDataPointsOutBig = NumDataPointsOutDI
+    if NumDataPointsOutRV>NumDataPointsOutDI:
+        numDataPointsOutBig = NumDataPointsOutRV
+    while i<numDataPointsOutBig:
         j = np.random.randint(0,len(t))
         if j not in js:
             js.append(j)
@@ -167,7 +170,7 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     data[:, 6] = pos_B[:, 1]*km_to_arcsec #7. y position of primary (arcsec)
     data[:, 7] = vel_B[:, 2] #8. radial velocity of primary (km/s)
     
-    #update raw forms to initial NewBEAT versions
+    #update raw forms to initial ExoSOFT versions
     data2 = np.zeros((pos_A.shape[0],5))
     data2[:,0] = data[:, 1]*const.daysPerYear+TimeLastPeri #JD 
     data2[:,1] = pos_A[:, 1]*km_to_arcsec - pos_B[:, 1]*km_to_arcsec #Ythi=Xplot=RA  separation between two bodies based on primary being at 0,0 ["]
@@ -196,7 +199,7 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     #########################################################
     #load up data for into arys for exosoft DI, exosoft RV.
     #########################################################
-    #dataDI2 has columns:
+    #dataDI has columns:
     #1. JD
     #2. RA (x) ["]
     #3. RA ERROR ["]
@@ -206,46 +209,47 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     #1. JD
     #6. RV of primary (or secondary) rel to CofM [m/s]
     #7. RV ERROR [m/s]
-    dataDI2 = np.empty((pos_A.shape[0],5))
-    dataDI2[:,0] = data2[:, 0]#1. JD
-    dataDI2[:,1] = data2[:,1]#2. RA (x) ["]
-    dataDI2[:,2] = errorRA #3. RA ERROR ["]
-    dataDI2[:,3] = data2[:,2]#4. Dec (y) ["]
-    dataDI2[:,4] = errorDec#5. Dec ERROR ["]
-    dataRV = np.empty((pos_A.shape[0],3))
-    dataRV[:,0] = data2[:, 0]#1. JD
-    if storePrimaryRVs:
-        dataRV[:,1] = data2[:,3] #RV primary [m/s]
-        dataRV[:,2] = errorRVprimary#RV primary error [m/s]
-    else:
-        dataRV[:,1] = data2[:,4]#RV secondary [m/s]
-        dataRV[:,2] = errorRVsecondary#RV secondary error [m/s]
-        
-    if True:
-        ## Randomly re-sample the DI data to half that of the RV to mimick the fact that there is usually more much RV data than DI data
-        dataDI3=[]
-        i=0
-        js=[]
-        while i<NumDataPointsOutDI:
-            j = np.random.randint(0,len(dataDI2[:,0]))
-            if j not in js:
-                js.append(j)
-                dataDI3.append(dataDI2[j,:])
-                i+=1
-        dataDI3 = np.array(dataDI3)
-    else:
-        dataDI3 = dataDI2
-    #print "resulting RV data files have "+str(len(dataRV[:,0]))+" epochs"
-    #print "resulting DI data files have "+str(len(dataDI3[:,0]))+" epochs"
+
+    ## Randomly re-sample the DI data to get number of epochs requested
+    dataDI = np.empty((NumDataPointsOutDI,5))
+    i=0
+    js=[]
+    while i<NumDataPointsOutDI:
+        j = np.random.randint(0,pos_A.shape[0])
+        if j not in js:
+            js.append(j)
+            # JD, RA (x) ["], RA ERROR ["], Dec (y) ["],Dec ERROR ["]
+            dataDI[i]=[data2[j, 0],data2[j,1],errorRA,data2[j,2],errorDec]
+            i+=1
+    ## Randomly re-sample the RV data to get number of epochs requested
+    dataRV = np.empty((NumDataPointsOutRV,3))
+    i=0
+    js=[]
+    while i<NumDataPointsOutRV:
+        j = np.random.randint(0,pos_A.shape[0])
+        if j not in js:
+            js.append(j)
+            if storePrimaryRVs:
+                # JD, RV primary [m/s], RV primary error [m/s]
+                dataRV[i] = [data2[j,0],data2[j,3],errorRVprimary]
+            else:
+                # JD, RV secondary [m/s], RV secondary error [m/s]
+                dataRV[i] = [data2[j,0],data2[j,4],errorRVsecondary]
+            i+=1   
+    
+    print "resulting RV data files have "+str(len(dataRV[:,0]))+" epochs"
+    print "resulting DI data files have "+str(len(dataDI[:,0]))+" epochs"
     
     ##write files to disk
     if False:
-        #raw all in one format, NOT for SMODT use.
+        #raw all in one format, NOT for ExoSOFT use.
         np.savetxt(os.path.join(outDir,outBaseName+'.dat'), data, fmt="%.10g")
     if True:
-        #2 files for SMODT 2.0/NewBEAT/exosoft
-        np.savetxt(os.path.join(outDir,outBaseName+'RVdata.dat'), dataRV, fmt="%.10g")
-        np.savetxt(os.path.join(outDir,outBaseName+'DIdata.dat'), dataDI3, fmt="%.10g")
+        # RV and DI files for ExoSOFT
+        if NumDataPointsOutRV>0:
+            np.savetxt(os.path.join(outDir,outBaseName+'RVdata.dat'), dataRV, fmt="%.10g")
+        if NumDataPointsOutDI>0:
+            np.savetxt(os.path.join(outDir,outBaseName+'DIdata.dat'), dataDI, fmt="%.10g")
     if quiet==False:
         print '\nOutput data files written to:\n'+outDir
 

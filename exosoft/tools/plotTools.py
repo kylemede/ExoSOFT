@@ -825,7 +825,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     # There is some custom code to place 'zoom-in' inserts that some could 
     # modify to use with their work.  Review current code and tweak to match 
     # your situaiton accordingly.
-    plotCustomInsets = True
+    plotCustomInsets = False
     savePlotDataToFile = True
     autoUnits = True
     latex=True

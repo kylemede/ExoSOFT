@@ -279,6 +279,7 @@ class Simulator(object):
                 str(self.nSaved)+", Finished: "+str(sample)+"/"+\
                 str(self.settings[self.stgNsampDict[stage]])+" = "+str(perc)+"%, Current T: "+str(temp)+"\n"
                 sumStr+=self.latestSumStr+'\n'+self.bestSumStr+'\n'
+                print "Accepted: "+str(self.acceptCount)+'\n'+self.bestSumStr #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
                 self.log.debug(sumStr)
         return (paramsOut,accept)
     

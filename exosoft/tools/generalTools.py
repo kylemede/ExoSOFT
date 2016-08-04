@@ -743,7 +743,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         #print 'ln741:confLevelFinder'
         mJupMult=(const.KGperMsun/const.KGperMjupiter)
         s = "\nFinal Range values:\nTOTAL "+repr([range100[0],range100[1]])
-        s+= "\n68%   "+repr(conf68Vals)+'\n95%   '+repr(conf95Vals)+'\n'
+        s+= '\n95%   '+repr(conf95Vals)+"\n68%   "+repr(conf68Vals)+'\n'
         s+= "   median,      68.3% error above,   68.3% error below\n"
         s+= str(dataMedian)+',  +'+str(conf68Vals[1]-dataMedian)+',   '+str(conf68Vals[0]-dataMedian)
         s+= "\nAverage 68.3% error = +/- "+str((conf68Vals[1]-conf68Vals[0])/2.0)
@@ -763,41 +763,22 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         outStr+=s
         s=s+75*'-'+'\n Leaving confLevelFinder \n'+75*'-'+'\n'
         log.debug('\n'+s)
-        #print 'ln764:confLevelFinder'
-        if verboseInternal:
-            print 'returnData = '+repr(returnData)+', returnChiSquareds = '+repr(returnChiSquareds)+', returnBestDataVal = '+repr(returnBestDataVal)
         ## return requested form of results
         if (returnData and returnChiSquareds and (returnBestDataVal==False)):
-            if verboseInternal:
-                print 'returning first 3'
             returnList =  ([conf68Vals,conf95Vals],dataAry, chiSquareds)
         elif (returnData and returnChiSquareds and returnBestDataVal):
-            if verboseInternal:
-                print 'returning all 4'
             returnList =   ([conf68Vals,conf95Vals],dataAry, chiSquareds, bestDataVal,outStr) ##MODIFIED
         elif (returnData and (returnChiSquareds==False)and (returnBestDataVal==False)):
-            if verboseInternal:
-                print 'returning data only'
             returnList =   ([conf68Vals,conf95Vals],dataAry)
         elif (returnData and (returnChiSquareds==False) and returnBestDataVal):
-            if verboseInternal:
-                print 'returning data and bestval'
             returnList =   ([conf68Vals,conf95Vals],dataAry, bestDataVal,outStr) ##MODIFIED
         elif ((returnData==False) and returnChiSquareds):
-            if verboseInternal:
-                print 'returning just chiSquareds'
             returnList =   ([conf68Vals,conf95Vals], chiSquareds)
         elif ((returnData==False) and returnChiSquareds and returnBestDataVal):
-            if verboseInternal:
-                print 'returning chiSquareds and bestval'
             returnList =   ([conf68Vals,conf95Vals], chiSquareds, bestDataVal)
         elif ((returnData==False)and(returnChiSquareds==False) and returnBestDataVal):
-            if verboseInternal:
-                print 'returning CLevels and bestval'
             returnList = ([conf68Vals,conf95Vals], bestDataVal)
         elif ((returnData==False)and(returnChiSquareds==False) and (returnBestDataVal==False)):
-            if verboseInternal:
-                print 'returning only CLevels'
             returnList =   [conf68Vals,conf95Vals]
         #print 'ln800:confLevelFinder'
         return returnList 

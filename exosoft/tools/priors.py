@@ -42,26 +42,26 @@ class Priors(object):
         comboPriors = 1.0
         try:
             if self.settings['ePrior']:
-                #print 'ePrior'
+                #print 'ePrior after'
                 comboPriors*=self.ePrior(pars[4])
             if self.settings['pPrior']:
-                #print 'pPrior'
+                #print 'pPrior after'
                 comboPriors*=self.pPrior(pars[7])
             if self.settings['incPrior']:
-                #print 'incPrior'
+                #print 'incPrior after'
                 comboPriors*=self.incPrior(pars[8])
             if self.settings['M1Prior']:
-                #print 'M1Prior'
+                #print 'M1Prior before'
                 comboPriors*=self.mass1Prior(pars[0])
-                #print 'M1Prior'
+                #print 'M1Prior after'
             if self.settings['M2Prior']:
-                #print 'M2Prior'
-                comboPriors*=self.mass2(pars[1],pars[0])
-                #print 'M2Prior'
+                #print 'M2Prior before'
+                comboPriors*=self.mass2Prior(pars[1],pars[0])
+                #print 'M2Prior after'
             if self.settings['parPrior']:
-                #print 'parPrior'
+                #print 'parPrior before'
                 comboPriors*=self.paraPrior(pars[2])
-                #print 'parPrior out'
+                #print 'parPrior after'
             return comboPriors
         except:
             self.log.critical("An error occured while trying to calculate the combined sigle priors.")
