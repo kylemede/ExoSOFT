@@ -58,6 +58,8 @@ advancedSettingsDict = {
 'chiMaxST':(10,'Max reduced chiSquared to enter ST.'),
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
 'cMaxMCMC':(2.0,'Max reduced chiSquared to enter MCMC.'),
+# Start all MCMC chains from the same best found during the SAST stages? [bool]
+'strtMCMCatBest':True,
 #number of times to produce a summary log msg during a stage's progress [int]
 'nSumry'  :10,
 # make plot of posterior distributions? [bool]

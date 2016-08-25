@@ -116,7 +116,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
                         log.debug('seems copy to dropbox related settings keys are not there...')
                 else: #elif (('n' in YN) or ('N' in YN)):
                     log.raisemsg("")
-                    raise IOError('\n\n'+s)
+                    raise IOError("")
             else:
                 os.mkdir(settings['finalFolder'])
             if False:
