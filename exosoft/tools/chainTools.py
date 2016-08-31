@@ -1,4 +1,4 @@
-import exoSOFTlogger
+import KMlogger
 import generalTools as genTools
 import readWriteTools as rwTools
 from multiprocessing import Process
@@ -7,7 +7,7 @@ import timeit
 import os
 import numpy as np
 
-log = exoSOFTlogger.getLogger('main.chainTools',lvl=100,addFH=False) 
+log = KMlogger.getLogger('main.chainTools',lvl=100,addFH=False) 
 
 class singleProc(Process):
     """

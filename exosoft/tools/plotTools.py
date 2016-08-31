@@ -2,20 +2,20 @@
 import numpy as np
 import os
 import matplotlib
-from PyAstronomy.pyasl.asl import lineWidth
-#from math import fabs
+import matplotlib.pyplot as plt
 ##matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
-matplotlib.pyplot.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
+plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 ##import pylab
 ##from pylab import Polygon
 Polygon =  matplotlib.patches.Polygon  
 gridspec =  matplotlib.gridspec
-plt = matplotlib.pyplot
 patches = matplotlib.patches
 MultLoc = matplotlib.ticker.MultipleLocator
 import copy
 #import glob
 #import shutil
+#from math import fabs
+#from PyAstronomy.pyasl.asl import lineWidth
 import timeit
 import scipy.optimize as so
 from scipy import ndimage
@@ -23,10 +23,10 @@ import constants as const
 import generalTools as genTools
 import readWriteTools as rwTools
 import cppTools
-import exoSOFTlogger
+import KMlogger
 import warnings
 warnings.simplefilter("error")
-log = exoSOFTlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
+log = KMlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
 colorsList =['Red','Orange','Purple','Fuchsia','Crimson','Green','Aqua','DarkGreen','Gold','DarkCyan','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown','Blue']
 
 

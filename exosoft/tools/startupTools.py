@@ -3,7 +3,7 @@ import shutil
 import os
 import copy
 import numpy as np
-import exoSOFTlogger
+import KMlogger
 import generalTools as genTools
 import readWriteTools as rwTools
 import constants as const
@@ -11,7 +11,7 @@ import warnings
 #from IPython.core.prompts import cwd_filt
 warnings.simplefilter("error")
 
-log = exoSOFTlogger.getLogger('main.suTools',lvl=100,addFH=False) 
+log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
 
 def startup(argv,ExoSOFTdir,rePlot=False):
     """

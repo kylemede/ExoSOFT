@@ -1,12 +1,7 @@
 import warnings
 warnings.simplefilter("error")
 
-from exoSOFTlogger import getLogger
-from exoSOFTlogger import setUpLogger
-from exoSOFTlogger import logSystemInfo
-from exoSOFTlogger import addFileHandler
-from exoSOFTlogger import addStreamHandler
-from exoSOFTlogger import logDict
+from KMlogger import *
 
 from startupTools import startup
 

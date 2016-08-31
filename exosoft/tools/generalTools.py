@@ -1,6 +1,6 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 #import numpy as np
-import exoSOFTlogger
+import KMlogger
 import cppTools
 import constants as const
 import copy
@@ -19,7 +19,7 @@ import plotTools
 import jdcal
 
 warnings.simplefilter("error")
-log = exoSOFTlogger.getLogger('main.genTools',lvl=100,addFH=False)  
+log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)  
     
 def mcmcEffPtsCalc(outputDataFilename):
     """

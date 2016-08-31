@@ -1,6 +1,6 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import numpy as np
-import exoSOFTlogger
+import KMlogger
 import generalTools as genTools
 from astropy.io import fits as pyfits
 import os
@@ -11,7 +11,7 @@ import shutil
 import warnings
 warnings.simplefilter("error")
 
-log = exoSOFTlogger.getLogger('main.rwTools',lvl=100,addFH=False)  
+log = KMlogger.getLogger('main.rwTools',lvl=100,addFH=False)  
 
 def dataReader(filename, colNum=0):
     """
