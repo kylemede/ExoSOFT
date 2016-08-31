@@ -1,3 +1,47 @@
+Dependencies:
+-------------
+Note: Installing python packages with pip is best as it handles the version and 
+dependency issues for you.  Here are the dependencies for ExoSOFT.
+
+## Those NOT available on pip
+# gcc
+# gcc-c++
+# swig
+# texlive-epstopdf
+
+#Available for install with pip
+python2.7 or higher
+numpy
+scipy
+pylab
+matplotlib
+psutil
+astropy
+PyAstronomy
+corner
+
+
+--------------
+Install & Run:
+--------------
+To get around the occiasional difficulties installing SWIG on a Mac or 
+Windows machine, you can use a platform independent installation with conda.
+
+FIRST SET UP AN ANACONDA ENVIRONMENT
+------------------------------------
+Download and install miniconda from: http://conda.pydata.org/docs/install/quick.html
+
+$ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
+$ source activate ExoSOFTcondaEnv
+## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
+$ conda install -c asmeurer pango
+$ pip install PyAstronomy corner
+## matplotlib.pyplot doesn't exists till frontend is built, to do this:
+$ ipython
+$ import pylab 
+
+
+
 Installation Notes
 ==================
 

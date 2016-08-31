@@ -1,6 +1,6 @@
 .. :changelog:
 
-1.0.0 (2016-02-13)
+1.0.0 (2016-08-31)
 ++++++++++++++++++
 
-- Initial release.
+- Initial public release.

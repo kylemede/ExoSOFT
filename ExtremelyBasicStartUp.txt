@@ -22,10 +22,29 @@ psutil
 swig
 astropy
 PyAstronomy
+corner.py
 
 
+--------------
 Install & Run:
 --------------
+FIRST SET UP AN ANACONDA ENVIRONMENT
+------------------------------------
+Download and install miniconda from: http://conda.pydata.org/docs/install/quick.html
+
+$ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
+$ source activate ExoSOFTcondaEnv
+## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
+$ conda install -c asmeurer pango
+$ pip install PyAstronomy
+$ pip install corner.py
+## matplotlib.pyplot doesn't exists till frontend is built, to do this:
+$ ipython
+$ import pylab 
+
+
+NEXT UNPACK AND SET UP ExoSOFT
+------------------------------
 1. unzip in directory of choice 
    (lets say '/home/ExoSOFT/' for demonstration purposes.)
 2. open '/home/ExoSOFT/exosoft/exosoftpath.py' and update the directory string

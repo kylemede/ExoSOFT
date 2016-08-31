@@ -40,12 +40,12 @@ from generalTools import fileSizeHR
 from generalTools import histConfLevels
 from generalTools import confLevelFinder
 
+from progBar import ProgBar
+
 from chainTools import multiProcObj
 from chainTools import iterativeSA
 
 import priors
-
-from progressbar.progressbar import ProgressBar
 
 from artificialDataMaker import calcOrbit
  

@@ -681,7 +681,6 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
             sz = 1
         
         ## run through all the data files and parameters requested and make histogram files
-        print 'about to try and make hists'#$$$$$$$$$$$$$$$$$$$$$$$$
         completeCLstr = '-'*22+'\nConfidence Levels are:\n'+'-'*80+'\n'
         for i in range(0,len(paramList)):
             #print paramStrs2[i]

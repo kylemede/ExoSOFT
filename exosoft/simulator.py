@@ -436,7 +436,7 @@ class Simulator(object):
         self.log.debug("Trying "+str(self.settings[self.stgNsampDict[stage]])+" samples for chain #"+str(chainNum)+" in "+stage+" mode.")
         self.chainNum = chainNum
         self.resetTracked(stage)
-        bar = tools.ProgressBar('green',width=1,block=' ',empty=' ',lastblock='')
+        bar = tools.ProgBar(total=100,barLength=0)
         modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         strtTemp = temp      
@@ -516,7 +516,7 @@ class Simulator(object):
                 endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
                 if self.settings['logLevel']<30:
                     perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
-                    bar.render(perc, stage+str(chainNum)+' '+endDatetime)#timeStr)
+                    bar.render(perc, suffix=stage+str(chainNum)+' '+endDatetime)#timeStr)
             if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
                 #push predicted completion time log file
                 self.log.fileonly(stage+str(chainNum)+' '+endDatetime)            
@@ -524,10 +524,10 @@ class Simulator(object):
                 self.log.debug("sigmasInRangeCounter>10 so breaking sample loop.")
                 break
         if self.settings['logLevel']<30:
-            bar.render(100,stage+str(chainNum)+' Complete!\n')
+            bar.render(100,suffix=stage+str(chainNum)+' Complete!\n')
         self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
         avgAcceptRate = self.endSummary(temp,sigmas,stage)
-        print str(avgAcceptRate)+'\n'
+        #print str(avgAcceptRate)+'\n'
         tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
         clobber = False
         if self.settings['curStg']=="SA":
