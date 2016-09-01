@@ -1,19 +1,19 @@
-## NOT on pip
+## Those NOT available on pip
 # gcc
 # gcc-c++
+# swig
 # texlive-epstopdf
 
-
-#On pip
+#Available for install with pip
+python2.7 or higher
 numpy
-pyfits
 scipy
 pylab
 matplotlib
 psutil
-swig
 astropy
 PyAstronomy
+corner
 
 
 

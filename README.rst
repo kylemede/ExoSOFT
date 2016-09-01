@@ -1,3 +1,24 @@
+ExoSOFT
+=======
+
+**The Exoplanet Simple Orbit Fitting Toolbox**
+
+ExoSOFT is a toolbox for the orbital analysis of exoplanets and binary star 
+systems.  It is free to compile, open source, fits any combination of 
+astrometric and radial velocity data, and offers 4 parameter space exploration 
+techniques, including MCMC.  Additionally, it is packaged together with an 
+automated set of post-processing and plotting routines to summarize the results
+.  Verifications were performed by fitting noisy synthetic data produced with 
+an independent Keplerian model for a variety of systems ranging the entire 
+parameter space.  Examples of its use on real data include 
+`Helminiak & Kuzuhara & Mede et. al. (2016) <????????>`_.  
+, for the V450And system, and the tau AB binary in 
+`Mede & Brandt (2014) <http://adsabs.harvard.edu/abs/2014IAUS..299...52M>`_.  
+ExoSOFT would be a suitable choice for performing orbital analysis during 
+surveys with new RV and direct imaging instruments.
+
+
+
 Dependencies:
 -------------
 Note: Installing python packages with pip is best as it handles the version and 
@@ -70,24 +91,43 @@ $ExoSOFT.py
 as it will just assume that without a provided path, you want to play with the 
 example.
 
-ExoSOFT
-=======
 
-**The Exoplanet Simple Orbit Fitting Toolbox**
+NEXT UNPACK AND SET UP ExoSOFT
+------------------------------
+1. unzip in directory of choice 
+   (lets say '/home/ExoSOFT/' for demonstration purposes.)
+2. open '/home/ExoSOFT/exosoft/exosoftpath.py' and update the directory string
+   for rootDir.
+3. open the settings.py file in '/home/ExoSOFT/examples/' and update the 
+   directories in the keys 'outDir', 'DIdataFile' and 'RVdataFile' 
+   on lines 39-47.
+4. Possibly not be necessary, but the cpp files might require being compiled 
+   again on your machine to run.
+   If so, from a bash terminal:
+    $cd '/home/ExoSOFT/exosoft/tools/cppTools/'
+    $make clean
+    $make
+   NOTE: If you have difficulties compiling, make sure SWIG is installed 
+         correctly.  The documentation for this is provided here:
+     http://www.swig.org/Doc3.0/Preface.html#Preface_osx_installation
+5. If the directories are updated to match the location on your machine and the 
+   cpp code compiled, let's try and run ExoSOFT by:
+    $cd '/home/ExoSOFT/exosoft/'
+    $python ExoSOFT.py
+6. If it runs properly, then check the outputs when finished in the directory 
+   you set 'outDir' to.  Else, the errors are most likely dependancy based, so 
+   please check the traceback to solve.  Setting the 'logLevel' on line 25 of 
+   settings.py to 10 will give you all the debug messages to help track down 
+   the problem.
+7. The current settings are the minimum to converge to a single posteriors peak
+   and perform all three stages of ExoSOFT in a couple minutes.  Running it for 
+   more samples by increasing the 'nSamples' parameter at the top or increasing 
+   the 'nChains' and 'nMCMCcns' to higher matching values would be produce more 
+   well sampled posteriors.  For example, 7 chains each of 5e7 were used to 
+   produce the results in the ExoSOFT release paper, which took our computer 
+   ~5hrs to complete.
 
-ExoSOFT is a toolbox for the orbital analysis of exoplanets and binary star 
-systems.  It is free to compile, open source, fits any combination of 
-astrometric and radial velocity data, and offers 4 parameter space exploration 
-techniques, including MCMC.  Additionally, it is packaged together with an 
-automated set of post-processing and plotting routines to summarize the results
-.  Verifications were performed by fitting noisy synthetic data produced with 
-an independent Keplerian model for a variety of systems ranging the entire 
-parameter space.  Examples of its use on real data include 
-`Helminiak & Kuzuhara & Mede et. al. (2016) <????????>`_.  
-, for the V450And system, and the tau AB binary in 
-`Mede & Brandt (2014) <http://adsabs.harvard.edu/abs/2014IAUS..299...52M>`_.  
-ExoSOFT would be a suitable choice for performing orbital analysis during 
-surveys with new RV and direct imaging instruments.
+
 
 Attribution
 -----------
