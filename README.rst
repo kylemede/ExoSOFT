@@ -24,22 +24,22 @@ Dependencies:
 Note: Installing python packages with pip is best as it handles the version and 
 dependency issues for you.  Here are the dependencies for ExoSOFT.
 
-## Those NOT available on pip
-# gcc
-# gcc-c++
-# swig
-# texlive-epstopdf
+ ## Those NOT available on pip
+ # gcc
+ # gcc-c++
+ # swig
+ # texlive-epstopdf
 
-#Available for install with pip
-python2.7
-numpy
-scipy
-pylab
-matplotlib
-psutil
-astropy
-PyAstronomy
-corner
+ #Available for install with pip
+ python2.7
+ numpy
+ scipy
+ pylab
+ matplotlib
+ psutil
+ astropy
+ PyAstronomy
+ corner
 
 
 --------------
@@ -78,7 +78,7 @@ sure the directory to ExoSOFT/exosoft/ is added to your PATH in your .bashrc or
  
  Then, to run:
 
-$python ExoSOFT.py /full/path/to/*settings.py
+ $python ExoSOFT.py /full/path/to/*settings.py
 
 If ExoSOFT.py is not executable after install, you can use $chmod +x ExoSOFT.py
 to make it so and avoid typing 'python' when starting it.
@@ -86,7 +86,7 @@ to make it so and avoid typing 'python' when starting it.
 A set of example settings and data files are in ExoSOFT/examples.  This can be 
 ran with:
 
-$ExoSOFT.py 
+ $ExoSOFT.py 
 
 as it will just assume that without a provided path, you want to play with the 
 example.
