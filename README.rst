@@ -76,7 +76,7 @@ Following install either by downloading from this repository or pip, make
 sure the directory to ExoSOFT/exosoft/ is added to your PATH in your .bashrc or
  .bash_profile.  
  
- Then, to run:
+Then, to run:
 
  $python ExoSOFT.py /full/path/to/*settings.py
 
@@ -135,7 +135,7 @@ Attribution
 Please cite our soon to be publish paper if you find this code useful in your
 research.  The Bibtex entry for this paper is::
 
-????
+ ????
 
 
 License
