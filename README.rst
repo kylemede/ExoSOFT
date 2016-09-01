@@ -25,21 +25,12 @@ Note: Installing python packages with pip is best as it handles the version and
 dependency issues for you.  Here are the dependencies for ExoSOFT.
 
  ## Those NOT available on pip
- # gcc
- # gcc-c++
- # swig
- # texlive-epstopdf
+ 
+ Python, gcc, gcc-c++, swig, texlive-epstopdf
 
  #Available for install with pip
- python2.7
- numpy
- scipy
- pylab
- matplotlib
- psutil
- astropy
- PyAstronomy
- corner
+ 
+ numpy, scipy, pylab, matplotlib, psutil, astropy, PyAstronomy, corner
 
 
 --------------
