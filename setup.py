@@ -35,7 +35,7 @@ setup(
     version="1.0.0", 
     author='Kyle Mede',
     author_email = 'kylemede@astron.s.u-tokyo.ac.jp',
-    url = 'https://github.com/kylemede/??????????',
+    url = 'https://github.com/kylemede/ExoSOFT',
     packages =['exosoft'],
     license = ['GNU GPLv3'],
     description ='Exoplanet Simple Orbit Fitting Toolbox',
@@ -53,6 +53,6 @@ setup(
         ],
     #include_dirs = [np.get_include()],
     install_requires = ['numpy''pyfits','scipy','pylab','matplotlib','psutil',\
-                        'swig','astropy','PyAstronomy'],
+                        'swig','astropy','PyAstronomy','KMlogger'],
     #ext_modules=[]
 )

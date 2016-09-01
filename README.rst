@@ -30,7 +30,7 @@ Python, gcc, gcc-c++, swig, texlive-epstopdf
 
  #Available for install with pip
  
-numpy, scipy, pylab, matplotlib, psutil, astropy, PyAstronomy, corner
+numpy, scipy, pylab, matplotlib, psutil, astropy, PyAstronomy, corner, KMlogger
 
 
 --------------
@@ -47,7 +47,7 @@ Download and install miniconda from: http://conda.pydata.org/docs/install/quick.
 2. $ source activate ExoSOFTcondaEnv
  ## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
 4. $ conda install -c asmeurer pango
-5. $ pip install PyAstronomy corner psutil
+5. $ pip install PyAstronomy corner psutil KMlogger
  ## matplotlib.pyplot doesn't exists till frontend is built, to do this:
 7. $ ipython
 8. $ import pylab 

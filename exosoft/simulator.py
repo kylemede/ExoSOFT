@@ -34,7 +34,7 @@ class Simulator(object):
         self.chainNum =0
         self.settings = settings
         self.log = tools.getLogger('main.simulator',lvl=100,addFH=False)
-        tools.logSystemInfo(self.log)
+        self.log.logSystemInfo()
         (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV,self.Priors) = self.starter() 
         self.Orbit = tools.cppTools.Orbit()
         self.Orbit.loadStaticVars(self.settings['omegaFdi'],self.settings['omegaFrv'],self.settings['lowEcc'],self.settings['pasa'])

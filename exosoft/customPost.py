@@ -8,7 +8,7 @@ import glob
 
 def customPost():
     settings = tools.startup(sys.argv,ExoSOFTdir,rePlot=True)
-    log = tools.getLogger('main',dir=settings['finalFolder'],lvl=100)
+    log = tools.getLogger('main',dr=settings['finalFolder'],lvl=100)
     skipBurnInStrip=True
     
     ## run make for swig if requested??
