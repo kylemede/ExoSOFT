@@ -52,14 +52,14 @@ FIRST SET UP AN ANACONDA ENVIRONMENT
 ------------------------------------
 Download and install miniconda from: http://conda.pydata.org/docs/install/quick.html
 
-1.$ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
-2.$ source activate ExoSOFTcondaEnv
-## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
-$ conda install -c asmeurer pango
-$ pip install PyAstronomy corner
-## matplotlib.pyplot doesn't exists till frontend is built, to do this:
-$ ipython
-$ import pylab 
+1. $ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
+2. $ source activate ExoSOFTcondaEnv
+3. ## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
+4. $ conda install -c asmeurer pango
+5. $ pip install PyAstronomy corner
+6. ## matplotlib.pyplot doesn't exists till frontend is built, to do this:
+7. $ ipython
+8. $ import pylab 
 
 
 
