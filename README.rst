@@ -26,11 +26,11 @@ dependency issues for you.  Here are the dependencies for ExoSOFT.
 
  ## Those NOT available on pip
  
- Python, gcc, gcc-c++, swig, texlive-epstopdf
+Python, gcc, gcc-c++, swig, texlive-epstopdf
 
  #Available for install with pip
  
- numpy, scipy, pylab, matplotlib, psutil, astropy, PyAstronomy, corner
+numpy, scipy, pylab, matplotlib, psutil, astropy, PyAstronomy, corner
 
 
 --------------
@@ -64,8 +64,7 @@ To make this work the user will also need the texlive-epstopdf or the verison
 for your OS to allow the epstopdf command from the cmd.
 
 Following install either by downloading from this repository or pip, make 
-sure the directory to ExoSOFT/exosoft/ is added to your PATH in your .bashrc or
- .bash_profile.  
+sure the directory to ExoSOFT/exosoft/ is added to your PATH in your .bashrc or .bash_profile.  
  
 Then, to run:
 
@@ -96,14 +95,16 @@ NEXT UNPACK AND SET UP ExoSOFT
    again on your machine to run.
    If so, from a bash terminal:
     $cd '/home/ExoSOFT/exosoft/tools/cppTools/'
+    
     $make clean
+    
     $make
-   NOTE: If you have difficulties compiling, make sure SWIG is installed 
-         correctly.  The documentation for this is provided here:
-     http://www.swig.org/Doc3.0/Preface.html#Preface_osx_installation
+   NOTE: If you have difficulties compiling, make sure SWIG is installed correctly.  The documentation for this is provided here:
+    http://www.swig.org/Doc3.0/Preface.html#Preface_osx_installation
 5. If the directories are updated to match the location on your machine and the 
    cpp code compiled, let's try and run ExoSOFT by:
     $cd '/home/ExoSOFT/exosoft/'
+    
     $python ExoSOFT.py
 6. If it runs properly, then check the outputs when finished in the directory 
    you set 'outDir' to.  Else, the errors are most likely dependancy based, so 
