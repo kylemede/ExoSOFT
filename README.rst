@@ -31,7 +31,7 @@ dependency issues for you.  Here are the dependencies for ExoSOFT.
 # texlive-epstopdf
 
 #Available for install with pip
-python2.7 or higher
+python2.7
 numpy
 scipy
 pylab
@@ -52,8 +52,8 @@ FIRST SET UP AN ANACONDA ENVIRONMENT
 ------------------------------------
 Download and install miniconda from: http://conda.pydata.org/docs/install/quick.html
 
-$ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
-$ source activate ExoSOFTcondaEnv
+1.$ conda create -n ExoSOFTcondaEnv pip python ipython numpy scipy matplotlib pylab swig astropy jdcal
+2.$ source activate ExoSOFTcondaEnv
 ## add 'source activate ExoSOFTcondaEnv' to end of .bashrc to have it load at beginning of terminal load every time.
 $ conda install -c asmeurer pango
 $ pip install PyAstronomy corner
