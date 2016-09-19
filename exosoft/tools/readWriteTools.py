@@ -70,7 +70,7 @@ def loadDIdata(filename):
         log.critical("a problem occured while trying to load DI data. \nPlease check it is formatted correctly.")
     return diData
 
-def loadDIdata_new(filename):
+def loadDIdata_cy(filename):
     """
     Load the astrometry data into a numpy array.
     
@@ -184,7 +184,7 @@ def loadRVdata(filename):
         log.critical("a problem occured while trying to load RV data.  \nPlease check it is formatted correctly.")
     return rvData
 
-def loadRVdata_new(filename):
+def loadRVdata_cy(filename):
     """
     Load the radial velocity data into a numpy array.  Provided jitter values 
     will be added in quadrature with the errors.
