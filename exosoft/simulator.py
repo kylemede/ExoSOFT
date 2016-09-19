@@ -183,7 +183,7 @@ class Simulator(object):
         paramsOut = copy.deepcopy(pars)
         ## convert from Raw form if in lowEcc mode
         self.Orbit.convertParsFromRaw(paramsOut)
-        ##wrap periodic params into allowed ranges
+        ## wrap periodic params into allowed ranges
         wrappedParsInts = [3,9]
         for par in wrappedParsInts:
             if par in self.paramInts:
