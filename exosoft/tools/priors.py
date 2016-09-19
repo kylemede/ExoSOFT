@@ -1,6 +1,6 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
 import numpy as np
-import constants
+import constants as const
 import sys
 
 class Priors(object):
@@ -73,7 +73,7 @@ class Priors(object):
         ret = 1.0
         if ecc!=0:
             if (self.settings['lowEcc']==False)and(self.settings['eMAX']!=0):
-                if (self.settings['PMIN']*constants.daysPerYear)>1000.0:
+                if (self.settings['PMIN']*const.daysPerYear)>1000.0:
                     ret = 2.0*ecc
         return ret
                   
@@ -88,12 +88,12 @@ class Priors(object):
         ret = 1.0
         if self.settings['incMAX']!=0:
             if inc not in [0.0,90.0,180.0]:
-                mn = self.settings['incMIN']*(constants.pi/180.0)
-                mx = self.settings['incMAX']*(constants.pi/180.0)
+                mn = self.settings['incMIN']*(const.pi/180.0)
+                mx = self.settings['incMAX']*(const.pi/180.0)
                 if self.settings['incPrior'] is 'sin':
-                    ret = np.sin(inc*(constants.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
+                    ret = np.sin(inc*(const.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
                 elif self.settings['incPrior'] is 'cos':
-                    ret =  np.cos(inc*(constants.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
+                    ret =  np.cos(inc*(const.pi/180.0))/np.abs(np.cos(mn)-np.cos(mx))
         return ret
         
     def mass1Prior(self,mass):
