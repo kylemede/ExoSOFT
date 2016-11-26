@@ -4,10 +4,10 @@ pylab
 matplotlib
 psutil
 astropy
-PyAstronomy
 corner
 jupyter
 KMlogger
+emcee
 
 
 

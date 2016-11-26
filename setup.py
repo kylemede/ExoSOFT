@@ -10,6 +10,8 @@ try:
 except ImportError:
     from distutils.core import setup
     setup
+    
+from distutils.extension import Extension
 
 if sys.argv[-1] == "publish":
     os.system("python setup.py sdist upload")
@@ -34,15 +36,12 @@ setup(
     name='ExoSOFT', 
     version="1.0.0", 
     author='Kyle Mede',
-    author_email = 'kylemede@astron.s.u-tokyo.ac.jp',
+    author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
-    packages =['exosoft'],
+    packages =['ExoSOFT'],
     license = ['GNU GPLv3'],
     description ='Exoplanet Simple Orbit Fitting Toolbox',
-    long_description=rd("README.rst") + "\n\n"
-                    + "Changelog\n"
-                    + "---------\n\n"
-                    + rd("HISTORY.rst"),
+    long_description="For further details, please read the documentation at\nhttp://ExoSOFT.readthedocs.io/en/latest/",
     package_data={"": ["LICENSE", "AUTHORS.rst"]},
     include_package_data=True,
     classifiers = [
@@ -52,7 +51,7 @@ setup(
         'Programming Language :: Python'
         ],
     #include_dirs = [np.get_include()],
-    install_requires = ['numpy''pyfits','scipy','pylab','matplotlib','psutil',\
-                        'swig','astropy','PyAstronomy','KMlogger'],
+    install_requires = ['numpy','pyfits','scipy','pylab','matplotlib',\
+                        'psutil','astropy','KMlogger','emcee'],
     #ext_modules=[]
 )
