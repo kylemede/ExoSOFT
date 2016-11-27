@@ -101,7 +101,9 @@ def autocorr(outputDataFilename,fast=True):
         completeStr+=currParamStr
         log.debug(currParamStr)
     if all_passed==False:
-        log.info("Was unable to calculate autocorr for at least one of the parameters.  Most likely as the chains hadn't converged.")
+        s = "Was unable to calculate autocorr for at least one of the parameters.  Most likely as the chains hadn't converged."
+        log.info(s)
+        completeStr+=s+'\n'
     #except:
     #    log.error("An error occurred when trying to calculate the correlation lengths, # effective steps")
     #print('done autocorr')
