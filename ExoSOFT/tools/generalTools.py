@@ -90,7 +90,8 @@ def autocorr(outputDataFilename):
         #print("\nx = "+repr(x))
         ac = -1e6
         try:
-            ac = emcee.autocorr.integrated_time(x)
+            
+            ac = emcee.autocorr.integrated_time(x,low=1,high=min(1000,len(x)))
         except:
             s = "\nError thrown while calculating autocorr for parameter, "+paramStrs[i]
             s+= "\nThis is most likely due to the chain not having converged yet, try a larger number of samples, or ignore this warning."
