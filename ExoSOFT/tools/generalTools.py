@@ -66,40 +66,42 @@ def mcmcEffPtsCalc(outputDataFilename):
         log.error("An error occurred when trying to calculate the correlation lengths, # effective steps")
     return completeStr
 
-def autocorr(outputDataFilename):
+def autocorr(outputDataFilename,fast=True):
     """
     This directly calls the integrated_time function from the emcee package.
-    
     
     https://github.com/dfm/emcee/blob/master/emcee/autocorr.py
     ' This estimate uses the iterative procedure described on page 16 of `Sokal's
     notes <http://www.stat.unc.edu/faculty/cji/Sokal.pdf>`_ to determine a
     reasonable window size.'
     """
-    log.info("Starting to calculate correlation lengths")
+    log.info("Starting to calculate autocorrelation with emcee.autocorr.integrated_time")
     (head,data) = rwTools.loadFits(outputDataFilename)
     #numSteps = data.shape[0]
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
     completeStr+= '\n'+'-'*67+'\nThe longest integrated autocorrelation times of all params are:\n'+'-'*67+'\n'
     
+    all_passed = True
     #print("\n\n in autocorr \n\n")
     for i in range(0,len(paramList)):
         #print('\ni = '+repr(i))
         x = data[:,paramList[i]]
         #print("\nx = "+repr(x))
-        ac = -1e6
+        ac = "too long"
         try:
-            
-            ac = emcee.autocorr.integrated_time(x,low=1,high=min(1000,len(x)))
+            ac = emcee.autocorr.integrated_time(x,fast=fast)
         except:
             s = "\nError thrown while calculating autocorr for parameter, "+paramStrs[i]
             s+= "\nThis is most likely due to the chain not having converged yet, try a larger number of samples, or ignore this warning."
-            log.warning(s)
+            log.debug(s)
+            all_passed = False
         #print("\n\n ac: "+repr(ac)+'\n\n')
         currParamStr = str(paramList[i])+', '+paramStrs[i]+" = "+str(ac)+'\n'
         completeStr+=currParamStr
         log.debug(currParamStr)
+    if all_passed==False:
+        log.info("Was unable to calculate autocorr for at least one of the parameters.  Most likely as the chains hadn't converged.")
     #except:
     #    log.error("An error occurred when trying to calculate the correlation lengths, # effective steps")
     #print('done autocorr')

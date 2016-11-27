@@ -207,7 +207,7 @@ def exoSOFT():
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         
         ## calc auto-correlation time using tools from the emcee package
-        if (FINALmpo.stage=='emcee') and (settings['calcIAC'] and os.path.exists(allFname)):
+        if ((FINALmpo.stage=='emcee')or(FINALmpo.stage=='MCMC')) and (settings['calcIAC'] and os.path.exists(allFname)):
             #print("\n about to call autocorr")
             iacStr = tools.autocorr(allFname)
         #print("iacStr = "+iacStr)

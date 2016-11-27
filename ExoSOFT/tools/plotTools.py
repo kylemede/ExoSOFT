@@ -1238,7 +1238,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         for i in range(0,nPts):
             last_epoch += (const.daysPerYear*paramsRV[7])/float(nPts)
             fakeEpochs[i] = last_epoch
-        fakeEpochs[-1] = paramsRV[6]+(const.daysPerYear*paramsRV[7]/2.0)
+        fakeEpochs[-1] = fakeEpochs[-2]#paramsRV[6]+(const.daysPerYear*paramsRV[7]/2.0)
         Model.Data.epochs_rv = fakeEpochs
         _ = tools.ln_posterior(paramsRVraw, Model)        
         fit_epochs = copy.deepcopy(Model.Data.epochs_rv)
