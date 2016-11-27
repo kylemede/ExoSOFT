@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
+#@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
 import matplotlib
 from six.moves import range
