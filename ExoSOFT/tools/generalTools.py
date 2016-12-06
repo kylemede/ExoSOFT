@@ -24,18 +24,6 @@ from .cytools import mean_corr_len
 from .model import ExoSOFTmodel, ln_posterior
 from .readWriteTools import loadFits, writeFits, rmFiles, dataReader
 
-#from ExoSOFT import tools
-#const = tools.constants
-#from .plotTools import histMakeAndDump
-#from ExoSOFT.tools import readWriteTools as rwtools 
-#from . import readWriteTools as rwtools 
-#from .readWriteTools import *
-#import constants as const
-#from cytools import mean_corr_len
-#from model import ExoSOFTmodel, ln_posterior
-#from plotTools import histMakeAndDump
-#import readWriteTools as rwtools 
-
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)  
     

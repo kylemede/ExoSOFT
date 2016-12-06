@@ -1,34 +1,30 @@
-#!/usr/bin/env python
 #@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
 import matplotlib
 from six.moves import range
 # Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
 matplotlib.use('Agg') 
-from . import tools
-from . import simulator
-#from exosoftpath import rootDir as ExoSOFTdir
 import sys
 import os
 import timeit
 import KMlogger
 import numpy as np
 
+from . import tools
+from . import simulator
+
 """
     This is the 'main' of ExoSOFT. 
     It will start things off, call the appropriate set of 
     simulation and post-processing steps.
 """ 
-def exoSOFT(ExoSOFT_dir='',sett_file_path=''):
+def exoSOFT(settings_in, priors_in):
     """
     'main'
     """
     ## Call startup to get dict and load up final directories into it.
-    if False:
-        #from exosoftpath import rootDir as ExoSOFTdir
-        ExoSOFTdir = ''
-        ExoSOFT_dir=ExoSOFTdir
-    settings = tools.startup(sys.argv,ExoSOFT_dir)
+    #settings = tools.startup(sett_file_path)
+    settings = tools.startup(settings_in, priors_in)
     log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=settings['logLevel'])
     log.logDict(settings)
     #log.debug("Prepend string passed in was '"+settings['prepend']+"'")
@@ -241,7 +237,5 @@ def exoSOFT(ExoSOFT_dir='',sett_file_path=''):
         log.debug("Post-processing took a total of "+tools.timeStrMaker(postTime))
         log.warning(" ExoSOFT is Done :-)\n EVERYTHING took a total of "+tools.timeStrMaker(allTime)+'\n')
         log.debug("End of ExoSOFT main")
-        ##END MAIN 
-
-if __name__ == '__main__':
-    exoSOFT()
+        
+# EOF

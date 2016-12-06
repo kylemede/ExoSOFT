@@ -7,9 +7,10 @@ import KMlogger
 from six.moves import range
 
 ## import from modules in ExoSOFT ##
+from . import constants as const
 from .cytools import orbit, model_input_pars
 from .utils import  load_di_data, load_rv_data
-from .priors import ExoSOFTpriors
+#from .priors import ExoSOFTpriors
 
 #from cytools import orbit, model_input_pars
 #from utils import  load_di_data, load_rv_data
@@ -48,8 +49,10 @@ class ExoSOFTmodel(object):
     
         self.Data = ExoSOFTdata(epochs_di, epochs_rv, rapa, rapa_err, decsa, decsa_err,
                  rv, rv_err, rv_inst_num,self.sd['data_mode'], self.sd['pasa'])
-    
-        self.Priors = ExoSOFTpriors(ecc_prior=self.sd['ecc_prior'], 
+        
+        ExoSOFTpriors = self.sd['ExoSOFTpriors']
+        
+        self.Priors = ExoSOFTpriors(const=const, ecc_prior=self.sd['ecc_prior'], 
              p_prior=self.sd['p_prior'], inc_prior=self.sd['inc_prior'], 
              m1_prior=self.sd['m1_prior'], m2_prior=self.sd['m2_prior'], 
              para_prior=self.sd['para_prior'], inc_min=self.sd['inc_min'],

@@ -35,7 +35,7 @@ else:
 
 setup(    
     name='ExoSOFT', 
-    version="1.0.63", 
+    version="1.0.66", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
@@ -53,7 +53,7 @@ setup(
         'Topic :: Scientific/Engineering',
         'Programming Language :: Python'
         ],
-    include_dirs = ['ExoSOFT','ExoSOFT/tools'],
+    include_dirs = ['ExoSOFT','ExoSOFT/tools','examples'],
     install_requires = ['numpy','pyfits','scipy','matplotlib',\
                         'psutil','astropy','KMlogger','emcee'],
     ext_modules = cythonize(["ExoSOFT/tools/cytools.pyx"]),

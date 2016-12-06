@@ -12,12 +12,6 @@ import warnings
 import KMlogger
 from six.moves import range
 
-## import from modules in ExoSOFT ##
-#from sphinx.ext.napoleon.docstring import GoogleDocstring
-#from . import generalTools as gentools
-#from .generalTools import nparyTolistStr
-#import generalTools as gentools
-
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.rwTools',lvl=100,addFH=False)  
 
@@ -397,65 +391,24 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         log.critical("An error occured while trying to load data!!")
     return realData
             
-def loadSettings(ExoSOFTdir,settFilePath):
+def load_settings(settings_in,priors_in):
+    """  
+    This is to load the settings file from the path provided, then load in the 
+    ExoSOFTpriors object.  It will first see if there is a priors.py in same 
+    folder as the settings.py, else, this will load the default priors.py 
+    packaged with ExoSOFT.
+    NOTE: filenames must be exactly settings.py and priors.py.
     """
-    Load the values from both the simple (symSettingsSimple.py) and advanced (symSettingsAdvanced.py)
-    into a dictionary for use throughout the simulation and post-processing.
-    Those that are deemed useful will be loaded in as a tuple with a comment for later adding to 
-    the resulting simulation data file fits header.
-    NOTE: the first step is to copy these files to standardized names so they can be called in to 
-          use.  They will overwrite the files:
-          ExoSOFT/tools/temp/simpleSettings.py   &   advancedSettings.py 
     
-    filenameRoot would be the absolute path plus the prepend to the settings files.
-    ex. '/run/..../ExoSOFT/settings_and_data/FakeData_'
-    """
-    ## A BIT HACKY FOR NOW, NEED TO FIND A CLEANER WAY TO DO THIS!?!?! $$$$$$$$
-    ## at same time, maybe consider entirely new way to handle the settings and funcs.  
-    ## Looked at YAML, but it is just convoluted python code with no advantages.
-    ## considered default files for the priors and ranges that could be overriden by those in the advanced dict, but gave up.  Also seems too convoluted.
-    #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    ## idea: user can pass in a filename root, OR a full path to the settings file.
-    ## If just root, assume it is in standard settings dir.
-    ## copy it to the temp dir with the constants file, import and then delete temp versions.
-    ##
-    ## load up temp directory with settings and priors files.
-    cwd = os.getenv('PWD')
-    toolsdir = os.path.join(ExoSOFTdir,'tools/')
-    settingsdir = os.path.dirname(os.path.abspath(settFilePath))
-    prepend = os.path.basename(settFilePath).split('settings.py')[0]
-    try:
-        os.remove(os.path.join(toolsdir,'temp/settings.py'))
-        os.remove(os.path.join(toolsdir,'temp/constants.py'))
-        os.remove(os.path.join(toolsdir,'temp/priors.py'))
-    except:
-        pass
-    # Check if specialized *_priors.py exists in same dir, else normal in same 
-    # same dir, else default one.
-    if os.path.exists(os.path.join(settingsdir,prepend+'priors.py')):
-        shutil.copy(os.path.join(settingsdir,prepend+'priors.py'),\
-                    os.path.join(toolsdir,'temp/priors.py'))
-    elif os.path.exists(os.path.join(settingsdir,'priors.py')):
-        shutil.copy(os.path.join(settingsdir,'priors.py'),\
-                    os.path.join(toolsdir,'temp/priors.py'))
-    else:
-        shutil.copy(os.path.join(toolsdir,'priors.py'),\
-                    os.path.join(toolsdir,'temp/priors.py'))
-    shutil.copy(settFilePath,os.path.join(toolsdir,'temp/settings.py'))
-    shutil.copy(os.path.join(toolsdir,'constants.py'),\
-                os.path.join(toolsdir,'temp/constants.py'))
-    os.chdir(toolsdir)
-    from .temp.settings import settings
-    if False:
-        try:
-            os.remove(os.path.join(toolsdir,'temp/settings.py'))
-            os.remove(os.path.join(toolsdir,'temp/constants.py'))
-            os.remove(os.path.join(toolsdir,'temp/priors.py'))
-        except:
-            pass
-    os.chdir(cwd)
-    ##################### End of hacky part ########################
-    
+    if priors_in==None:
+        ## load the default priors object
+        from .priors import ExoSOFTpriors as priors_in
+        #print(repr(ExoSOFTpriors))
+
+    settings = settings_in
+
+    settings['ExoSOFTpriors'] = priors_in
+            
     #######################################################
     ## determine argPeriOffsetRV and argPeriOffsetDI values
     #######################################################
@@ -472,7 +425,7 @@ def loadSettings(ExoSOFTdir,settFilePath):
     log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
     
     #for key in settings:
-    #    print key+' = '+repr(settings[key])
+    #    print(key+' = '+repr(settings[key]))
     #sys.exit('shirt')
     return settings
 

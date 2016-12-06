@@ -8,29 +8,22 @@ import os
 import copy
 import numpy as np
 import KMlogger
-
 import warnings
 from six.moves import range
 from six.moves import input
 
 ## import from modules in ExoSOFT ##
 from . import constants as const
-from .readWriteTools import loadSettings, copyCodeFiles, loadRealData
-
-#from ExoSOFT import tools
-#const = tools.constants
-#from . import readWriteTools as rwtools
+from .readWriteTools import load_settings, loadRealData
 
 warnings.simplefilter("error")
-
 log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
 
-def startup(argv,ExoSOFTdir,rePlot=False):
+def startup(settings_in,priors_in,rePlot=False):
     """
     Ways to start ExoSOFT:
     If shebang at top of ExoSOFT.py matches your system and location of ExoSOFT/ExoSOFT
     has been added to your PATH, then follow type 'a' below.  Else, use 'b' version.
-    
     
     1. Provide full path to settings file.
         a: $ExoSOFT.py /path/you/want/settings.py
@@ -67,9 +60,10 @@ def startup(argv,ExoSOFTdir,rePlot=False):
     -Check if start startParams and startSigmas in dictionary make sense.
     NOTE: have ExoSOFTdir handled with setup.py??
     """    
-    settFilePath = getSettFilePath(argv,ExoSOFTdir)
+    #settFilePath = getSettFilePath(sett_file_path)
     # extra double check file exists
-    if os.path.exists(settFilePath)==False:
+    #if os.path.exists(settFilePath)==False:
+    if settings_in==None:
         log.critical('Critical error occured while trying to load in the settings.  Quiting ExoSOFT!!')
         #*********************************************************************
         s = "\nSETTINGS FILE NOT FOUND!"
@@ -79,11 +73,13 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         raise IOError('\n\n'+s)
         #*********************************************************************
     else:
-        settings = loadSettings(ExoSOFTdir,settFilePath)
+        #settings = loadSettings(ExoSOFTdir,settFilePath)
+        #settings = load_settings(settFilePath)
+        settings = load_settings(settings_in,priors_in)
         log.setStreamLevel(settings['logLevel'])
-        settings['ExoSOFTdir']=ExoSOFTdir
-        settings['settingsDir']=os.path.dirname(settFilePath)
-        settings['settFilePath']= settFilePath
+        #settings['ExoSOFTdir']=ExoSOFTdir
+        #settings['settingsDir']=os.path.dirname(settFilePath)
+        #settings['settFilePath']= settFilePath
         ## check if outDir is defined, else to write outputs in cwd
         if settings['outDir']==None:
             print('*'*35+"\n* 'outDir' parameter was None.")
@@ -134,12 +130,12 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             if False:
                 for key in settings:
                     print(key+' = '+repr(settings[key]))
-            ## copy all of current code to output directory
-            codeCopyDir = os.path.join(settings['finalFolder'],'codeUsed')
-            os.mkdir(codeCopyDir)
-            log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
-            setFiles = [settings['settFilePath'],settings['rv_dataFile'],settings['di_dataFile']]
-            copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
+#             ## copy all of current code to output directory
+#             codeCopyDir = os.path.join(settings['finalFolder'],'codeUsed')
+#             os.mkdir(codeCopyDir)
+#             log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
+#             setFiles = [settings['settFilePath'],settings['rv_dataFile'],settings['di_dataFile']]
+#             copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
             ## make folder for later copying pickle files for recovery if error
             ## or customPost work needs them.
             os.mkdir(pklDir)
@@ -442,12 +438,12 @@ def modePrep(settings,sigmas):
     
     return settings
 
-def getSettFilePath(argv,ExoSOFTdir):
+def getSettFilePath(sett_file_path):
     ## Pull in settings filename prepend from command line args, if provided
     inArg = ''
-    if len(argv)>1:
+    if len(sett_file_path)>1:
         try:
-            inArg = argv[1]
+            inArg =sett_file_path
         except:
             print('\nWarning: Only able to handle a single argument on the cmd !!\n')    
     if inArg=='--help':
@@ -528,11 +524,12 @@ def getSettFilePath(argv,ExoSOFTdir):
                 print('* No settings file provided.  ')
                 yn = input('* Use the example one? (y/n): ')
                 if (('y' in yn) or ('Y' in yn)):
-                    examplesDir = os.path.join(ExoSOFTdir.split('ExoSOFT')[0],'examples/')
-                    settFilePath = os.path.join(examplesDir,"settings.py")
+                    #examplesDir = os.path.join(ExoSOFTdir.split('ExoSOFT')[0],'examples/')
+                    #settFilePath = os.path.join(examplesDir,"settings.py")
                     if os.path.exists(settFilePath)==False:
                         log.critical('Critical error occured while trying to load in the settings.  Exiting ExoSOFT!!')
-                        s = "\nTHAT SETTINGS FILE DOES NOT EXIST!!"
+                        s = "PROVIDED/AUTO SETTINGS FILE WAS: "+settFilePath
+                        s+= "\n\nTHAT SETTINGS FILE DOES NOT EXIST!!"
                         s+= "\nARGUMENT PROVIDED TO ExoSOFT WAS: '"+inArg+"'"
                         s+= "\nMETHOD #3 IN EXAMPLE MODE BROKEN!!!\n"
                         s+= 'PLEASE CHECK THAT DIRECTORY TO SEE IF FILE IS THERE.'

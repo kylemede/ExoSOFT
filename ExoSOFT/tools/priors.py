@@ -5,7 +5,7 @@ import numpy as np
 import sys
 
 ## import from modules in ExoSOFT ##
-from . import constants as const
+#from . import constants as const
 #import constants as const
 
 class ExoSOFTpriors(object):
@@ -18,10 +18,11 @@ class ExoSOFTpriors(object):
     mass of companion: (None,True, 'IMF','PDMF','CMF') True indicates default of 'CMF'
     parallax: (None,True) True indicates default of 'gauss'
     """
-    def __init__(self, ecc_prior=True, p_prior=True, inc_prior=True, 
+    def __init__(self,const=None, ecc_prior=True, p_prior=True, inc_prior=True, 
                  m1_prior=True, m2_prior=True, para_prior=True, inc_min=0.0,
                  inc_max=180.0, p_min=0.0, p_max=300.0, para_est=0, 
                  para_err=0, m1_est=0, m1_err=0, m2_est=0, m2_err=0):   
+        self.const = const
         ## choices   
         # choices:2e  
         self.e_prior = ecc_prior
@@ -126,7 +127,7 @@ class ExoSOFTpriors(object):
         ret = 1.0
         if ecc!=0:
             if (self.e_prior == True) or (self.e_prior == '2e'):
-                if (self.p_min*const.daysPerYear)>1000.0:
+                if (self.p_min*self.const.daysPerYear)>1000.0:
                     ret = 2.0*ecc
         return ret
                   
