@@ -1,15 +1,12 @@
-#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
+#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
 import os
 import matplotlib
 import matplotlib.pyplot as plt
-from six.moves import range
 ##matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
 plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
-##import pylab
-##from pylab import Polygon
 Polygon =  matplotlib.patches.Polygon  
 gridspec =  matplotlib.gridspec
 patches = matplotlib.patches
@@ -24,8 +21,25 @@ import scipy.optimize as so
 from scipy import ndimage
 import warnings
 import KMlogger
-from ExoSOFT import tools
-const = tools.constants
+from six.moves import range
+
+## import from modules in ExoSOFT  ##
+from . import constants as const
+from .model import ExoSOFTmodel, ln_posterior
+from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal 
+from .readWriteTools import loadFits, loadRealData
+
+#import constants as const
+#import model
+#from ExoSOFT import tools
+#import ExoSOFT.readWriteTools as rwtools
+#from ExoSOFT.tools import readWriteTools
+#from . import readWriteTools as rwtools 
+#from ExoSOFT.readWriteTools import loadFits, writeFits, rmFiles, dataReader, loadRealData
+#import .readWriteTools as rwtools
+#import generalTools as gentools
+#from .readWriteTools import *
+#from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal     
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
@@ -102,7 +116,7 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
         xlabelOrig = xLabel
         try:
             for i in range(len(histData[:,0])):
-                histData[i,0] = tools.jdToGcal(histData[i,0])
+                histData[i,0] = jdToGcal(histData[i,0])
             if latex:
                 xLabel=xLabel[:-5]+'year]}$'
             else:
@@ -221,11 +235,11 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
             bestValOrig = bestVal
             try:
                 for i in range(len(histData[:,0])):
-                    histData[i,0] = tools.jdToGcal(histData[i,0])
-                bestVal = tools.jdToGcal(bestVal)
+                    histData[i,0] = jdToGcal(histData[i,0])
+                bestVal = jdToGcal(bestVal)
                 for i in range(2):
                     for j in range(2):
-                        confLevels[i][j] = tools.jdToGcal(confLevels[i][j])
+                        confLevels[i][j] = jdToGcal(confLevels[i][j])
                 if latex:
                     xLabel=xLabel[:-5]+'year]}$'
                 else:
@@ -362,11 +376,11 @@ def addDIdataToPlot(subPlot,realData,asConversion,errMult=1.0,thkns=1.0,pasa=Fal
     ## plot a cross for either DI data format
     if pasa:
         ## convert PASA data and errors into EN versions, calc max and then plot if errMult>0
-        (xcenters, E_error, ycenters, N_error)=tools.PASAtoEN(diData[:,1],0,diData[:,3],0)
-        (xas, E_error, yas, N_error)=tools.PASAtoEN(diData[:,1]-diData[:,2]*errMult,0,diData[:,3],0)
-        (xbs, E_error, ybs, N_error)=tools.PASAtoEN(diData[:,1]+diData[:,2]*errMult,0,diData[:,3],0)
-        (xcs, E_error, ycs, N_error)=tools.PASAtoEN(diData[:,1],0,diData[:,3]-diData[:,4]*errMult,0)
-        (xds, E_error, yds, N_error)=tools.PASAtoEN(diData[:,1],0,diData[:,3]+diData[:,4]*errMult,0)
+        (xcenters, E_error, ycenters, N_error)=PASAtoEN(diData[:,1],0,diData[:,3],0)
+        (xas, E_error, yas, N_error)=PASAtoEN(diData[:,1]-diData[:,2]*errMult,0,diData[:,3],0)
+        (xbs, E_error, ybs, N_error)=PASAtoEN(diData[:,1]+diData[:,2]*errMult,0,diData[:,3],0)
+        (xcs, E_error, ycs, N_error)=PASAtoEN(diData[:,1],0,diData[:,3]-diData[:,4]*errMult,0)
+        (xds, E_error, yds, N_error)=PASAtoEN(diData[:,1],0,diData[:,3]+diData[:,4]*errMult,0)
         xALL = np.concatenate((xcenters,xas,xbs,xcs,xds))
         yALL = np.concatenate((ycenters,yas,ybs,ycs,yds))
         xmin = np.min(xALL)*asConversion
@@ -445,10 +459,10 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         log.debug("writing resulting figure to:\n"+plotFilename)
         
         ## load first data file to get param lists 
-        (head,data) = tools.loadFits(outputDataFilenames[0])
+        (head,data) = loadFits(outputDataFilenames[0])
         ## get parameter lists and filter accordingly
-        (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=plotALLpars)
-        (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=plotALLpars)
+        (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=plotALLpars)
+        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=plotALLpars)
         # modify x labels to account for DI only situations where M1=Mtotal
         if (np.var(data[:,1])==0)and (0 in paramList):
             paramStrs2[0] = 'm total [Msun]'
@@ -458,8 +472,8 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         # remake lists of params to match subset.
         if len(paramsToPlot)!=0:
             if plotALLpars==False:
-                (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=True)
-                (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=True)
+                (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+                (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
                 paramStrs2Use = []
                 paramStrsUse = []
                 paramFileStrsUse = []
@@ -608,7 +622,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
     plotDataDir+='/'
     
     #print 'about to load fits file'
-    (head,data) = tools.loadFits(outputDataFilename)
+    (head,data) = loadFits(outputDataFilename)
     if head!=False:  
         log.debug(' Inside summaryPlotter')
         s= '\nCreating summary plot for file:\n'+outputDataFilename
@@ -623,8 +637,8 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
             plotFilename = plotFilename
         #print "about to try and extract parstrs from header"  #$$$$$$$$$$$$$$$$$$$$$$$$   
         ## get parameter lists and filter accordingly
-        (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=plotALLpars)
-        (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=plotALLpars)
+        (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=plotALLpars)
+        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=plotALLpars)
         #print "got extract parstrs from header"  #$$$$$$$$$$$$$$$$$$
         #print repr((paramList,paramStrs,paramFileStrs))#$$$$$$$$$$$$$$$$$$
         #print repr((paramList2,paramStrs2,paramFileStrs2))#$$$$$$$$$$$$$$$$$$
@@ -638,8 +652,8 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
         # remake lists of params to match subset.
         if len(paramsToPlot)!=0:
             if plotALLpars==False:
-                (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=True)
-                (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=True)
+                (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+                (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
                 paramStrs2Use = []
                 paramStrsUse = []
                 paramFileStrsUse = []
@@ -698,10 +712,10 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 log.debug('Checking parameter has useful data '+str(i)+"/"+str(len(paramStrs2)-1)+": "+paramStrs2[i]+", for file:\n"+outputDataFilename)
                 weightHists = False
                 if stage in ['SA','MC']:
-                    (CLevels,data,chiSquareds,bestDataVal,clStr) = tools.confLevelFinder(outputDataFilename,paramList[i], returnData=True, returnChiSquareds=True, returnBestDataVal=True)
+                    (CLevels,data,chiSquareds,bestDataVal,clStr) = confLevelFinder(outputDataFilename,paramList[i], returnData=True, returnChiSquareds=True, returnBestDataVal=True)
                     weightHists = True
                 else:
-                    (CLevels,data,bestDataVal,clStr) = tools.confLevelFinder(outputDataFilename,paramList[i], returnData=True, returnChiSquareds=False, returnBestDataVal=True)
+                    (CLevels,data,bestDataVal,clStr) = confLevelFinder(outputDataFilename,paramList[i], returnData=True, returnChiSquareds=False, returnBestDataVal=True)
                     chiSquareds = []
                 #print 'ln704'
                 if bestDataVal!=0:
@@ -893,13 +907,13 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             orbParamsDI = orbParams[settInt]
             
             ## instantiate Model class for this set of settings
-            Model = tools.ExoSOFTmodel(settingsDI)
+            Model = ExoSOFTmodel(settingsDI)
             real_epochs_di = copy.deepcopy(Model.Data.epochs_di)
             real_decsa = copy.deepcopy(Model.Data.decsa)
             real_rapa = copy.deepcopy(Model.Data.rapa)
             
             ##get the real data
-            realData = tools.loadRealData(diFilename=settingsDI['di_dataFile'],rvFilename=settingsDI['rv_dataFile'],dataMode=settingsDI['data_mode'])
+            realData = loadRealData(diFilename=settingsDI['di_dataFile'],rvFilename=settingsDI['rv_dataFile'],dataMode=settingsDI['data_mode'])
             for parSetInt in range(0,len(orbParamsDI)):
                 #print('plotting orbit parameter set # '+str(parSetInt))
                 #convert 'stored' to 'direct/raw' versions
@@ -910,7 +924,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 
                 # ExoSOFTmodel will calculate predicted/ExoSOFTmodel data for each epoch in Model.Data.epochs_di
                 ## calculate the fit locations for the DI epochs to calculate 0-C
-                _ = tools.ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model)
                 predicted_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 predicted_rapa_model = copy.deepcopy(Model.Data.rapa_model)
                 
@@ -927,7 +941,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     fakeEpochs[i] = paramsDI[5]+(const.daysPerYear*paramsDI[7]*(i/float(nPts)))
                 fakeEpochs[nPts-1]  = fakeEpochs[0]+const.daysPerYear*paramsDI[7]
                 Model.Data.epochs_di = fakeEpochs
-                _ = tools.ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model)
                 fit_epochs = copy.deepcopy(Model.Data.epochs_di)
                 fit_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 fit_rapa_model = copy.deepcopy(Model.Data.rapa_model)
@@ -945,7 +959,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     fakeQuarterEpochs[i] = paramsDI[5]+(const.daysPerYear*paramsDI[7]*(i/4.0))
                 # Calculate orbit for quarter epochs
                 Model.Data.epochs_di = fakeQuarterEpochs
-                _ = tools.ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model)
                 quarter_epochs = copy.deepcopy(Model.Data.epochs_di)
                 quarter_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 quarter_rapa_model = copy.deepcopy(Model.Data.rapa_model)
@@ -967,7 +981,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 Model.Data.decsa_err = np.ones((2),dtype=np.dtype('d'))
                 Model.Data.rapa_model = np.ones((2),dtype=np.dtype('d'))
                 Model.Data.decsa_model = np.ones((2),dtype=np.dtype('d'))
-                _ = tools.ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model)
                 lon_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 lon_rapa_model = copy.deepcopy(Model.Data.rapa_model)
                 lonXYs = np.array([[lon_rapa_model[0],lon_decsa_model[0]],[lon_rapa_model[1],lon_decsa_model[1]]])
@@ -991,7 +1005,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     hFit = hPredicted = '[x,y]'
                 residualDIdata = []
                 if pasa:
-                    (xcenters, E_error, ycenters, N_error)= tools.PASAtoEN(real_rapa[:],0,real_decsa[:],0)
+                    (xcenters, E_error, ycenters, N_error)= PASAtoEN(real_rapa[:],0,real_decsa[:],0)
                     for i in range(0,len(real_epochs_di)):
                         residualDIdata.append([xcenters[i]-predicted_rapa_model[i],ycenters[i]-predicted_decsa_model[i]])
                 else:
@@ -1204,7 +1218,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
     ################
     settingsRV = settings[0]
     ##get the real data
-    realData = tools.loadRealData(diFilename=settingsRV['di_dataFile'],rvFilename=settingsRV['rv_dataFile'],dataMode=settingsRV['data_mode'])
+    realData = loadRealData(diFilename=settingsRV['di_dataFile'],rvFilename=settingsRV['rv_dataFile'],dataMode=settingsRV['data_mode'])
     ## ensure orbParams are in required format for Orbit
     params = []
     for par in orbParams[0][0]:
@@ -1215,7 +1229,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         realDataRV = realDataRV[np.where(realDataRV[:,6]<1e6)[0],:]
         
         ## instantiate Model class for this set of settings
-        Model = tools.ExoSOFTmodel(settingsRV)
+        Model = ExoSOFTmodel(settingsRV)
         paramsRV = copy.deepcopy(params)
         paramsRVraw = copy.deepcopy(Model.Params.stored_to_direct(paramsRV))
         real_epochs_rv = copy.deepcopy(Model.Data.epochs_rv)
@@ -1223,7 +1237,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         real_rv_err = copy.deepcopy(Model.Data.rv_err)
         # ExoSOFTmodel will calculate predicted/ExoSOFTmodel data for each epoch in Model.Data.epochs_di
         ## calculate the fit locations for the DI epochs to calculate 0-C
-        _ = tools.ln_posterior(paramsRVraw, Model)
+        _ = ln_posterior(paramsRVraw, Model)
         predicted_rv_model = copy.deepcopy(Model.Data.decsa_model)
         
         ##Make ExoSOFTmodel data for 100~1000 points for plotting fit
@@ -1240,7 +1254,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             fakeEpochs[i] = last_epoch
         fakeEpochs[-1] = fakeEpochs[-2]#paramsRV[6]+(const.daysPerYear*paramsRV[7]/2.0)
         Model.Data.epochs_rv = fakeEpochs
-        _ = tools.ln_posterior(paramsRVraw, Model)        
+        _ = ln_posterior(paramsRVraw, Model)        
         fit_epochs = copy.deepcopy(Model.Data.epochs_rv)
         fit_rv_model = copy.deepcopy(Model.Data.rv_model)
         
@@ -1537,7 +1551,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
         matplotlib.rc('font',family='serif')
         matplotlib.rc('text', usetex=False)
     if len(paramsToPlot)==2:
-        (head,data) = tools.loadFits(outputDataFilename)
+        (head,data) = loadFits(outputDataFilename)
         if head!=False:  
             log.debug(' Inside densityPlotter')
             s= '\nCreating 2D density plot for file:\n'+outputDataFilename
@@ -1550,7 +1564,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
             else:
                 plotFilename = plotFilename
             ## Get strings representing axes titles and plot filenames in latex and standard formats
-            (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=True)
+            (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
             ## modify x labels to account for DI only situations where M1=Mtotal
             if np.var(data[:,1])==0:
                 paramStrs[0] = r'$m_{total}$ [$M_{\odot}$]'
@@ -1692,7 +1706,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
         matplotlib.rc('font',family='serif')
         matplotlib.rc('text', usetex=False)
         
-    (head,data) = tools.loadFits(outputDataFilename)
+    (head,data) = loadFits(outputDataFilename)
     
     if head!=False:  
         log.debug(' Inside tranglePlotter')
@@ -1708,8 +1722,8 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
             plotFilename = plotFilename
                 
         ## get parameter lists and filter accordingly
-        (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=True)
-        (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=True)
+        (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
         # modify x labels to account for DI only situations where M1=Mtotal
         if (np.var(data[:,1])==0)and (0 in paramList):
             paramStrs2[0] = 'm total [Msun]'
@@ -1757,7 +1771,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
                            max_n_ticks=5, top_ticks=False)
         log.debug("back from corner func")
         toc = timeit.default_timer()
-        log.info("corner plotting took a total of "+tools.timeStrMaker(toc-tic))
+        log.info("corner plotting took a total of "+timeStrMaker(toc-tic))
     
         #plt.tight_layout()
         ## Save file if requested.
@@ -1768,7 +1782,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
             log.info(s)
         plt.close()
         toc2 = timeit.default_timer()
-        log.info("Saving took a total of "+tools.timeStrMaker(toc2-toc))
+        log.info("Saving took a total of "+timeStrMaker(toc2-toc))
         if (plotFormat=='eps') and True:
             log.debug('converting to PDF as well')
             try:
@@ -1807,7 +1821,7 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         lblSz = 50
         fntSz = 60
         lnWdth = 6
-    (head,data) = tools.loadFits(outputDataFilename)
+    (head,data) = loadFits(outputDataFilename)
     
     if head!=False:  
         log.debug(' Inside progressPlotter')
@@ -1816,7 +1830,7 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         log.info(s)
         
         #Find best orbit params
-        bestPars = tools.findBestOrbit(outputDataFilename,bestToFile=False,by_ln_prob=emcee_stage)
+        bestPars = findBestOrbit(outputDataFilename,bestToFile=False,by_ln_prob=emcee_stage)
         #print('back from findBestOrbit')
         
         ## check if the passed in value for plotFilename includes format extension
@@ -1826,8 +1840,8 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         else:
             plotFilename = plotFilename
                 
-        (paramList,paramStrs,paramFileStrs) = tools.getParStrs(head,latex=latex,getALLpars=True)
-        (paramList2,paramStrs2,paramFileStrs2) = tools.getParStrs(head,latex=False,getALLpars=True)
+        (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
         nu =  head['NU']
         
         ## modify y labels to account for DI only situations where M1=Mtotal

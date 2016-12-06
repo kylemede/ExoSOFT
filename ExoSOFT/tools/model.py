@@ -3,11 +3,20 @@ from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
 import copy
+import KMlogger
+from six.moves import range
+
+## import from modules in ExoSOFT ##
 from .cytools import orbit, model_input_pars
 from .utils import  load_di_data, load_rv_data
 from .priors import ExoSOFTpriors
-import KMlogger
-from six.moves import range
+
+#from cytools import orbit, model_input_pars
+#from utils import  load_di_data, load_rv_data
+#from priors import ExoSOFTpriors
+#import cytools
+#import utils
+#import priors
 
 log = KMlogger.getLogger('main.model',lvl=100,addFH=False)
 

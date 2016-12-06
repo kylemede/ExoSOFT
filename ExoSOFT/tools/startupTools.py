@@ -1,4 +1,6 @@
+#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 #import sys
+#from IPython.core.prompts import cwd_filt
 from __future__ import absolute_import
 from __future__ import print_function
 import shutil
@@ -6,13 +8,19 @@ import os
 import copy
 import numpy as np
 import KMlogger
-from ExoSOFT import tools
-const = tools.constants
 
 import warnings
 from six.moves import range
 from six.moves import input
-#from IPython.core.prompts import cwd_filt
+
+## import from modules in ExoSOFT ##
+from . import constants as const
+from .readWriteTools import loadSettings, copyCodeFiles, loadRealData
+
+#from ExoSOFT import tools
+#const = tools.constants
+#from . import readWriteTools as rwtools
+
 warnings.simplefilter("error")
 
 log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
@@ -71,7 +79,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         raise IOError('\n\n'+s)
         #*********************************************************************
     else:
-        settings = tools.loadSettings(ExoSOFTdir,settFilePath)
+        settings = loadSettings(ExoSOFTdir,settFilePath)
         log.setStreamLevel(settings['logLevel'])
         settings['ExoSOFTdir']=ExoSOFTdir
         settings['settingsDir']=os.path.dirname(settFilePath)
@@ -131,7 +139,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
             os.mkdir(codeCopyDir)
             log.debug('Copying all files in the RESULTS folder over to output folder:\n '+codeCopyDir)
             setFiles = [settings['settFilePath'],settings['rv_dataFile'],settings['di_dataFile']]
-            tools.copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
+            copyCodeFiles(settings['ExoSOFTdir'], codeCopyDir,setFiles)
             ## make folder for later copying pickle files for recovery if error
             ## or customPost work needs them.
             os.mkdir(pklDir)
@@ -148,7 +156,7 @@ def startup(argv,ExoSOFTdir,rePlot=False):
         ## Then load up a list of the parameters to vary during simulation.                     #
         ## Note: Originally this was done in simulator startup, but thought better to move here.#
         #########################################################################################
-        realData = tools.loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
+        realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
         if (type(realData)!=list)and(type(realData)!=np.ndarray):
             log.critical('Critical error occured while trying to load real data files.  Quiting ExoSOFT!!')
             #***************************************************************************************************

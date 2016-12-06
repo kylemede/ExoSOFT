@@ -1,11 +1,11 @@
-#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp
+#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 from __future__ import absolute_import
 from __future__ import print_function
 #import numpy as np
+#import timeit
 import copy
 import os
 import shutil
-import timeit
 import datetime
 import glob
 import numpy as np
@@ -13,14 +13,28 @@ from scipy import interpolate
 import sys
 from astropy.io import fits as pyfits
 import warnings
-from . import readWriteTools as rwTools
-from . import plotTools
 import jdcal
 import emcee
 import KMlogger
-from ExoSOFT import tools
-const = tools.constants
 from six.moves import range
+
+## import from modules in ExoSOFT ##
+from . import constants as const
+from .cytools import mean_corr_len
+from .model import ExoSOFTmodel, ln_posterior
+from .readWriteTools import loadFits, writeFits, rmFiles, dataReader
+
+#from ExoSOFT import tools
+#const = tools.constants
+#from .plotTools import histMakeAndDump
+#from ExoSOFT.tools import readWriteTools as rwtools 
+#from . import readWriteTools as rwtools 
+#from .readWriteTools import *
+#import constants as const
+#from cytools import mean_corr_len
+#from model import ExoSOFTmodel, ln_posterior
+#from plotTools import histMakeAndDump
+#import readWriteTools as rwtools 
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)  
@@ -36,7 +50,7 @@ def mcmcEffPtsCalc(outputDataFilename):
     length step.  This way it produces an average value that is more reliable.
     """
     log.info("Starting to calculate correlation lengths")
-    (head,data) = rwTools.loadFits(outputDataFilename)
+    (head,data) = loadFits(outputDataFilename)
     numSteps = data.shape[0]
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
@@ -54,7 +68,7 @@ def mcmcEffPtsCalc(outputDataFilename):
             if True:
                 dataC = np.ascontiguousarray(data[:,paramList[i]],dtype=np.dtype('d'))
                 #print("Calling cy mean_corr_len")
-                meanCorrLength = tools.mean_corr_len(dataC)
+                meanCorrLength = mean_corr_len(dataC)
                 #print(" cy output = "+str(meanCorrLength))
             
             currParamStr = str(paramList[i])+', '+paramStrs[i]+", "+str(meanCorrLength)
@@ -76,7 +90,7 @@ def autocorr(outputDataFilename,fast=True):
     reasonable window size.'
     """
     log.info("Starting to calculate autocorrelation with emcee.autocorr.integrated_time")
-    (head,data) = rwTools.loadFits(outputDataFilename)
+    (head,data) = loadFits(outputDataFilename)
     #numSteps = data.shape[0]
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
@@ -125,7 +139,7 @@ def burnInCalc(mcmcFnames,combinedFname):
     #chiSquaredsALL = np.array([])
     burnInLengths = []
     # calculate median of combined data ary
-    (head,data) = rwTools.loadFits(combinedFname)
+    (head,data) = loadFits(combinedFname)
     #nu = float(head0['NU'])
     chiSqs = data[:,11]
     if type(chiSqs)!=np.ndarray:
@@ -140,7 +154,7 @@ def burnInCalc(mcmcFnames,combinedFname):
     ## calculate location of medianALL in each chain
     for filename in mcmcFnames:
         if os.path.exists(filename):
-            (head,data) = rwTools.loadFits(filename)
+            (head,data) = loadFits(filename)
             chiSqs = data[:,11]
             likelihoods = np.exp(-chiSqs/2.0)
             #medianChain = np.median(chiSquaredsChain)
@@ -170,7 +184,7 @@ def burnInStripper(mcmcFnames,burnInLengths):
         filename = mcmcFnames[i]
         burnIn = burnInLengths[i]
         if os.path.exists(filename):
-            (head,data) = rwTools.loadFits(filename)
+            (head,data) = loadFits(filename)
             ##strip burn-in and write to new fits     
             log.debug("Before stripping burn-in, file had "+str(len(data[:,0]))+" samples")        
             hdu = pyfits.PrimaryHDU(data[burnIn:,:])
@@ -206,7 +220,7 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
             ## stage 2 ->  Use them to compare between chains 
             ##             then calc R and T.
             ###########################################################
-            (head,data) = rwTools.loadFits(mcmcFileList[0])
+            (head,data) = loadFits(mcmcFileList[0])
             (paramList,paramStrs,_) = getParStrs(head,latex=False)
             
             Nc = len(mcmcFileList)
@@ -214,7 +228,7 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
             allStg1vals=np.zeros((Nc,len(paramList),3))
             for i in range(0,len(mcmcFileList)):
                 log.debug("Starting to calc chain #"+str(i)+' GR values')
-                (head,data) = rwTools.loadFits(mcmcFileList[i])
+                (head,data) = loadFits(mcmcFileList[i])
                 allStg1vals[i,:,2]=data.shape[0]
                 for j in range(0,len(paramList)):
                     log.debug("calculating stage 1 of GR for chain #"+str(i)+", param: "+paramStrs[j])
@@ -368,7 +382,7 @@ def cleanUp(settings,stageList,allFname):
     ## write best orbit to a fits file for minimal customPost.py plotting
     bst = findBestOrbit(allFname, bestToFile=False, findAgain=False,by_ln_prob=stageList[-1]=='emcee')
     outFname = os.path.join(settings['finalFolder'],'bestFit.fits')
-    rwTools.writeFits(outFname,bst,settings,clob=False)
+    writeFits(outFname,bst,settings,clob=False)
     
     delFiles = []
     fnames = glob.glob(os.path.join(settings['finalFolder'],"pklTemp-*"))
@@ -394,7 +408,7 @@ def cleanUp(settings,stageList,allFname):
             delFiles.append(nm)
             
     ##try to delete files
-    rwTools.rmFiles(delFiles)
+    rmFiles(delFiles)
     
 def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,iacStr,allTime,postTime,durationStrings,MCmpo,SAmpo,STmpo,MCMCmpo,emcee_mpo):
     """
@@ -405,7 +419,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         f = open(summaryFname,'a')
     else:
         f = open(summaryFname,'w')
-    head = rwTools.loadFits(finalFits,noData=True)
+    head = loadFits(finalFits,noData=True)
     totalSamps = head['NSAMPLES']
     (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
@@ -452,9 +466,9 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
                         bestFit2 = findBestOrbit(fname,bestToFile=False,findAgain=True,by_ln_prob=stage=='emcee')
                         
                         #### calc chi squared for these params
-                        Model = tools.ExoSOFTmodel(settings)
+                        Model = ExoSOFTmodel(settings)
                         paramsLast = copy.deepcopy(Model.Params.stored_to_direct(bestFit2))
-                        _ = tools.ln_posterior(paramsLast, Model)
+                        _ = ln_posterior(paramsLast, Model)
                         #Model.chi_squared_3d
                         #Model.chi_squared_di
                         #Model.chi_squared_rv
@@ -478,15 +492,15 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         ############################################
         ## calculate chi squareds for the best fit #
         ############################################
-        Model = tools.ExoSOFTmodel(settings)
+        Model = ExoSOFTmodel(settings)
         _params = copy.deepcopy(Model.Params.stored_to_direct(bestFit))
-        _ = tools.ln_posterior(_params, Model)
+        _ = ln_posterior(_params, Model)
         reducedDI = Model.chi_squared_di/head['NUDI']
         reducedRV = Model.chi_squared_rv/head['NURV']
         reduced3D = Model.chi_squared_3d/head['NU']
         
 #         ##get the real data
-#         realData = rwTools.loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
+#         realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
 #         ## Make Orbit cpp obj
 #         Orbit = tools.cppTools.Orbit()
 #         try:
@@ -613,7 +627,7 @@ def keplersThird(p=0,atot=0,mtot=0):
     
 def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
     if finalFits!='':
-        (head,data) = rwTools.loadFits(finalFits)
+        (head,data) = loadFits(finalFits)
         nu = head['NU']
         nuDI = head['NUDI']
         nuRV = head['NURV']
@@ -627,53 +641,106 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
         nuDI = 1.0
         nuRV = 1.0
         
-    ##get the real data
-    realData = rwTools.loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
-    ## Make Orbit cpp obj
-    Orbit = tools.cppTools.Orbit()
-    try:
-        pasa = settings["pasa"]
-    except:
-        pasa = False
-    Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
-    Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
-    ## ensure orbParams are in required format for Orbit
-    params = []
-    for par in orbParams:
-        params.append(par)
-    params=np.array(params,dtype=np.dtype('d'),order='C')
-    Orbit.loadRealData(realData)
-    predictedData = np.ones((realData.shape[0],3),dtype=np.dtype('d'),order='C')
-    Orbit.calculate(predictedData,params)
-    ## Calculate chi squareds for 3D,DI,RV and update bestPars and bestSumStr if this is better than the best
-    (raw3D, reducedDI, reducedRV, reduced3D) = chiSquaredCalc3D(realData,predictedData,nuDI,nuRV,nu)
+        
+    ############################################
+    ## calculate chi squareds for the best fit #
+    ############################################
+    Model = ExoSOFTmodel(settings)
+    _params = copy.deepcopy(Model.Params.stored_to_direct(orbParams))
+    _ = ln_posterior(_params, Model)
+    raw3D = Model.chi_squared_3d
+    reducedDI = Model.chi_squared_di/nuDI
+    reducedRV = Model.chi_squared_rv/nuRV
+    reduced3D = Model.chi_squared_3d/nu  
+        
+    ## OLD WAY below, delete it soon! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#     ##get the real data
+#     realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
+#     ## Make Orbit cpp obj
+#     Orbit = tools.cppTools.Orbit()
+#     try:
+#         pasa = settings["pasa"]
+#     except:
+#         pasa = False
+#     Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
+#     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
+#     ## ensure orbParams are in required format for Orbit
+#     params = []
+#     for par in orbParams:
+#         params.append(par)
+#     params=np.array(params,dtype=np.dtype('d'),order='C')
+#     Orbit.loadRealData(realData)
+#     predictedData = np.ones((realData.shape[0],3),dtype=np.dtype('d'),order='C')
+#     Orbit.calculate(predictedData,params)
+#     ## Calculate chi squareds for 3D,DI,RV and update bestPars and bestSumStr if this is better than the best
+#     (raw3D, reducedDI, reducedRV, reduced3D) = chiSquaredCalc3D(realData,predictedData,nuDI,nuRV,nu)
+
     print('(raw3D, reducedDI, reducedRV, reduced3D) = ',repr((raw3D, reducedDI, reducedRV, reduced3D)))
     
 def predictLocation(orbParams,settings,epochs=[]):
     
-    ##get the real data
-    realData = rwTools.loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode= settings['data_mode'])
-    ## Make Orbit cpp obj
-    Orbit = tools.cppTools.Orbit()
-    try:
-        pasa = settings["pasa"]
-    except:
-        pasa = False
-    Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
-    Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
-    ## ensure orbParams are in required format for Orbit
-    params = []
-    for par in orbParams:
-        params.append(par)
-    params=np.array(params,dtype=np.dtype('d'),order='C')
-    fakeData = np.ones((len(epochs),7),dtype=np.dtype('d'),order='C')
-    fakeData[:,0]=epochs[:]
-    Orbit.loadRealData(fakeData)
-    predictedData = np.ones((len(epochs),3),dtype=np.dtype('d'),order='C')
-    print("fakeData are:\n"+repr(fakeData))
-    print("predicted epochs data before are:\n"+repr(predictedData))
-    Orbit.calculate(predictedData,params)
-    print("predicted epochs data are:\n"+repr(predictedData))
+    
+    ############################################
+    ## calculate chi squareds for the best fit #
+    ############################################
+    Model = ExoSOFTmodel(settings)
+    
+    ## make empty inputs for measured data
+    nPts = len(epochs)
+    predEpochs = np.array(epochs,dtype=np.dtype('d'))
+    Model.Data.rapa = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.rapa_err = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.decsa = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.decsa_err = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.rapa_model = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.decsa_model = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.epochs_di = predEpochs
+
+    Model.Data.rv = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.rv_err = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.rv_model = np.ones((nPts),dtype=np.dtype('d'))
+    Model.Data.rv_inst_num = np.zeros((nPts),dtype=np.dtype('i'))
+    Model.Data.epochs_rv = predEpochs
+    
+    ## call model to predict data for given epochs
+    _params = copy.deepcopy(Model.Params.stored_to_direct(orbParams))
+    _ = ln_posterior(_params, Model)
+    
+    ## resulting measurable astrometry and rv for those epochs and orbital elements
+    fit_decsa_model = copy.deepcopy(Model.Data.decsa_model)
+    fit_rapa_model = copy.deepcopy(Model.Data.rapa_model)
+    fit_rv_model = copy.deepcopy(Model.Data.rv_model)
+    
+    ## OLD WAY, delete soon!! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+#     ##get the real data
+#     realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode= settings['data_mode'])
+#     ## Make Orbit cpp obj
+#     Orbit = tools.cppTools.Orbit()
+#     try:
+#         pasa = settings["pasa"]
+#     except:
+#         pasa = False
+#     Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
+#     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
+#     ## ensure orbParams are in required format for Orbit
+#     params = []
+#     for par in orbParams:
+#         params.append(par)
+#     params=np.array(params,dtype=np.dtype('d'),order='C')
+#     fakeData = np.ones((len(epochs),7),dtype=np.dtype('d'),order='C')
+#     fakeData[:,0]=epochs[:]
+#     Orbit.loadRealData(fakeData)
+#     predictedData = np.ones((len(epochs),3),dtype=np.dtype('d'),order='C')
+#     print("fakeData are:\n"+repr(fakeData))
+#     print("predicted epochs data before are:\n"+repr(predictedData))
+#     Orbit.calculate(predictedData,params)
+#     print("predicted epochs data are:\n"+repr(predictedData))
+
+    print("Predicted astrometry and RV for the epochs: "+repr(predEpochs))
+    print("Astrometry (Dec or SA, depending on 'pasa' setting): "+repr(fit_decsa_model))
+    print("Astrometry (RA or PA, depending on 'pasa' setting): "+repr(fit_rapa_model))
+    print("Radial Velocity: "+repr(fit_rv_model))
+
     
 def chiSquaredCalc3D(realData,modelData,nuDI,nuRV,nu3D,pasa=False): 
     """
@@ -735,6 +802,42 @@ def getParInts(head):
     for i in ints:
         parInts.append(int(i))  
     return parInts        
+
+def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, parRange=False,retHist=False):
+    """
+    This will make a matplotlib histogram using the input settings, then writing the resulting  
+    centers of the bins and number of data points in said bin values to disk, with '.dat' extension
+    if not added already.
+    
+    This function is designed to work with a follow up like histLoadAndPlot_** to produce publication worthy plots.
+    """
+    #print('data :\n'+repr(data))
+    #print('parRange :\n'+repr(parRange))
+    if weight:
+        ## use the likelihoods as the weights
+        theWeights = np.exp(-chiSquareds/2.0)
+    else:
+        theWeights = np.ones(len(data))      
+    if parRange==False:
+        (hst,bin_edges) = np.histogram(data,bins=nbins,normed=False,weights=theWeights,density=None)
+    elif len(parRange)==2:
+        (hst,bin_edges) = np.histogram(data,bins=nbins,range=(parRange[0],parRange[1]),normed=False,weights=theWeights,density=None)
+    else:
+        log.critical('the range value provided to histMakeAndDump did not have required length of zero or 2.')
+    #find center of bins
+    if type(bin_edges)!=np.ndarray:
+        bin_edges = np.array(bin_edges)
+    binCenters = (bin_edges[1:]+bin_edges[:-1])/2.0
+    histData=np.zeros((len(hst),2))
+    histData[:,0]=binCenters
+    histData[:,1]=hst
+    #print('hst :\n'+repr(hst))
+    if outFilename!='':
+        if outFilename[-4:]!='.dat':
+            outFilename=outFilename+'.dat'
+        np.savetxt(outFilename,histData)
+    if retHist:
+        return histData
         
 def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=False, returnBestDataVal=False):
     """
@@ -754,10 +857,10 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
     log.debug('Inside confLevelFinder')
     outStr=''
     if os.path.exists(filename):
-        (dataAry,chiSquareds,[bestDataVal,dataMedian,dataValueStart,dataValueMid,dataValueEnd]) = rwTools.dataReader(filename, colNum)
+        (dataAry,chiSquareds,[bestDataVal,dataMedian,dataValueStart,dataValueMid,dataValueEnd]) = dataReader(filename, colNum)
         if len(dataAry>0) or (dataValueStart!=dataValueMid!=dataValueEnd):
             #print 'ln688:confLevelFinder'
-            histAry = plotTools.histMakeAndDump(chiSquareds,dataAry,weight=False,retHist=True)
+            histAry = histMakeAndDump(chiSquareds,dataAry,weight=False,retHist=True)
             #print 'ln690:confLevelFinder'
             [conf68Vals,conf95Vals,range99,range100] = histConfLevels(histAry)
             #print 'ln692:confLevelFinder'
@@ -935,7 +1038,7 @@ def findBestOrbit(filename,bestToFile=True,findAgain=False, by_ln_prob=True):
             log.error("Tried to load previously found best orbit from file, but failed, so will find it from data again.")
     if gotIt==False:
         log.debug("trying to find best orbit in file:\n"+filename)   
-        (head,data) = rwTools.loadFits(filename)
+        (head,data) = loadFits(filename)
         if by_ln_prob:
             probBest = np.max(data[:,11])
             loc = np.where(data[:,11]==probBest)
@@ -980,62 +1083,7 @@ def nparyTolistStr(ary,brackets=True,dmtr=','):
     if brackets:
         s+=']'
     return s
-   
-def copyCodeFiles(src, dst,settingsFiles=None):
-    """
-    For copying the code and settings files used to the output directory.
-    """
-    #First copy the code directory/tree
-    copytree(src, dst)
-    #now copy the settings files
-    if settingsFiles is not None:
-        if (type(settingsFiles)!=list)and(type(settingsFiles)==str):
-            settingsFiles = [settingsFiles]
-        setdst = os.path.join(dst,'settingsFilesUsed')
-        os.mkdir(setdst)
-        for f in settingsFiles:
-            s=f
-            d=os.path.join(setdst, os.path.basename(f))
-            try:
-                shutil.copy2(s, d)
-                log.debug("Copying:\n "+repr(s)+'\nto:\n'+repr(d))
-            except:
-                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
-    
-def copytree(src, dst):
-    """
-    Recursively copy a directory and its contents to another directory.
-    
-    WARNING: this is not advised for higher level folders as it can also copy subfolders 
-    thus leading to a very large copy command if not careful.
-    
-    Code taken and simplified from:
-    http://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
-    """
-    skipStrs = [".git",".pyc",".py~",".sty",".so",".cxx",".o",".h~",".cc~"]
-    for item in os.listdir(src):
-        s = os.path.join(src, item)
-        d = os.path.join(dst, item)
-        if os.path.isdir(s):
-            try:
-                shutil.copytree(s, d)
-                log.debug("Copying directory:\n "+repr(s)+'\nto:\n'+repr(d))
-            except:
-                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
-        else:
-            try:
-                #Check if filepath contains one of the skip 
-                #strs and copy only if it is fine.
-                fine = True
-                for skipStr in skipStrs:
-                    if skipStr in item:
-                        fine=False
-                if fine:
-                    shutil.copy2(s, d)
-                    log.debug("Copying file:\n "+repr(s)+'\nto:\n'+repr(d))
-            except:
-                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))                        
-    
+
 def ENtoPASA(E, E_error, N, N_error):
     """
     Will calculate the Separation and Position Angles for a given East and North, including their errors.

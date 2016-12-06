@@ -2,10 +2,11 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
-import ExoSOFT
-from ExoSOFT import tools
-from . import constants as const
 import sys
+
+## import from modules in ExoSOFT ##
+from . import constants as const
+#import constants as const
 
 class ExoSOFTpriors(object):
     """

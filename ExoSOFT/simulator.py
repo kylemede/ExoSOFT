@@ -10,7 +10,7 @@ import copy
 import timeit
 import datetime
 import emcee
-import tools
+from . import tools
 import KMlogger
 from six.moves import range
 #from tools.model import constants as const

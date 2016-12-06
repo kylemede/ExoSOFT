@@ -5,9 +5,9 @@ import matplotlib
 from six.moves import range
 # Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
 matplotlib.use('Agg') 
-import tools
-import simulator
-from exosoftpath import rootDir as ExoSOFTdir
+from . import tools
+from . import simulator
+#from exosoftpath import rootDir as ExoSOFTdir
 import sys
 import os
 import timeit
@@ -19,12 +19,16 @@ import numpy as np
     It will start things off, call the appropriate set of 
     simulation and post-processing steps.
 """ 
-def exoSOFT():
+def exoSOFT(ExoSOFT_dir='',sett_file_path=''):
     """
     'main'
     """
     ## Call startup to get dict and load up final directories into it.
-    settings = tools.startup(sys.argv,ExoSOFTdir)
+    if False:
+        #from exosoftpath import rootDir as ExoSOFTdir
+        ExoSOFTdir = ''
+        ExoSOFT_dir=ExoSOFTdir
+    settings = tools.startup(sys.argv,ExoSOFT_dir)
     log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=settings['logLevel'])
     log.logDict(settings)
     #log.debug("Prepend string passed in was '"+settings['prepend']+"'")

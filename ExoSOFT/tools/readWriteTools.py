@@ -9,13 +9,84 @@ import sys
 import pickle
 import shutil
 import warnings
-from sphinx.ext.napoleon.docstring import GoogleDocstring
-from six.moves import range
-warnings.simplefilter("error")
 import KMlogger
-from ExoSOFT import tools
+from six.moves import range
 
+## import from modules in ExoSOFT ##
+#from sphinx.ext.napoleon.docstring import GoogleDocstring
+#from . import generalTools as gentools
+#from .generalTools import nparyTolistStr
+#import generalTools as gentools
+
+warnings.simplefilter("error")
 log = KMlogger.getLogger('main.rwTools',lvl=100,addFH=False)  
+
+
+def nparyTolistStr(ary,brackets=True,dmtr=','):
+    s=''
+    if brackets:
+        s+='['
+    for val in ary:
+        s+=str(val)+dmtr
+    s=s[:-1]
+    if brackets:
+        s+=']'
+    return s
+    
+def copytree(src, dst):
+    """
+    Recursively copy a directory and its contents to another directory.
+    
+    WARNING: this is not advised for higher level folders as it can also copy subfolders 
+    thus leading to a very large copy command if not careful.
+    
+    Code taken and simplified from:
+    http://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
+    """
+    skipStrs = [".git",".pyc",".py~",".sty",".so",".cxx",".o",".h~",".cc~"]
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            try:
+                shutil.copytree(s, d)
+                log.debug("Copying directory:\n "+repr(s)+'\nto:\n'+repr(d))
+            except:
+                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
+        else:
+            try:
+                #Check if filepath contains one of the skip 
+                #strs and copy only if it is fine.
+                fine = True
+                for skipStr in skipStrs:
+                    if skipStr in item:
+                        fine=False
+                if fine:
+                    shutil.copy2(s, d)
+                    log.debug("Copying file:\n "+repr(s)+'\nto:\n'+repr(d))
+            except:
+                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))      
+
+def copyCodeFiles(src, dst,settingsFiles=None):
+    """
+    For copying the code and settings files used to the output directory.
+    """
+    #First copy the code directory/tree
+    copytree(src, dst)
+    #now copy the settings files
+    if settingsFiles is not None:
+        if (type(settingsFiles)!=list)and(type(settingsFiles)==str):
+            settingsFiles = [settingsFiles]
+        setdst = os.path.join(dst,'settingsFilesUsed')
+        os.mkdir(setdst)
+        for f in settingsFiles:
+            s=f
+            d=os.path.join(setdst, os.path.basename(f))
+            try:
+                shutil.copy2(s, d)
+                log.debug("Copying:\n "+repr(s)+'\nto:\n'+repr(d))
+            except:
+                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
 
 def dataReader(filename, colNum=0):
     """
@@ -557,7 +628,7 @@ def periodicDataDump(filename,d):
                         for val in d[i]:
                             outstr+='%.14g  ' % (val)
                         outstr += '\n'
-                        outfile.write(outstr)#tools.nparyTolistStr(d[i],brackets=False,dmtr=' ')+'\n')
+                        outfile.write(outstr)#nparyTolistStr(d[i],brackets=False,dmtr=' ')+'\n')
                         #outfile.write(re.sub("\n ","\n",re.sub("[\\[\\]]","",np.array2string(d,precision=16))))
         else:
             if old:
@@ -569,9 +640,9 @@ def periodicDataDump(filename,d):
                         for val in d[i]:
                             outstr+='%.14g  ' % (val)
                         outstr += '\n'
-                        outfile.write(outstr)#tools.nparyTolistStr(d[i],brackets=False,dmtr=' '))
+                        outfile.write(outstr)#nparyTolistStr(d[i],brackets=False,dmtr=' '))
                         #outfile.write(re.sub("\n ","\n",re.sub("[\\[\\]]","",np.array2string(d))))
-                        #print tools.nparyTolistStr(d[i],brackets=False,dmtr=' ')
+                        #print nparyTolistStr(d[i],brackets=False,dmtr=' ')
                     #raise IOError('\n\n'+s)
                 
 
@@ -671,7 +742,7 @@ def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
     f = open(filename,'w')
     f.write("Best-fit between all "+stage+" chains had a reduce chi squared of "+str(bstChiSqr)+'\n')
     f.write("\nIts parameters were:\n")
-    f.write(tools.nparyTolistStr(pars)+'\n')
+    f.write(nparyTolistStr(pars)+'\n')
     f.write("\n\nIts sigmas were:\n")
     #double check clean up sigs of pars that were not varying
     paramInts = settings['paramInts']
@@ -686,7 +757,7 @@ def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
         except:
             sigs_out = sigs
             log.debug("Failed to zero non-varying sigmas, but no biggie. It's a benign bug.")
-    f.write(tools.nparyTolistStr(sigs_out)+'\n')
+    f.write(nparyTolistStr(sigs_out)+'\n')
     f.close()
     log.info("Best fit params and sigmas from "+stage+" stage were written to :\n"+filename)    
     

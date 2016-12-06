@@ -1,8 +1,8 @@
+#@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 from __future__ import absolute_import
 import warnings
 warnings.simplefilter("error")
 
-#from KMlogger import *
 from . import constants
 
 from .model import ExoSOFTmodel
@@ -12,6 +12,7 @@ from .cytools import mean_corr_len
 
 from .startupTools import startup
 
+from . import readWriteTools
 from .readWriteTools import loadRealData
 from .readWriteTools import loadSettings
 from .readWriteTools import loadFits
@@ -24,6 +25,8 @@ from .readWriteTools import rmFiles
 from .readWriteTools import pklIt
 from .readWriteTools import unPklIt
 from .readWriteTools import reloadMpoROs
+from .readWriteTools import copytree
+from .readWriteTools import copyCodeFiles
 
 from . import generalTools
 from .generalTools import findBestOrbit
@@ -36,8 +39,6 @@ from .generalTools import burnInStripper
 from .generalTools import timeStrMaker
 from .generalTools import dateStrMaker
 from .generalTools import copyToDB
-from .generalTools import copytree
-from .generalTools import copyCodeFiles
 from .generalTools import chiSquaredCalc3D
 from .generalTools import recheckFit3D
 from .generalTools import predictLocation
@@ -59,11 +60,6 @@ from .progBar import ProgBar
 
 from .chainTools import multiProcObj
 from .chainTools import iterativeSA
-
-#import priors
-
-#from artificialDataMaker import calcOrbit
-
 
 from .utils import load_settings_dict
 from .utils import make_starting_params

@@ -1,4 +1,6 @@
-import tools
-import ExoSOFT
-import exosoftpath
-import simulator
+from ExoSOFT import exoSOFT
+
+from . import tools
+#import ExoSOFT
+#import exosoftpath
+#import simulator
