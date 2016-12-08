@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from ExoSOFT import exoSOFT
-import sys
+#import sys
 import os
 
 #cwd = os.getenv('PWD')
@@ -11,14 +11,13 @@ os.system('ls')
 settings_in = None
 priors_in = None
 if os.path.exists('./settings.py'):
-    #print("Yup!  settings.py is here")
+    print("Yup!  settings.py is here")
     from settings import settings as settings_in
     #print(repr(settings))
 if os.path.exists('./priors.py'):
-    #print("Yup!  priors.py is here")
+    print("Yup!  priors.py is here")
     from priors import ExoSOFTpriors as priors_in
     #print(repr(ExoSOFTpriors))
-
 
 exoSOFT(settings_in, priors_in)
 

@@ -12,7 +12,7 @@ from .startupTools import startup
 
 from . import readWriteTools
 from .readWriteTools import loadRealData
-from .readWriteTools import loadSettings
+from .readWriteTools import load_settings
 from .readWriteTools import loadFits
 from .readWriteTools import writeFits
 from .readWriteTools import combineFits

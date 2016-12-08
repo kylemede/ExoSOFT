@@ -55,7 +55,7 @@ setup(
         ],
     include_dirs = ['ExoSOFT','ExoSOFT/tools','examples'],
     install_requires = ['numpy','pyfits','scipy','matplotlib',\
-                        'psutil','astropy','KMlogger','emcee'],
+                        'psutil','astropy','KMlogger','emcee','pathos'],
     ext_modules = cythonize(["ExoSOFT/tools/cytools.pyx"]),
     #ext_modules=[]
     #ext_modules=[ Extension("cytools",["ExoSOFT/tools/cytools.c"]),Extension("cytools",["ExoSOFT/tools/cytools.pyx"]) ]

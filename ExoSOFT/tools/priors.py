@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
 import sys
-
-## import from modules in ExoSOFT ##
-#from . import constants as const
-#import constants as const
+#############################################################################
+##  Do not import any non-standard modules here, only use those universaly ##
+##  available to minimize any errors that could occur.                     ##
+#############################################################################
 
 class ExoSOFTpriors(object):
     """
@@ -87,32 +87,32 @@ class ExoSOFTpriors(object):
         comboPriors = 1.0
         try:
             if self.e_prior:
-                #print 'ePrior before'#$$$$$$$$$$
+                #print('ePrior before')#$$$$$$$$$$
                 comboPriors*=self.ecc_prior_fn(pars[4])
                 #print('e prior = ',self.ecc_prior_fn(pars[4]))
             if self.p_prior:
-                #print 'pPrior before'#$$$$$$$$$$
+                #print('pPrior before')#$$$$$$$$$$
                 comboPriors*=self.p_prior_fn(pars[7])
                 #print('p prior = ',self.p_prior_fn(pars[7]))
             if self.inc_prior:
-                #print 'incPrior before'#$$$$$$$$$$
+                #print('incPrior before')#$$$$$$$$$$
                 comboPriors*=self.inc_prior_fn(pars[8])
                 #print('inc prior = ',self.inc_prior_fn(pars[8]))
             if self.m1_prior:
-                #print 'M1Prior before'#$$$$$$$$$$
+                #print('M1Prior before')#$$$$$$$$$$
                 comboPriors*=self.m1_prior_fn(pars[0])
                 #print('m1 prior = ',self.m1_prior_fn(pars[0]))
-                #print 'M1Prior after'#$$$$$$$$$$
+                #print('M1Prior after')#$$$$$$$$$$
             if self.m2_prior:
-                #print 'M2Prior before'#$$$$$$$$$$
+                #print('M2Prior before')#$$$$$$$$$$
                 comboPriors*=self.m2_prior_fn(pars[1],pars[0])
                 #print('m2 prior = ',self.m2_prior_fn(pars[1],pars[0]))
-                #print 'M2Prior after'#$$$$$$$$$$
+                #print('M2Prior after')#$$$$$$$$$$
             if self.para_prior:
-                #print 'parPrior before'#$$$$$$$$$$
+                #print('parPrior before')#$$$$$$$$$$
                 comboPriors*=self.para_prior_fn(pars[2])
                 #print('para prior = ',self.para_prior_fn(pars[2]))
-                #print 'parPrior after'#$$$$$$$$$$
+                #print('parPrior after')#$$$$$$$$$$
             return comboPriors
         except:
             print("An error occured while trying to calculate the combined sigle priors.")

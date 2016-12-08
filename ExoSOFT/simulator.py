@@ -5,11 +5,12 @@ import numpy as np
 import os
 import gc
 import copy
-#import sys
+import sys
 #from scipy.constants.codata import precision
 import timeit
 import datetime
 import emcee
+import pathos.multiprocessing as mp
 from . import tools
 import KMlogger
 from six.moves import range
@@ -511,16 +512,38 @@ class Simulator(object):
             ndim_raw = len(self.settings['rangeMinsRaw']) # number of parameters in the model, in 'raw'/'direct' format
             nwalkers = self.settings['n_wlkrs']
             nsteps = int(float(self.settings['nSamples'])/float(nwalkers))  ##$$$ leave this way, or add to settings dict?
+            
+            if nsteps<self.settings['n_emcee_burn']:
+                ## There will be no samples kept after removing burn-in!
+                ## Thus, don't run emcee.
+                ## NOTE: another option here would be to change the value of 
+                ## 'n_emcee_burn' to a lower number, or change rmBurn' to False...
+                s = "\nCRITICAL PROBLEM WITH SETTINGS:"
+                s+= "\nThere will be no samples kept after removing burn-in!"
+                s+= "\n'nsteps', "+str(nsteps)+", is less than 'n_emcee_burn', "
+                s+= str(self.settings['n_emcee_burn'])+'!!\n'
+                s+= "Thus, all steps emcee takes will be deleted.\n"
+                s+= "Options:\n-shorten 'n_emcee_burn'\n-increase 'nSamples'\n"
+                s+= "-change 'rmBurn' to False\n"                
+                self.log.raisemsg(s)
+                sys.exit()
+                
             #print('\n'*3+'Calling make_start_params')
             #print('\n'+repr(latestParsRaw)+'\n')
             ## NOTE: starting_guesses array must be a numpy array with dtype=np.dtype('d').
             starting_guesses = tools.make_starting_params(latestParsRaw,nwalkers,scale=0.01)###$$$$$$$$$$$$$$$$$$$$$$$$$ maybe move this over to the built in starting samples func
             #print('\n'*3+'back from make_start_params')
+                     
             ## Call emcee to explore the parameter space
-            sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
-                                            args=[self.Model], threads=ncpu)
+            #sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
+            #                                args=[self.Model], threads=ncpu)
             self.log.importantinfo("\nObjects and inputs prepared, now calling emcee.")
+            
+            p = mp.ProcessingPool(ncpu)
+            sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
+                                                    args=[self.Model], threads=ncpu, pool=p)
             sampler.run_mcmc(starting_guesses, nsteps)
+            #sampler = test_emcee(nwalkers, ndim_raw, tools.ln_posterior, self.Model, ncpu,starting_guesses, nsteps)
             self.log.importantinfo("ensamble sampling with emcee complete.\n")
             
             ################################################################
@@ -664,4 +687,15 @@ class Simulator(object):
             #self.acceptStr
                 
         return (outFname,self.paramsBestStored,sigmas,self.bestRedChiSqr,avgAcceptRate,self.acceptStr)
+    
+    
+def test_emcee(nwalkers, ndim_raw, ln_post, Model, ncpu,starting_guesses, nsteps):
+    import pathos.multiprocessing as mp
+    p = mp.ProcessingPool(ncpu)
+
+    sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, ln_post, 
+                                            args=[Model], threads=ncpu, pool=p)
+    #self.log.importantinfo("\nObjects and inputs prepared, now calling emcee.")
+    sampler.run_mcmc(starting_guesses, nsteps)
+    return sampler
 #END OF FILE      

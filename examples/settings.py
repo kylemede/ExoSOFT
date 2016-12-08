@@ -2,14 +2,14 @@
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (500000,"Number of MCMC or MC samples"),
+'nSamples' : (10000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
-'nChains' : (5,"Number MC/SA/ST of chains"),
+'nChains' : (3,"Number MC/SA/ST of chains"),
 # Number of MCMC chains to run in parallel. ONLY available in 'MCMC' mode. [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
-'nMCMCcns' : (5,"Number MCMC of chains"),
+'nMCMCcns' : (3,"Number MCMC of chains"),
 # Number of emcee walkers to run.  ONLY available in 'emcee' mode. [1,500] [int]
 'n_wlkrs' :  (200,"Number of emcee walkers"),
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
@@ -22,7 +22,7 @@ simpleSettingsDict={
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
 # NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'MCMC',
+'stages' : 'emcee',
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
 'initCrit' : 'tight',
@@ -33,7 +33,7 @@ simpleSettingsDict={
 # if unknown, set to False!! else [comma separated list of doubles]
 'startParams' : [0.989258173441,0.000969607646338,49.4824152464,101.824621571,0.0570635830548,2450656.6178,2450656.6178,12.0122193117,44.5819933928,0.194526776635,5.22763017736,46.9083271473,8.91689222077,-0.0413666288362],
 # if unknown, set to False!! else [comma separated list of doubles]
-'startSigmas' : [0.0025495,4.99e-06,0.099,0.36,0.000101373206355,4.5,0.049,0.089,0.00098488578018,0.006],#[0.07755,0.0001617,2.772,11.16,0.00283844977793,148.5,1.274,2.581,0.0315163449657,0.18],
+'startSigmas' : [0.0025495,4.99e-06,0.099,0.36,0.000101373206355,4.5,0.049,0.089,0.00098488578018,0.006],
 }
 
 directoriesDict = {
@@ -43,10 +43,9 @@ directoriesDict = {
 'di_dataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',      
 # full path to input radial velocity data file. [string]
 'rv_dataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
-
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
 #*************************************************************************************************************************
-'outRoot' : "TEST-ArtificialJupiter-5percentError-ExoSOFT2-tst",
+'outRoot' : "TEST-ArtificialJupiter-5percentError-ExoSOFT2-tst-tst",
 #*************************************************************************************************************************               
 }
 

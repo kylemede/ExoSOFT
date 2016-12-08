@@ -26,20 +26,8 @@ from six.moves import range
 ## import from modules in ExoSOFT  ##
 from . import constants as const
 from .model import ExoSOFTmodel, ln_posterior
-from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal 
-from .readWriteTools import loadFits, loadRealData
-
-#import constants as const
-#import model
-#from ExoSOFT import tools
-#import ExoSOFT.readWriteTools as rwtools
-#from ExoSOFT.tools import readWriteTools
-#from . import readWriteTools as rwtools 
-#from ExoSOFT.readWriteTools import loadFits, writeFits, rmFiles, dataReader, loadRealData
-#import .readWriteTools as rwtools
-#import generalTools as gentools
-#from .readWriteTools import *
-#from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal     
+from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal, confLevelFinder
+from .readWriteTools import loadFits, loadRealData 
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
