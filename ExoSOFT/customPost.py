@@ -1,17 +1,18 @@
+#@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
 from __future__ import print_function
 from . import tools
-#from tools import constants as const
-from .exosoftpath import rootDir as ExoSOFTdir
 import sys
 import os
 import numpy as np
 import glob
+import KMlogger
 from six.moves import range
 
-def customPost():
-    settings = tools.startup(sys.argv,ExoSOFTdir,rePlot=True)
-    log = tools.getLogger('main',dr=settings['finalFolder'],lvl=100)
+def custom_post(settings_in, priors_in):
+    ## load up settings that were passed in
+    settings = tools.startup(settings_in, priors_in,rePlot=True)
+    log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=100)
     skipBurnInStrip=True
     
     ## run make for swig if requested??
@@ -90,7 +91,7 @@ def customPost():
         print('about to find best orbit')
         bestFit = tools.findBestOrbit(allFname,bestToFile=False,findAgain=False)
     else:
-        bestFit = np.array([0.605838520481,0.146024522998,48.0692312367,98.8893962294,0.640666046184,2445709.98532,2445709.98532,8.2093394771,40.2779824043,166.743572004,3.39834214958,43.3616906776,0.0,9730.87607461,11612.1046117,12586.0296274])
+        bestFit = np.array([0.989258173441,0.000969607646338,49.4824152464,101.824621571,0.0570635830548,2450656.6178,2450656.6178,12.0122193117,44.5819933928,0.194526776635,5.22763017736,46.9083271473,8.91689222077,-0.0413666288362],)
     if True:
         print('about to make orbit plots')
         ##for reference: DIlims=[[[xMin,xMax],[yMin,yMax]],[[xCropMin,xCropMax],[yCropMin,yCropMax]]]   [[[,],[,]],[[,],[]]]
@@ -158,8 +159,4 @@ def customPost():
     if False and settings['CopyToDB']:
         print('about to copy files to dropbox')
         tools.copyToDB(settings)
-
-if __name__ == '__main__':
-    customPost()    
-
 #END OF FILE

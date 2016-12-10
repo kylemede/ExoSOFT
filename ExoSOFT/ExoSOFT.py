@@ -64,7 +64,7 @@ def exoSOFT(settings_in, priors_in):
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif SAmpo!=None:
-            (startParams,startSigmas,chis,outFiles) = SAmpo.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
+            (startParams,startSigmas,_,outFiles) = SAmpo.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
         else:
             log.critical("No SA results available to start the ST chains with.")
         if len(startParams)>0:
@@ -81,17 +81,17 @@ def exoSOFT(settings_in, priors_in):
         startParams = []
         startSigmas = []
         if settings['stages']=='MCMC':
-            chisSorted = list(range(0,settings['nMCMCcns']))
-            for i in range(0,settings['nMCMCcns']):
+            _ = list(range(0,settings['nMCMCcns']))
+            for _ in range(0,settings['nMCMCcns']):
                 startParams.append(settings['startParams'])
                 startSigmas.append(settings['startSigmas'])
         elif STmpo!=None:
             try:
-                (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'],allBest=settings['strtMCMCatBest'])
+                (startParams,startSigmas,_,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'],allBest=settings['strtMCMCatBest'])
                 log.debug('Starting all MCMC chain at the same top fit '+\
                           'found during the ST stage.')
             except:
-                (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
+                (startParams,startSigmas,_,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=True,nProcs=settings['nMCMCcns'])
         else:
             log.critical("No ST results available to start the MCMC chains with.")
         if len(startParams)>0:
@@ -106,17 +106,17 @@ def exoSOFT(settings_in, priors_in):
         startParams = []
         startSigmas = []
         if STmpo!=None:
-            (startParams,startSigmas,chisSorted,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=False,nProcs=1)
-            log.debug('Use best fit from ST stage as the center of the ball for emcee walkers')
+            (startParams,startSigmas,_,outFiles) = STmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=False,nProcs=1)
+            log.debug('Use best fit from ST stage as the center of the ball for the emcee walkers')
         elif SAmpo!=None:
-            (startParams,startSigmas,chisSorted,outFiles) = SAmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=False,nProcs=1)
-            log.debug('Use best fit from SA stage as the center of the ball for emcee walkers')
+            (startParams,startSigmas,_,outFiles) = SAmpo.getTopProcs(settings['cMaxMCMC'],fillToNumProc=False,nProcs=1)
+            log.debug('Use best fit from SA stage as the center of the ball for the emcee walkers')
         else:
             startParams = [settings['startParams']]
+            startSigmas = [settings['startSigmas']]
             log.debug('Use startParams in settings dictionary as the center of the ball for emcee walkers')
-        
         emcee_mpo = tools.multiProcObj(settings,Sim,'emcee')
-        emcee_mpo.run(params=startParams,sigmas=[startSigmas])
+        emcee_mpo.run(params=startParams,sigmas=startSigmas)
         stgsPassed = emcee_mpo.writeBest()
         if stgsPassed:
             durationStrings+='** emcee stage **\n'+emcee_mpo.latestRetStr

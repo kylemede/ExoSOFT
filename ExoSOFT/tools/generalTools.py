@@ -43,7 +43,7 @@ def mcmcEffPtsCalc(outputDataFilename):
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
     try:
-        completeStr+= '\n'+'-'*47+'\nThe mean correlation lengths of all params are:\n'+'-'*47
+        completeStr+= '\n'+'-'*47+'\nThe mean correlation lengths of all params are:\n'+'(based on Tegmark et. al. 2004)\n' +'-'*47
         completeStr+='\nTotal # of steps stored '+str(numSteps)+'\nparam #, param name, mean correlation length'
         completeStr+= ' -> total # of steps/mean correlation length = number of effective points\n'
         for i in range(0,len(paramList)):
@@ -82,7 +82,7 @@ def autocorr(outputDataFilename,fast=True):
     #numSteps = data.shape[0]
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
-    completeStr+= '\n'+'-'*67+'\nThe longest integrated autocorrelation times of all params are:\n'+'-'*67+'\n'
+    completeStr+= '\n'+'-'*63+'\nThe longest integrated autocorrelation times of all params are:\n'+"(using emcee.autocorr.integrated_time)\n"+'-'*63+'\n'
     
     all_passed = True
     #print("\n\n in autocorr \n\n")
@@ -555,7 +555,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\n'+grStr)
     f.write(effPtsStr)
     f.write('\n'+iacStr)
-    f.write('\n'+'-'*44+'\nAverage acceptance rates for each stage:\n'+'-'*44+'\n')
+    f.write('\n'+'-'*40+'\nAverage acceptance rates for each stage:\n'+'-'*40+'\n')
     if MCmpo!=None:
         f.write('For MC stage: '+str(np.mean(MCmpo.avgAcceptRates))+'\n')
         #(outFname,params,sigmas,bstChi,avgAcceptRates,acceptStrs) = MCmpo.getBest()

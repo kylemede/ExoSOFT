@@ -45,7 +45,7 @@ setup(
     long_description="For further details, please read the documentation at\nhttp://ExoSOFT.readthedocs.io/en/latest/",
     package_data={"": ["LICENSE", "AUTHORS.rst","ExoSOFT/tools/cytools.c","ExoSOFT/tools/cytools.pyx"]},
     package_dir = {"ExoSOFT":'ExoSOFT'},
-    scripts = ['scripts/ExoSOFT'],
+    scripts = ['scripts/ExoSOFT','scripts/custompost'],
     include_package_data=True,
     classifiers = [
         'Development Status :: 5 - Production/Stable',
@@ -53,7 +53,7 @@ setup(
         'Topic :: Scientific/Engineering',
         'Programming Language :: Python'
         ],
-    include_dirs = ['ExoSOFT','ExoSOFT/tools','examples'],
+    include_dirs = ['ExoSOFT','ExoSOFT/tools'],
     install_requires = ['numpy','pyfits','scipy','matplotlib',\
                         'psutil','astropy','KMlogger','emcee','pathos'],
     ext_modules = cythonize(["ExoSOFT/tools/cytools.pyx"]),

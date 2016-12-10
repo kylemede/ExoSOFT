@@ -2,7 +2,7 @@
 
 simpleSettingsDict={
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : (10000,"Number of MCMC or MC samples"),
+'nSamples' : (100000,"Number of MCMC or MC samples"),
 # Number of simulation chains to run in parallel, [1,100] [int].  
 # NOTE: greater than numCores-1 causes system to slow down!
 # For MCMC mode this is the number of SA and ST chains.
@@ -22,7 +22,7 @@ simpleSettingsDict={
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
 # NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'emcee',
+'stages' : 'SASTemcee',
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
 'initCrit' : 'tight',
@@ -40,12 +40,12 @@ directoriesDict = {
 # Directory where you want the output data folder to go [string, at least 2 chars long]
 'outDir' : '/mnt/Data1/Todai_Work/Data/data_ExoSOFT',
 # full path to input astrometry data file. [string]
-'di_dataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/DIdata.dat',      
+'di_dataFile': './DIdata.dat',      
 # full path to input radial velocity data file. [string]
-'rv_dataFile': '/mnt/HOME/MEGA/Dropbox/EclipseWorkspaceDB/ExoSOFT/examples/RVdata.dat',
+'rv_dataFile': './RVdata.dat',
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
 #*************************************************************************************************************************
-'outRoot' : "TEST-ArtificialJupiter-5percentError-ExoSOFT2-tst-tst",
+'outRoot' : "ExoSOFT-TEST-Synthetic-Jupiter",
 #*************************************************************************************************************************               
 }
 
@@ -81,7 +81,7 @@ advancedSettingsDict = {
 # (should already be handled by SimAnneal stage2 though...)?
 'rmBurn' : (True,"Remove Burn-in?"),
 # number of burn-in samples to remove from beginning of emcee walker chains. [int]
-'n_emcee_burn' : 1000,
+'n_emcee_burn' : 500,
 # Calculate the Correlation lengths and number of effective points of each chain (must be more than 1 chain)? [bool]
 # NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
 'calcCL' :True,
@@ -102,7 +102,7 @@ advancedSettingsDict = {
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
 'maxUstd': 0.5,
 # number of samples to draw for sigma tuning stage [int].
-'nSTsamp' :(100000,"Num ST samples"),
+'nSTsamp' :(50000,"Num ST samples"),
 # Starting sigma size, ratio of parameter range, recommend [0.05,0.25].  [double]
 # After first trial of SA and ST, take ST output and use here.
 'strtSig' : (0.01,"start percent param range for SA"),

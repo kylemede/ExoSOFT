@@ -1220,9 +1220,9 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         Model = ExoSOFTmodel(settingsRV)
         paramsRV = copy.deepcopy(params)
         paramsRVraw = copy.deepcopy(Model.Params.stored_to_direct(paramsRV))
-        real_epochs_rv = copy.deepcopy(Model.Data.epochs_rv)
-        real_rv = copy.deepcopy(Model.Data.rv)
-        real_rv_err = copy.deepcopy(Model.Data.rv_err)
+        #real_epochs_rv = copy.deepcopy(Model.Data.epochs_rv)
+        #real_rv = copy.deepcopy(Model.Data.rv)
+        #real_rv_err = copy.deepcopy(Model.Data.rv_err)
         # ExoSOFTmodel will calculate predicted/ExoSOFTmodel data for each epoch in Model.Data.epochs_di
         ## calculate the fit locations for the DI epochs to calculate 0-C
         _ = ln_posterior(paramsRVraw, Model)
@@ -1259,7 +1259,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             #        print('before offset subtract realData = '+str(realDataRV[i,0])+', '+str(realDataRV[i,5])+", "+str(realDataRV[i,6])+", "+str(realDataRV[i,7]))
             zeroedRealDataRV = copy.deepcopy(realDataRV)
             for i in range(0,zeroedRealDataRV.shape[0]):
-                rvBefore = zeroedRealDataRV[i,5]
+                #rvBefore = zeroedRealDataRV[i,5]
                 zeroedRealDataRV[i,5]-=paramsRV[13+int(zeroedRealDataRV[i,7])]
                 #print str(rvBefore)+' - '+str(paramsRV[13+int(zeroedRealDataRV[i,7])])+" = "+str(zeroedRealDataRV[i,5])
             
