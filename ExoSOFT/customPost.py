@@ -15,16 +15,6 @@ def custom_post(settings_in, priors_in):
     log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=100)
     skipBurnInStrip=True
     
-    ## run make for swig if requested??
-    if False:
-        cwd = os.getcwd()
-        log.debug("-"*45+" Starting to remake CPP/SWIG tools "+45*"-")
-        os.chdir(os.path.join(settings['ExoSOFTdir'],'tools/cppTools/'))
-        os.system('make clean')
-        os.system('make')
-        os.chdir(cwd)
-        log.debug("-"*45+" Done re-making CPP/SWIG tools "+45*"-")
-
     ## make list of output files
     outFiles = []
     if settings['stageList'][-1]=='MCMC':
