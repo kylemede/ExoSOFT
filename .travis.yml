@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python:
   #- "2.6"
@@ -6,18 +7,30 @@ python:
   - "3.3"
   - "3.4"
   - "3.5"
-# command to install dependencies
+cache: apt
+addons:
+    apt:
+        packages:
+            - libatlas-dev
+            - libatlas-base-dev
+            - liblapack-dev
+            - gfortran
+before_install:
+ - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+ - bash miniconda.sh -b -p $HOME/miniconda
+ - export PATH="$HOME/miniconda/bin:$PATH"
+ - conda update --yes conda
 install: 
-# Install conda
-- pip install conda
-- conda init
-- conda update conda --yes
-- pip install -r requirements.txt
-- pip install python-coveralls
+ - conda install --yes python=$TRAVIS_PYTHON_VERSION pip cython numpy scipy nose matplotlib psutil astropy corner KMlogger emcee pathos
+ - conda init
+ - conda update conda --yes
+ #- pip install -r requirements.txt
+ - pip install pep8 python-coveralls
+ - pip install .
 # command to run tests
 script:
-  coverage run --source=ExoSOFT setup.py test
+ - coverage run --source=ExoSOFT setup.py test
 after_success:
-  coveralls
+ - coveralls
 notifications:
   email: false
