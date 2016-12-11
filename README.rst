@@ -26,7 +26,7 @@ dependency issues for you.  Here are the dependencies for ExoSOFT.
 
  ## Those NOT available on pip
  
-Python, gcc, gcc-c++, swig, texlive-epstopdf
+Python, gcc, gcc-c++, texlive-epstopdf
 
  #Available for install with pip
  
