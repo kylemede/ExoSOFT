@@ -28,6 +28,7 @@ install:
   - conda info -a
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip cython numpy scipy nose matplotlib psutil
   - source activate test-environment
+  - pip install astropy
   - python setup.py install
   #- pip install cython numpy scipy nose matplotlib psutil
   #- pip install astropy
