@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.6"
+  #- "2.6"
   - "2.7"
   #- "3.2"
   - "3.3"
@@ -38,6 +38,6 @@ install:
   #- pip install -r requirements.txt
 # command to run tests
 script:
-  - coverage run --source=ExoSOFT setup.py test
+  coverage run --source=ExoSOFT setup.py test
 after_success:
-  - coveralls
+  coveralls
