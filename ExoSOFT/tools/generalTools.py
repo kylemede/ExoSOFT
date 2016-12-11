@@ -959,14 +959,13 @@ def histConfLevels(histAry):
     [range68,range95,range100]
     """
     ##avoid float comparison errors for near identicle numbers by rounding all
-    #print 'ln819:histConfLevels'
     if True:
         for i in range(0,len(histAry[:,0])):
             histAry[i,0] = round(histAry[i,0],12)
     halfStepSize = round((histAry[1,0]-histAry[0,0])*0.5,12)
     res = abs(histAry[1,0]-histAry[0,0])/100.0
     xs=np.arange(histAry[0,0],histAry[-1,0],res)
-    #print 'ln826:histConfLevels'
+    
     ## interpolate
     f = interpolate.interp1d(histAry[:,0], histAry[:,1],kind='cubic')
     if xs[-1]>np.max(histAry[:,0]):

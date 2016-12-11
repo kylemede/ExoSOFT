@@ -16,9 +16,10 @@ from six.moves import range
 
 class Simulator(object):
     """
-    This is the Simulator parent class.  
+    The primary 'Simulator' class/object for ExoSOFT.
     It contains the functions to perform basic 'shotgun' Monte Carlo, 
-    Simulated Annealing, Sigma Tunning, and pure MCMC simulations.
+    Simulated Annealing, Sigma Tunning, pure MCMC, and ensemble mcmc 
+    (using emcee) simulations.
     """
     def __init__(self,settings):
         self.paramsLast = 0

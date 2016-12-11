@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import numpy as np
+#import numpy as np
 import os
 import sys
-import re
+#import re
 
 try:
     from setuptools import setup
@@ -11,7 +11,7 @@ except ImportError:
     from distutils.core import setup
     setup
     
-#from distutils.extension import Extension
+from distutils.extension import Extension
 from Cython.Build import cythonize
 
 if sys.argv[-1] == "publish":
@@ -35,7 +35,7 @@ else:
 
 setup(    
     name='ExoSOFT', 
-    version="1.1.1", 
+    version="1.1.11", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
@@ -43,8 +43,9 @@ setup(
     license = ['GNU GPLv3'],
     description ='Exoplanet Simple Orbit Fitting Toolbox',
     long_description="For further details, please read the documentation at\nhttp://ExoSOFT.readthedocs.io/en/latest/",
-    package_data={"": ["LICENSE", "AUTHORS.rst","ExoSOFT/tools/cytools.c","ExoSOFT/tools/cytools.pyx"]},
-    package_dir = {"ExoSOFT":'ExoSOFT'},
+    # Forcefully adding the non-python files to the package to ensure they get in
+    data_files = [('ExoSOFT/tools',["ExoSOFT/tools/cytools.pyx","ExoSOFT/tools/cytools.c"])],
+    package_dir = {"ExoSOFT":'ExoSOFT', "ExoSOFT.tools":'ExoSOFT/tools'},
     scripts = ['scripts/ExoSOFT','scripts/custompost'],
     include_package_data=True,
     classifiers = [
@@ -54,9 +55,8 @@ setup(
         'Programming Language :: Python'
         ],
     include_dirs = ['ExoSOFT','ExoSOFT/tools'],
-    install_requires = ['numpy','pyfits','scipy','matplotlib',\
+    install_requires = ['cython','numpy','scipy','matplotlib',\
                         'psutil','astropy','KMlogger','emcee','pathos'],
-    ext_modules = cythonize(["ExoSOFT/tools/cytools.pyx"]),
-    #ext_modules=[]
-    #ext_modules=[ Extension("cytools",["ExoSOFT/tools/cytools.c"]),Extension("cytools",["ExoSOFT/tools/cytools.pyx"]) ]
+    # use cythonize to compile cython module cytools.pyx to both a .c and .so
+    ext_modules = cythonize([Extension("./ExoSOFT/tools/cytools",["ExoSOFT/tools/cytools.pyx"])]),
 )

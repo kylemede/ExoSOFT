@@ -10,14 +10,6 @@ from six.moves import range
 from . import constants as const
 from .cytools import orbit, model_input_pars
 from .utils import  load_di_data, load_rv_data
-#from .priors import ExoSOFTpriors
-
-#from cytools import orbit, model_input_pars
-#from utils import  load_di_data, load_rv_data
-#from priors import ExoSOFTpriors
-#import cytools
-#import utils
-#import priors
 
 log = KMlogger.getLogger('main.model',lvl=100,addFH=False)
 
