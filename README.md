@@ -26,10 +26,12 @@ Installation
 ============
 
 Option 1:
+---------
 
  $ pip install ExoSOFT
  
 Option 2: 
+---------
 
  -clone this repository
  
