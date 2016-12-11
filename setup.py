@@ -41,7 +41,7 @@ setup(
     url = 'https://github.com/kylemede/ExoSOFT',
     packages =['ExoSOFT','ExoSOFT.tools'],
     license = ['GNU GPLv3'],
-    description ='Exoplanet Simple Orbit Fitting Toolbox',
+    description ='The Exoplanet Simple Orbit Fitting Toolbox (ExoSOFT)',
     long_description="For further details, please read the documentation at\nhttp://ExoSOFT.readthedocs.io/en/latest/",
     # Forcefully adding the non-python files to the package to ensure they get in
     data_files = [('ExoSOFT/tools',["ExoSOFT/tools/cytools.pyx","ExoSOFT/tools/cytools.c"])],
