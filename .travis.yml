@@ -1,0 +1,19 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  #- "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+# command to install dependencies
+install: 
+- pip install -r requirements.txt
+- pip install python-coveralls
+# command to run tests
+script:
+  coverage run --source=ExoSOFT setup.py test
+after_success:
+  coveralls
+notifications:
+  email: false
