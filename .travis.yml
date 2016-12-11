@@ -1,15 +1,17 @@
 language: python
 python:
-  # We don't actually use the Travis Python, but this keeps it organized.
   - "2.6"
   - "2.7"
+  #- "3.2"
   - "3.3"
   - "3.4"
+  - "3.5"
 notifications:
   email: false
 sudo: required
+before_install:
+ - sudo apt-get update
 install: 
-  - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -27,13 +29,13 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip
   - source activate test-environment
   - python setup.py install
- #- pip install cython numpy scipy nose matplotlib psutil
- #- pip install astropy
- #- pip install  corner KMlogger emcee pathos
- #- pip install -r requirements.txt
- - pip install pep8 python-coveralls
+  #- pip install cython numpy scipy nose matplotlib psutil
+  #- pip install astropy
+  #- pip install  corner KMlogger emcee pathos
+  #- pip install -r requirements.txt
+  - pip install pep8 python-coveralls
 # command to run tests
 script:
- - coverage run --source=ExoSOFT setup.py test
+  - coverage run --source=ExoSOFT setup.py test
 after_success:
- - coveralls
+  - coveralls
