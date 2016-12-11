@@ -1,6 +1,11 @@
 ExoSOFT
 =======
 
+[![Build Status](https://travis-ci.org/kylemede/ExoSOFT.svg?branch=master)](https://travis-ci.org/kylemede/ExoSOFT)
+
+
+
+
 **The Exoplanet Simple Orbit Fitting Toolbox**
 
 ExoSOFT is a toolbox for the orbital analysis of exoplanets and binary star 
