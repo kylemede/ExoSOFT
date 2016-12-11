@@ -29,12 +29,13 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pip cython numpy scipy nose matplotlib psutil
   - source activate test-environment
   - pip install astropy
+  - pip install -r requirements.txt
+  - pip install pep8 python-coveralls
   - python setup.py install
   #- pip install cython numpy scipy nose matplotlib psutil
   #- pip install astropy
   #- pip install  corner KMlogger emcee pathos
   #- pip install -r requirements.txt
-  - pip install pep8 python-coveralls
 # command to run tests
 script:
   - coverage run --source=ExoSOFT setup.py test
