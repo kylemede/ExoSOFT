@@ -35,7 +35,7 @@ else:
 
 setup(    
     name='ExoSOFT', 
-    version="1.2.2", 
+    version="1.0.0", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
