@@ -8,6 +8,9 @@ ExoSOFT
 
 Successfully installing on Travis CI for Python versions 2.7, 3.3 & 3.4
 
+
+Documentation of the code can be found [HERE](http://exosoft.readthedocs.io/en/latest/index.html)
+
 **The Exoplanet Simple Orbit Fitting Toolbox**
 
 ExoSOFT is a toolbox for the orbital analysis of exoplanets and binary star 
