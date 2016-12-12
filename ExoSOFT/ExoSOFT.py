@@ -1,14 +1,14 @@
 #@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
-import matplotlib
-from six.moves import range
+#import matplotlib
 # Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
-matplotlib.use('Agg') 
-import sys
+#matplotlib.use('Agg') 
+#import sys
 import os
 import timeit
 import KMlogger
-import numpy as np
+#import numpy as np
+from six.moves import range
 
 from . import tools
 from . import simulator
