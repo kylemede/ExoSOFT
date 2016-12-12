@@ -1,5 +1,5 @@
 # cython: embedsignature=True
-import constants as const
+import .constants as const
 
 #python setup.py build_ext --inplace
 
@@ -9,7 +9,6 @@ import constants as const
 Docstring at top of cytools.pyx
 """
 def mean_corr_len(x):
-    #print("in mean_corr_len.  About to call _mean_corr_len")
     m = mean_corr_len_cy(x)
     return m
 
@@ -24,7 +23,6 @@ cdef double mean_corr_len_cy(double [:] x):
     cdef double var_all, half_var_all, n_cl, s_x, s_xx, v
     cdef int i_last, npts, cl_tot
     
-    #print("in _mean_corr_len")
     npts = x.shape[0]
     var_all = var_calc(x)
     half_var_all = var_all/2.0
@@ -34,7 +32,6 @@ cdef double mean_corr_len_cy(double [:] x):
     s_x = 0
     s_xx = 0
     for i in range(npts):
-        #print("s_x "+str(s_x))
         s_x += x[i]
         s_xx += x[i]*x[i]
         v = (s_xx/float(i-i_last+1))-(s_x/float(i-i_last+1))*(s_x/float(i-i_last+1))
@@ -61,13 +58,10 @@ cdef double var_calc(double [:] x):
     ave = mean_calc(x)
     if npts>1:
         for i in range(npts):
-            #print("s = "+str(s))
             s = x[i]-ave
-            #print("s = "+str(s))
             ep+=s
             var+=s*s 
         var = (var-(ep*ep)/npts)/(npts-1)
-    #print("var to return from var_calc = "+str(var))
     return var
     
 cdef double mean_calc(double [:] x):
@@ -83,7 +77,6 @@ cdef double mean_calc(double [:] x):
     while i<npts:
         sm+=x[i]
         i+=1
-    #print("sum from mean calc = "+str(sm))
     return sm/float(npts)
     
 cdef double ecc_anomaly(double p, double tc, double to, double ecc, 
@@ -110,7 +103,7 @@ cdef double ecc_anomaly(double p, double tc, double to, double ecc,
     
     pi = const.pi
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    warnings_on = True  #$$$$ for debugging, kill this after finished testing?
+    #warnings_on = True  #$$$$ for debugging, kill this after finished testing?
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
         
     ## Calc Mean Anomaly
@@ -140,18 +133,18 @@ cdef double ecc_anomaly(double p, double tc, double to, double ecc,
             elif newton_count== maxiter -1:
                 ## Failure!
                 raise
-        # double check E found satisfies original equation
-        if (fabs((ea-ecc*sin(ea))-ma)>1e-5):
-            if warnings_on:
-                print "PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"
-                if True:
-                    print "M = "+str(ma)
-                    print "E = "+str(ea)
-                    print "T0 = "+str(to)
-                    print "Tc = "+str(tc)
-                    print "P = "+str(p)
-                    print "Eprime = "+str(ea_prime)
-                    print "NewtonCount = "+str(newton_count)
+        ## double check E found satisfies original equation
+        #if (fabs((ea-ecc*sin(ea))-ma)>1e-5):
+        #    if warnings_on:
+        #        print "PROBLEM!! resulting E from Newton's loop isn't within error limit!!!"
+        #        if True:
+        #            print "M = "+str(ma)
+        #            print "E = "+str(ea)
+        #            print "T0 = "+str(to)
+        #            print "Tc = "+str(tc)
+        #            print "P = "+str(p)
+        #            print "Eprime = "+str(ea_prime)
+        #            print "NewtonCount = "+str(newton_count)
     return ea
     
 cdef double ta_anomaly(double ea, double ecc):
