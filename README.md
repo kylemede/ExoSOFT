@@ -53,7 +53,7 @@ How to run ExoSOFT
 Make a valid settings.py file, matching the format in the [repository's examples directory](https://github.com/kylemede/ExoSOFT/tree/master/examples). 
   Depending on the system you are investigating, you will also need to have data files of the corect format ([data format examples here](https://github.com/kylemede/ExoSOFT/tree/master/examples)).
   
-***Make sure to update the directory where ExoSOFT should write all output files to, as indicated by the 'outDir' setting in your local settings.py file.***
+** *Make sure to update the directory where ExoSOFT should write all output files to, as indicated by the 'outDir' setting in your local settings.py file.* **
 
 Then, from the directory containing the settings.py, simply start ExoSOFT with:
 

@@ -1,0 +1,2 @@
+include README.md LICENSE HISTORY.rst AUTHORS.rst
+include ExoSOFT/tools/cytools.c ExoSOFT/tools/cytools.pyx
