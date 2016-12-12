@@ -6,7 +6,7 @@ ExoSOFT
 [![License](https://img.shields.io/badge/license-GPL-blue.svg)](https://github.com/kylemede/ExoSOFT/blob/master/LICENSE)
 <!--[![Coverage Status](https://coveralls.io/repos/github/kylemede/ExoSOFT/badge.svg?branch=master)](https://coveralls.io/github/kylemede/ExoSOFT?branch=master)-->
 
-
+Successfully installing on Travis CI for Python versions 2.7, 3.3 & 3.4
 
 **The Exoplanet Simple Orbit Fitting Toolbox**
 
