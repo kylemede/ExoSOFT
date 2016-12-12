@@ -58,5 +58,5 @@ setup(
     install_requires = ['cython','numpy','scipy','matplotlib',\
                         'psutil','astropy','KMlogger','emcee','pathos'],
     # use cythonize to compile cython module cytools.pyx to both a .c and .so
-    ext_modules = cythonize([Extension("./ExoSOFT/tools/cytools",["ExoSOFT/tools/cytools.pyx"])]),
+    ext_modules = cythonize([Extension("ExoSOFT.tools.cytools",["./ExoSOFT/tools/cytools.pyx"])]),
 )
