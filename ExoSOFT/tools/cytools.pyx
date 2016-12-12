@@ -1,5 +1,5 @@
 # cython: embedsignature=True
-import .constants as const
+from . import constants as const
 
 #python setup.py build_ext --inplace
 
