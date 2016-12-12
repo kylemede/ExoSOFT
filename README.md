@@ -6,9 +6,9 @@ ExoSOFT
 [![License](https://img.shields.io/badge/license-GPL-blue.svg)](https://github.com/kylemede/ExoSOFT/blob/master/LICENSE)
 <!--[![Coverage Status](https://coveralls.io/repos/github/kylemede/ExoSOFT/badge.svg?branch=master)](https://coveralls.io/github/kylemede/ExoSOFT?branch=master)-->
 
-(Build tests on Travis CI currently being done for Python versions 2.7, 3.3 and 3.4.)
+*(Build tests on Travis CI currently being done for Python versions 2.7, 3.3 and 3.4.)*
 
-Documentation of the code can be found [HERE](http://exosoft.readthedocs.io/en/latest/index.html)
+Documentation of the code can be found [HERE](http://exosoft.readthedocs.io/en/latest/index.html) *(Note: Documentation is still a work in progress)*
 
 **The Exoplanet Simple Orbit Fitting Toolbox**
 
