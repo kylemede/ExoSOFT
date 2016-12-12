@@ -61,3 +61,20 @@ Then, from the directory containing the settings.py, simply start ExoSOFT with:
  
 Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/ExoSOFT/tools/priors.py) and edit accordingly.
 
+
+Attribution
+===========
+
+Please cite our soon to be publish paper if you find this code useful in your
+research.  The Bibtex entry for this paper is::
+
+ ?? STILL UNDER SUBMISSION AND NOT ON ARXIV ??
+
+License
+=======
+
+Copyright 2016 Kyle Mede and contributors.
+
+ExoSOFT is free software made available under the GNU GPLv3 license. 
+For details see the license.txt file.
+
