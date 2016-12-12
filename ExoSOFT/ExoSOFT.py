@@ -237,5 +237,4 @@ def exoSOFT(settings_in, priors_in):
         log.debug("Post-processing took a total of "+tools.timeStrMaker(postTime))
         log.warning(" ExoSOFT is Done :-)\n EVERYTHING took a total of "+tools.timeStrMaker(allTime)+'\n')
         log.debug("End of ExoSOFT main")
-        
 # EOF

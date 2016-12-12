@@ -2,7 +2,9 @@ ExoSOFT
 =======
 
 [![Build Status](https://travis-ci.org/kylemede/ExoSOFT.svg?branch=master)](https://travis-ci.org/kylemede/ExoSOFT)
-
+[![PyPI version](https://badge.fury.io/py/ExoSOFT.svg)](https://badge.fury.io/py/ExoSOFT)
+[![License](https://img.shields.io/badge/license-GPL-blue.svg)](https://github.com/kylemede/ExoSOFT/blob/master/LICENSE)
+<!--[![Coverage Status](https://coveralls.io/repos/github/kylemede/ExoSOFT/badge.svg?branch=master)](https://coveralls.io/github/kylemede/ExoSOFT?branch=master)-->
 
 
 
