@@ -164,8 +164,11 @@ class Simulator(object):
             varyInt = self.paramInts[np.random.randint(0,len(self.paramInts))]
             self.parIntVaryAry.append(varyInt)
             sig = sigs[varyInt]
-            parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)        
-        
+            ## Draw from a uniform proposal distribution
+            #parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)   
+            ## Draw from a normal distribution
+            parsOut[varyInt]=np.random.normal(pars[varyInt],sig)    
+            
         return parsOut
     
     def accept(self,sample,pars,ln_post=1,temp=1.0,stage=''):
