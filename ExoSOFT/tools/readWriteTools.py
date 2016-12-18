@@ -391,7 +391,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         log.critical("An error occured while trying to load data!!")
     return realData
             
-def load_settings(settings_in,priors_in):
+def load_settings(settings_in,advanced_settings_in,priors_in):
     """  
     This is to load the settings file from the path provided, then load in the 
     ExoSOFTpriors object.  It will first see if there is a priors.py in same 
@@ -404,9 +404,18 @@ def load_settings(settings_in,priors_in):
         ## load the default priors object
         from .priors import ExoSOFTpriors as priors_in
         #print(repr(ExoSOFTpriors))
+        
+    if advanced_settings_in==None:
+        log.debug("no advanced settings provided by user, loading in defaults.")
+        from .advanced_settings import advanced_settings_dict
 
     settings = settings_in
-
+    
+    # merge two settings dicts
+    for key in advanced_settings_dict:
+        settings[key] = advanced_settings_dict[key]
+    
+    # push priors into settings
     settings['ExoSOFTpriors'] = priors_in
             
     #######################################################

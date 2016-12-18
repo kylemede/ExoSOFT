@@ -18,13 +18,13 @@ from . import simulator
     It will start things off, call the appropriate set of 
     simulation and post-processing steps.
 """ 
-def exoSOFT(settings_in, priors_in):
+def exoSOFT(settings_in, advanced_settings_in, priors_in):
     """
     'main'
     """
     ## Call startup to get dict and load up final directories into it.
     #settings = tools.startup(sett_file_path)
-    settings = tools.startup(settings_in, priors_in)
+    settings = tools.startup(settings_in, advanced_settings_in, priors_in)
     log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=settings['logLevel'])
     log.logDict(settings)
     #log.debug("Prepend string passed in was '"+settings['prepend']+"'")

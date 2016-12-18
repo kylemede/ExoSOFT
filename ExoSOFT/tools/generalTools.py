@@ -553,6 +553,12 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\n'+clStr)
     f.write('\n'+burnInStr)
     f.write('\n'+grStr)
+    ## Add note about GR validity if starting all MCMC chains at same position.
+    if (settings['stages']=='MCMC') or (settings['strtMCMCatBest']==True):
+        s ="\n NOTE: as the MCMC chains were all started at the same position, "+\
+        "it questions the validity of the resulting Gelman-Rubin statistics.  "+\
+        "\nThus, they must only be considered a loose indicator/estimator of convergence." 
+        f.write(s)
     f.write(effPtsStr)
     f.write('\n'+iacStr)
     f.write('\n'+'-'*40+'\nAverage acceptance rates for each stage:\n'+'-'*40+'\n')

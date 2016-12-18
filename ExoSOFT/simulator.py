@@ -516,7 +516,7 @@ class Simulator(object):
             
             ## Thin the resulting chains to reduce disk space wasted 
             ## storing highly correlated steps
-            if self.settings['thin_emcee']:
+            if self.settings['thin_rate']>0:
                 trace = trace[:, ::self.settings['thin_rate'], :]
                 lnprobs = lnprobs[:, ::self.settings['thin_rate']]
             self.log.importantinfo("\nAfter burn-in strip AND thinning")

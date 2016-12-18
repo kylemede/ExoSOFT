@@ -9,6 +9,7 @@ import copy
 import numpy as np
 import KMlogger
 import warnings
+import multiprocessing
 from six.moves import range
 from six.moves import input
 
@@ -19,7 +20,7 @@ from .readWriteTools import load_settings, loadRealData
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
 
-def startup(settings_in,priors_in,rePlot=False):
+def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
     """
     Ways to start ExoSOFT:
     If shebang at top of ExoSOFT.py matches your system and location of ExoSOFT/ExoSOFT
@@ -75,7 +76,7 @@ def startup(settings_in,priors_in,rePlot=False):
     else:
         #settings = loadSettings(ExoSOFTdir,settFilePath)
         #settings = load_settings(settFilePath)
-        settings = load_settings(settings_in,priors_in)
+        settings = load_settings(settings_in,advanced_settings_in,priors_in)
         log.setStreamLevel(settings['logLevel'])
         #settings['ExoSOFTdir']=ExoSOFTdir
         #settings['settingsDir']=os.path.dirname(settFilePath)
@@ -303,12 +304,21 @@ def startup(settings_in,priors_in,rePlot=False):
         settings['m1_prior']=m1Dict[settings['m1_prior']]
         m2Dict = {True:'CMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF','CMF':'CMF'}
         settings['m2_prior']=m2Dict[settings['m2_prior']]
+        
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
         
-        ## extra to be extra careful, but will be able to kill this soon
-        if settings['nChains']<settings['nMCMCcns']:
-            settings['nChains'] = settings['nMCMCcns']
+        # load up # of cpus to use 
+        ncpu = multiprocessing.cpu_count()
+        if settings['nCPUs']<0:
+            settings['nChains'] = ncpu-settings['nCPUs']
+            settings['nMCMCcns'] = ncpu-settings['nCPUs']
+        elif settings['nCPUs']>0:
+            settings['nChains'] = settings['nCPUs']
+            settings['nMCMCcns'] = settings['nCPUs']
+        else:
+            settings['nChains'] = ncpu
+            settings['nMCMCcns'] = ncpu
         
         return settings
         
@@ -431,6 +441,21 @@ def modePrep(settings,sigmas):
         nSTsampDict = {'loose':10000,'enough':100000,'tight':500000}
         settings['nSTsamp']= nSTsampDict[settings['initCrit']]
         settings['commentsDict']['nSTsamp'] = "Num ST samples"
+    
+    if settings['thin_rate']==None:
+        settings['thin_rate'] = 0
+    if settings['thin_rate']<=settings['nSamples']/settings['n_wlkrs']:
+        if 'emcee' in stageList:
+            log.critical("thin_rate was less than nSamples/n_wlkers.  "+\
+                         "Thus, thin_rate was set to 0.")
+            settings['thin_rate'] = 0
+    
+    if settings['n_emcee_burn']==None:
+        settings['n_emcee_burn'] = 0
+    if settings['n_emcee_burn']>=settings['nSamples']/settings['n_wlkrs']:
+        log.critical("n_emcee_burn was greater than nSamples/n_wlkers.  "+\
+                         "Thus, n_emcee_burn was set to 0.")
+        settings['n_emcee_burn'] = 0
         
     settings['startParams'] = startParams
     settings['startSigmas'] = startSigmas

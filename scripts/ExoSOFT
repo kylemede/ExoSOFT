@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 from ExoSOFT import exoSOFT
+import yaml
 #import sys
 import os
 
@@ -10,14 +11,25 @@ import os
 #os.system('ls')
 settings_in = None
 priors_in = None
-if os.path.exists('./settings.py'):
+advanced_settings_in = None
+if os.path.exists('./settings.yaml'):
     #print("Yup!  settings.py is here")
-    from settings import settings as settings_in
+    #from settings import settings as settings_in
+    f = open('./settings.yaml','r')
+    settings_in = yaml.load(f)
+    f.close()
+    #print(repr(settings))
+if os.path.exists('./advanced_settings.yaml'):
+    #print("Yup!  settings.py is here")
+    #from settings import settings as settings_in
+    f = open('./advanced_settings.yaml','r')
+    advanced_settings_in = yaml.load(f)
+    f.close()
     #print(repr(settings))
 if os.path.exists('./priors.py'):
     #print("Yup!  priors.py is here")
     from priors import ExoSOFTpriors as priors_in
     #print(repr(ExoSOFTpriors))
 
-exoSOFT(settings_in, priors_in)
+exoSOFT(settings_in,advanced_settings_in, priors_in)
 
