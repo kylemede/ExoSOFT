@@ -1714,7 +1714,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
                 
         ## get parameter lists and filter accordingly
         (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
-        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
+        (_,paramStrs2,_) = getParStrs(head,latex=False,getALLpars=True)
         # modify x labels to account for DI only situations where M1=Mtotal
         if (np.var(data[:,1])==0)and (0 in paramList):
             paramStrs2[0] = 'm total [Msun]'
