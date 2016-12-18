@@ -234,6 +234,6 @@ class ExoSOFTpriors(object):
         return d
     
     def gaussian(self,x,mu,sig):
-        return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sig, 2.)))
+        return np.exp( (-(x - mu)*(x - mu)) / (2.0*(sig*sig)) )
 
 #END OF FILE
