@@ -1,5 +1,9 @@
 # cython: embedsignature=True
-from . import constants as const
+#from . import constants as const
+from astropy import constants as const
+from numpy import pi
+days_per_year = 365.2422
+sec_per_year = 60*60*24*days_per_year
 
 #python setup.py build_ext --inplace
 
@@ -101,13 +105,12 @@ cdef double ecc_anomaly(double p, double tc, double to, double ecc,
         double fabs(double _x)
         double floor(double _x)
     
-    pi = const.pi
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     #warnings_on = True  #$$$$ for debugging, kill this after finished testing?
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
         
     ## Calc Mean Anomaly
-    ma = (2.0*pi*(epoch-2.0*to+tc))/(p*const.days_per_year)
+    ma = (2.0*pi*(epoch-2.0*to+tc))/(p*days_per_year)
     #Find if over one full orbit and shift into [-2pi,2pi]
     multiples = floor(ma/(2.0*pi))
     ma -= multiples*2.0*pi
@@ -160,7 +163,6 @@ cdef double ta_anomaly(double ea, double ecc):
         double cos(double _x)
         double acos(double _x)
     
-    pi = const.pi
     
     # calculate TA from E
     ta = acos( (cos(ea)-ecc)/(1.0-ecc*cos(ea)) )
@@ -185,7 +187,7 @@ cdef void orbit_rv(double [:] epochs, double ecc, double to, double tc, double p
         double cos(double _x)
         
     npts = epochs.shape[0]
-    arg_peri_rad = arg_peri_rv*(const.pi/180.0)
+    arg_peri_rad = arg_peri_rv*(pi/180.0)
     
     ## calculate rv for each epoch in the data
     for i in range(npts):
@@ -211,8 +213,7 @@ cdef void orbit_di(double [:] epochs, double long_an, double ecc, double to,
         double cos(double _x)
         double sqrt(double _x)
         double atan2(double _x,double _y)
-        
-    pi = const.pi
+
     npts = epochs.shape[0]
     long_an_rad = long_an*(pi/180.0)
     arg_peri_rad = arg_peri_di*(pi/180.0)
@@ -267,8 +268,6 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
         double sqrt(double _x)
         double pow(double _x, double _y)
         
-    pi = const.pi
-    sec_per_year = const.sec_per_year
     ## push pars in array into meaningful variables.
     ########### special conversions for specialty parametrizations ############
     ## Convert sqrt(e)sin(omega)&sqrt(e)cos(omega) => e and omega if required.
@@ -294,9 +293,9 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
     ## Calculate a_tot and a_tot_au
     a_tot = 0.0
     if m1!=0:
-        top = p*p*sec_per_year*sec_per_year *const.Grav*const.kg_per_msun*(m1+m2)
+        top = p*p*sec_per_year*sec_per_year *const.G.value*const.M_sun.value*(m1+m2)
         a_tot =pow( top/(4.0*pi*pi) , (1.0/3.0))
-    a_tot_au = a_tot/const.m_per_au
+    a_tot_au = a_tot/const.au.value
     
     ## set K, Tc/To to defaults, then check if they need to be calculated
     #  properly for use in the RV model.
@@ -308,12 +307,12 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
         #        Using 'semi-major version' by default for simplicity/speed.
         # semi-major axis version
         top =  2.0*pi * (a_tot/(1.0+(m1/m2))) * sin(inc*(pi/180.0)) 
-        k =  top / (p*const.sec_per_year*sqrt(1.0-ecc*ecc))
+        k =  top / (p*sec_per_year*sqrt(1.0-ecc*ecc))
         # masses version
         #cdef double part1, part2, part3
-        #part1 = pow( (2.0*const.pi*const.Grav)/(p*const.sec_per_year) , (1.0/3.0) )
-        #part2 = pow( (m2*const.kg_per_msun)/((m1+m2)*const.kg_per_msun) , (2.0/3.0) )
-        #part3 = sin(inc*(const.pi/180.0)) / sqrt(1.0-ecc*ecc)
+        #part1 = pow( (2.0*pi*const.G.value)/(p*sec_per_year) , (1.0/3.0) )
+        #part2 = pow( (m2*const.M_sun.value)/((m1+m2)*const.M_sun.value) , (2.0/3.0) )
+        #part3 = sin(inc*(pi/180.0)) / sqrt(1.0-ecc*ecc)
         #k = part1 * part2 * part3 
         
         ## Calculate Tc <-> T if needed.  Note, only relevant to RV data.
@@ -321,7 +320,7 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
             ta_temp = (pi/2.0)-arg_peri_rv*(pi/180.0)
             half_ea = atan2( sqrt(1.0-ecc)*sin(ta_temp/2.0) , sqrt(1.0+ecc)*cos(ta_temp/2.0) )
             m_t_tc = 2.0*half_ea-ecc*sin(2.0*half_ea);
-            delta_t = (m_t_tc*p*const.days_per_year)/(2.0*pi);
+            delta_t = (m_t_tc*p*days_per_year)/(2.0*pi);
             if vary_tc:
                 # If directly varying Tc, rather than To, then 
                 # value in the pars array is Tc, so exchange vars

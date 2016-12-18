@@ -10,12 +10,16 @@ import numpy as np
 import KMlogger
 import warnings
 import multiprocessing
+#from astropy import constants as const
 from six.moves import range
 from six.moves import input
 
 ## import from modules in ExoSOFT ##
-from . import constants as const
+#from . import constants as const
 from .readWriteTools import load_settings, loadRealData
+
+daysPerYear = 365.2422
+#secPerYear = 60*60*24*daysPerYear
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
@@ -177,7 +181,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         if  settings['t_max']==settings['t_min']==-1:
             ## set T range to [earliest Epoch-max period,earliest epoch]
             settings['t_max']=np.min(realData[:,0])
-            settings['t_min']=np.min(realData[:,0])-settings['p_max']*const.daysPerYear
+            settings['t_min']=np.min(realData[:,0])-settings['p_max']*daysPerYear
         ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
         if settings['data_mode']=='DI':
             settings['m1_min']=settings['m1_min']+settings['m2_min']

@@ -4,10 +4,11 @@ from __future__ import print_function
 import numpy as np
 import copy
 import KMlogger
+from astropy import constants as const
 from six.moves import range
 
 ## import from modules in ExoSOFT ##
-from . import constants as const
+#from . import constants as const
 from .cytools import orbit, model_input_pars
 from .utils import  load_di_data, load_rv_data
 

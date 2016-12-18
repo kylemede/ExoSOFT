@@ -21,13 +21,16 @@ import scipy.optimize as so
 from scipy import ndimage
 import warnings
 import KMlogger
+from astropy import constants as const
 from six.moves import range
 
 ## import from modules in ExoSOFT  ##
-from . import constants as const
+#from . import constants as const
 from .model import ExoSOFTmodel, ln_posterior
 from .generalTools import getParStrs, timeStrMaker, findBestOrbit, PASAtoEN, jdToGcal, confLevelFinder
 from .readWriteTools import loadFits, loadRealData 
+
+days_per_year = 365.2422
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.plotTools',lvl=100,addFH=False)  
@@ -91,8 +94,8 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
     ## check if m2 and if it should be in jupiter masses
     if parInt==1:
         if np.max(histData[:,0])<0.02:
-            histData[:,0]=histData[:,0]*(const.KGperMsun/const.KGperMjupiter)
-            trueVal = trueVal*(const.KGperMsun/const.KGperMjupiter)
+            histData[:,0]=histData[:,0]*(const.M_sun.value/const.M_jup.value)
+            trueVal = trueVal*(const.M_sun.value/const.M_jup.value)
             valRange = np.max(histData[:,0])-np.min(histData[:,0])
             xLabel='m2 [Mjupiter]'
             if latex:
@@ -204,13 +207,13 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
     ## check if M2 and if it should be in jupiter masses
     if parInt==1:
         if np.max(histData[:,0])<0.02:
-            histData[:,0]=histData[:,0]*(const.KGperMsun/const.KGperMjupiter)
-            bestVal = bestVal*(const.KGperMsun/const.KGperMjupiter)
+            histData[:,0]=histData[:,0]*(const.M_sun.value/const.M_jup.value)
+            bestVal = bestVal*(const.M_sun.value/const.M_jup.value)
             valRange = np.max(histData[:,0])-np.min(histData[:,0])
             xLabel='m2 [Mjupiter]'
             if latex:
                 xLabel=r'$m_2$ [$M_{J}$]'
-            confLevels=confLevels*(const.KGperMsun/const.KGperMjupiter)
+            confLevels=confLevels*(const.M_sun.value/const.M_jup.value)
     
     if convertJDover10yrs:
         #print("\n\n'[JD]' in xLabel = "+repr('[JD]' in xLabel))
@@ -792,7 +795,7 @@ def star(R, x0, y0, color='w', N=5, thin = 0.5):
     """
     polystar = np.zeros((2*N, 2))
     for i in range(2*N):
-        angle = i*const.pi/N
+        angle = i*np.pi/N
         r = R*(1-thin*(i%2))
         polystar[i] = [r*np.cos(angle)+x0, r*np.sin(angle)+y0]
     return Polygon(polystar, fc=color, ec='black',linewidth=1.5)  
@@ -805,7 +808,7 @@ def epochsToPhases(epochs,Tc,P_yrs, halfOrbit=False):
     """    
     verbose=False         
     phases = []
-    P_days = P_yrs*const.daysPerYear
+    P_days = P_yrs*days_per_year
     for epoch in epochs:
         phaseTimeDiff = epoch - int((epoch-Tc)/P_days)*P_days-Tc #phase shifted into [Tc,Tc+P]
         if verbose:
@@ -926,8 +929,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 Model.Data.rapa_model = np.ones((nPts),dtype=np.dtype('d'))
                 Model.Data.decsa_model = np.ones((nPts),dtype=np.dtype('d'))
                 for i in range(0,nPts-1):
-                    fakeEpochs[i] = paramsDI[5]+(const.daysPerYear*paramsDI[7]*(i/float(nPts)))
-                fakeEpochs[nPts-1]  = fakeEpochs[0]+const.daysPerYear*paramsDI[7]
+                    fakeEpochs[i] = paramsDI[5]+(days_per_year*paramsDI[7]*(i/float(nPts)))
+                fakeEpochs[nPts-1]  = fakeEpochs[0]+days_per_year*paramsDI[7]
                 Model.Data.epochs_di = fakeEpochs
                 _ = ln_posterior(paramsDIraw, Model)
                 fit_epochs = copy.deepcopy(Model.Data.epochs_di)
@@ -944,7 +947,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 Model.Data.rapa_model = np.ones((4),dtype=np.dtype('d'))
                 Model.Data.decsa_model = np.ones((4),dtype=np.dtype('d'))
                 for i in range(0,4):
-                    fakeQuarterEpochs[i] = paramsDI[5]+(const.daysPerYear*paramsDI[7]*(i/4.0))
+                    fakeQuarterEpochs[i] = paramsDI[5]+(days_per_year*paramsDI[7]*(i/4.0))
                 # Calculate orbit for quarter epochs
                 Model.Data.epochs_di = fakeQuarterEpochs
                 _ = ln_posterior(paramsDIraw, Model)
@@ -961,7 +964,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                 
                 ## Find Ascending and Descending Node locations
                 nodeEpochs = nodeEpochsCalc(paramsDI,settingsDI["omegaFdi"]) 
-                #print('period/2 = '+repr(const.daysPerYear*paramsDI[7]*(1.0/2.0)))
+                #print('period/2 = '+repr(days_per_year*paramsDI[7]*(1.0/2.0)))
                 Model.Data.epochs_di = np.array(nodeEpochs,dtype=np.dtype('d'))
                 Model.Data.rapa = np.ones((2),dtype=np.dtype('d'))
                 Model.Data.rapa_err = np.ones((2),dtype=np.dtype('d'))
@@ -1235,12 +1238,12 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         Model.Data.rv_err = np.ones((nPts),dtype=np.dtype('d'))
         Model.Data.rv_model = np.ones((nPts),dtype=np.dtype('d'))
         Model.Data.rv_inst_num = np.zeros((nPts),dtype=np.dtype('i'))
-        #fakeEpochs[:] = paramsRV[6]-(const.daysPerYear*paramsRV[7]/2.0)
-        last_epoch = paramsRV[6]-(const.daysPerYear*paramsRV[7]/2.0)
+        #fakeEpochs[:] = paramsRV[6]-(days_per_year*paramsRV[7]/2.0)
+        last_epoch = paramsRV[6]-(days_per_year*paramsRV[7]/2.0)
         for i in range(0,nPts):
-            last_epoch += (const.daysPerYear*paramsRV[7])/float(nPts)
+            last_epoch += (days_per_year*paramsRV[7])/float(nPts)
             fakeEpochs[i] = last_epoch
-        fakeEpochs[-1] = fakeEpochs[-2]#paramsRV[6]+(const.daysPerYear*paramsRV[7]/2.0)
+        fakeEpochs[-1] = fakeEpochs[-2]#paramsRV[6]+(days_per_year*paramsRV[7]/2.0)
         Model.Data.epochs_rv = fakeEpochs
         _ = ln_posterior(paramsRVraw, Model)        
         fit_epochs = copy.deepcopy(Model.Data.epochs_rv)
@@ -1423,16 +1426,16 @@ def nodeEpochsCalc(paramsDI,omegaDIoffset):
             ta =ta+360.0
         elif ta>360:
             ta =ta-360.0
-        TA_s_rad = ta*(const.pi/180.0)
+        TA_s_rad = ta*(np.pi/180.0)
         top = np.sqrt(1.0-paramsDI[4])*np.sin(TA_s_rad/2.0)   
         btm = np.sqrt(1.0+paramsDI[4])*np.cos(TA_s_rad/2.0) 
         ATAN_rad = np.arctan2(top, btm)
         #NOTE: both math.atan2 and np.arctan2 tried with same results, both produce negatives rather than continuous 0-360 
         #thus, must correct for negative outputs
         if ATAN_rad<0:
-            ATAN_rad = ATAN_rad+(2.0*const.pi)
+            ATAN_rad = ATAN_rad+(2.0*np.pi)
         M_s_rad = ATAN_rad*2.0-paramsDI[4]*np.sin(ATAN_rad*2.0)
-        delta_t = (M_s_rad*paramsDI[7]*const.daysPerYear)/(2.0*const.pi)
+        delta_t = (M_s_rad*paramsDI[7]*days_per_year)/(2.0*np.pi)
         nodeEpochs.append(paramsDI[5]+delta_t)
     return nodeEpochs
  
@@ -1840,8 +1843,8 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         ## check if m2 and if it should be in jupiter masses
         elif paramToPlot==1:
             if np.max(data[:,1])<0.02:
-                data[:,1]=data[:,paramToPlot]*(const.KGperMsun/const.KGperMjupiter)
-                bestPars[1] = bestPars[1]*(const.KGperMsun/const.KGperMjupiter)
+                data[:,1]=data[:,paramToPlot]*(const.M_sun.value/const.M_jup.value)
+                bestPars[1] = bestPars[1]*(const.M_sun.value/const.M_jup.value)
                 valRange = np.max(data[:,1])-np.min(data[:,1])
                 paramStrs2[1]='m2 [Mjupiter]'
                 paramStrs[1]='$m_2$ [$M_{J}$]'

@@ -12,6 +12,7 @@ import numpy as np
 from scipy import interpolate
 import sys
 from astropy.io import fits as pyfits
+from astropy import constants as const
 import warnings
 import jdcal
 import emcee
@@ -19,10 +20,13 @@ import KMlogger
 from six.moves import range
 
 ## import from modules in ExoSOFT ##
-from . import constants as const
+#from . import constants as const
 from .cytools import mean_corr_len
 from .model import ExoSOFTmodel, ln_posterior
 from .readWriteTools import loadFits, writeFits, rmFiles, dataReader
+
+days_per_year = 365.2422
+sec_per_year = 60*60*24*days_per_year
 
 warnings.simplefilter("error")
 log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)  
@@ -272,7 +276,7 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
 def jdToGcal(jd):
     "Convert standard Julian Date to a double representing its Gregorian date."
     (y,m,d,s) = jdcal.jd2gcal(2400000.5, jd-2400000.5)
-    yrs = float('%.2f'%(y+(m/12.0)+(d/const.daysPerYear)+(s/const.secPerYear)))
+    yrs = float('%.2f'%(y+(m/12.0)+(d/days_per_year)+(s/sec_per_year)))
     return yrs
     
 def timeStrMaker(deltaT):
@@ -487,25 +491,6 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         reducedRV = Model.chi_squared_rv/head['NURV']
         reduced3D = Model.chi_squared_3d/head['NU']
         
-#         ##get the real data
-#         realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
-#         ## Make Orbit cpp obj
-#         Orbit = tools.cppTools.Orbit()
-#         try:
-#             pasa = settings["pasa"]
-#         except:
-#             pasa = False
-#         Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
-#         Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
-#         ## ensure bestFit are in required format for Orbit
-#         params = []
-#         for par in bestFit:
-#             params.append(par)
-#         params=np.array(params,dtype=np.dtype('d'),order='C')
-#         Orbit.loadRealData(realData)
-#         modelData = np.ones((realData.shape[0],3),dtype=np.dtype('d'),order='C')
-#         Orbit.calculate(modelData,params)
-#        (raw3D, reducedDI, reducedRV, reduced3D) = chiSquaredCalc3D(realData,modelData,head['NUDI'],head['NURV'],head['NU'],False)
         for i in range(len(bestFit)):
             if i==2:
                 bestStr+=paramStrs[2]+" = "+str(bestFit[2])
@@ -515,7 +500,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
                     bestStr+='\n'
             elif i==1:
                 if bestFit[1]<0.1:
-                    mJupMult=(const.KGperMsun/const.KGperMjupiter)
+                    mJupMult=(const.M_sun.value/const.M_jup.value)
                     bestStr+=paramStrs[1]+" = "+str(bestFit[1])+", OR "+str(bestFit[1]*mJupMult)+' in [Mjupiter]\n'
                 else:
                     bestStr+=paramStrs[1]+" = "+str(bestFit[1])+'\n'
@@ -608,12 +593,12 @@ def keplersThird(p=0,atot=0,mtot=0):
     mtot in [Msun]
     """
     if (atot==0)and(mtot!=0)and(p!=0):
-        atot = (((p**2)*(const.secPerYear**2)*const.Grav*const.KGperMsun*mtot)/(4.0*const.pi**2))**(1.0/3.0)
-        atot = atot/const.MperAU
+        atot = (((p**2)*(sec_per_year**2)*const.G.value*const.M_sun.value*mtot)/(4.0*np.pi**2))**(1.0/3.0)
+        atot = atot/const.au.value
     elif (atot!=0)and(mtot==0)and(p!=0):
-        mtot = ((((atot*const.MperAU)**3)*4.0*const.pi**2)/((p**2)*(const.secPerYear**2)*const.Grav*const.KGperMsun))
+        mtot = ((((atot*const.au.value)**3)*4.0*np.pi**2)/((p**2)*(sec_per_year**2)*const.G.value*const.M_sun.value))
     elif (atot!=0)and(mtot!=0)and(p==0):
-        p = np.sqrt((((atot*const.MperAU)**3)*4.0*(const.pi**2))/(const.Grav*mtot*(const.secPerYear**2)*const.KGperMsun))
+        p = np.sqrt((((atot*const.au.value)**3)*4.0*(np.pi**2))/(const.G.value*mtot*(sec_per_year**2)*const.M_sun.value))
     else:
         log.critical('More than 1 parameter was zero, so I can not calc K3')
     
@@ -657,7 +642,7 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
 #     except:
 #         pasa = False
 #     Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
-#     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
+#     Orbit.loadConstants(const.G.value,np.pi,const.M_sun.value, days_per_year,sec_per_year,const.au.value)
 #     ## ensure orbParams are in required format for Orbit
 #     params = []
 #     for par in orbParams:
@@ -715,7 +700,7 @@ def predictLocation(orbParams,settings,epochs=[]):
 #     except:
 #         pasa = False
 #     Orbit.loadStaticVars(settings['omegaFdi'],settings['omegaFrv'],settings['lowEcc'],pasa)
-#     Orbit.loadConstants(const.Grav,const.pi,const.KGperMsun, const.daysPerYear,const.secPerYear,const.MperAU)
+#     Orbit.loadConstants(const.G.value,np.pi,const.M_sun.value, days_per_year,sec_per_year,const.au.value)
 #     ## ensure orbParams are in required format for Orbit
 #     params = []
 #     for par in orbParams:
@@ -909,7 +894,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             chiSquareds = 0
             log.error("confLevelFinder: Entire column had a constant value of "+str(dataValueStart))
         #print 'ln741:confLevelFinder'
-        mJupMult=(const.KGperMsun/const.KGperMjupiter)
+        mJupMult=(const.M_sun.value/const.M_jup.value)
         s = "\nFinal Range values:\nTOTAL "+repr([range100[0],range100[1]])
         s+= '\n95%   '+repr(conf95Vals)+"\n68%   "+repr(conf68Vals)+'\n'
         s+= "   median,      68.3% error above,   68.3% error below\n"
@@ -1179,11 +1164,11 @@ def m2siniCalc(K,p,m1,e):
     m1 [Msun]
     p [yrs]
     """
-    pSecs = p*const.secPerYear
-    m1KG = m1*const.KGperMsun
-    A = K*((pSecs/(2*np.pi*const.Grav))**(1.0/3.0))
+    pSecs = p*sec_per_year
+    m1KG = m1*const.M_sun.value
+    A = K*((pSecs/(2*np.pi*const.G.value))**(1.0/3.0))
     B = (m1KG**(2.0/3.0))*np.sqrt(1-e**2)
-    C = (1.0/const.KGperMjupiter)
+    C = (1.0/const.M_jup.value)
     m2sini=A*B*C
     return m2sini
 
@@ -1219,10 +1204,10 @@ def semiMajAmp(m1,m2,inc,ecc,p):
     p [yrs]
     inc [deg]
     """
-    pSecs = p*const.secPerYear
-    m1KG = m1*const.KGperMsun
-    A = ((2.0*np.pi*const.Grav)/pSecs)**(1.0/3.0)
-    B = (m2*const.KGperMjupiter*np.sin(np.radians(inc)))
+    pSecs = p*sec_per_year
+    m1KG = m1*const.M_sun.value
+    A = ((2.0*np.pi*const.G.value)/pSecs)**(1.0/3.0)
+    B = (m2*const.M_jup.value*np.sin(np.radians(inc)))
     C = m1KG**(2.0/3.0)*np.sqrt(1.0-ecc**2.0)
     print('Resulting K is '+repr(A*(B/C)))
     #return A*(B/C)
