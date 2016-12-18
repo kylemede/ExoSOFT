@@ -19,9 +19,6 @@ from . import simulator
     simulation and post-processing steps.
 """ 
 def exoSOFT(settings_in, advanced_settings_in, priors_in):
-    """
-    'main'
-    """
     ## Call startup to get dict and load up final directories into it.
     #settings = tools.startup(sett_file_path)
     settings = tools.startup(settings_in, advanced_settings_in, priors_in)
