@@ -48,7 +48,7 @@ setup(
     data_files = [('ExoSOFT/tools',["./ExoSOFT/tools/cytools.c"]) , ('ExoSOFT/tools',["./ExoSOFT/tools/cytools.pyx"])],
     package_data = {'ExoSOFT/tools':["./ExoSOFT/tools/cytools.c"] , 'ExoSOFT/tools':["./ExoSOFT/tools/cytools.pyx"]},
     package_dir = {"ExoSOFT":'ExoSOFT', "ExoSOFT.tools":'ExoSOFT/tools'},
-    scripts = ['scripts/ExoSOFT','scripts/custompost'],
+    scripts = ['scripts/ExoSOFT'],
     include_package_data=True,
     classifiers = [
         'Development Status :: 5 - Production/Stable',
@@ -58,7 +58,7 @@ setup(
         ],
     include_dirs = ['ExoSOFT','ExoSOFT/tools'],
     install_requires = ['cython','numpy','scipy','matplotlib',\
-                        'psutil','astropy','KMlogger','emcee','pathos','corner','yaml'],
+                        'psutil','astropy','KMlogger','emcee','pathos','corner','pyyaml'],
     # use cythonize to compile cython module cytools.pyx to both a .c and .so
     ext_modules = cythonize([Extension("ExoSOFT.tools.cytools",["./ExoSOFT/tools/cytools.pyx"])]),
 )

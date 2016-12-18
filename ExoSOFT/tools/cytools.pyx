@@ -1,9 +1,6 @@
 # cython: embedsignature=True
-#from . import constants as const
 from astropy import constants as const
-from numpy import pi
-days_per_year = 365.2422
-sec_per_year = 60*60*24*days_per_year
+import numpy as np
 
 #python setup.py build_ext --inplace
 
@@ -95,7 +92,7 @@ cdef double ecc_anomaly(double p, double tc, double to, double ecc,
     
     E returned in units of radians.
     """
-    cdef double ma, multiples, e_prime, ea, pi
+    cdef double ma, multiples, e_prime, ea, pi, days_per_year
     cdef int newton_count, maxiter
     cdef bint warnings_on
     
@@ -105,6 +102,8 @@ cdef double ecc_anomaly(double p, double tc, double to, double ecc,
         double fabs(double _x)
         double floor(double _x)
     
+    pi = np.pi
+    days_per_year = 365.2422
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     #warnings_on = True  #$$$$ for debugging, kill this after finished testing?
     #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -163,6 +162,7 @@ cdef double ta_anomaly(double ea, double ecc):
         double cos(double _x)
         double acos(double _x)
     
+    pi = np.pi
     
     # calculate TA from E
     ta = acos( (cos(ea)-ecc)/(1.0-ecc*cos(ea)) )
@@ -181,11 +181,13 @@ cdef void orbit_rv(double [:] epochs, double ecc, double to, double tc, double p
      
     model value = calculated rv + the instrument specific offset.
     """
-    cdef double top, ea, ta, rv, arg_peri_rad
+    cdef double top, ea, ta, rv, arg_peri_rad, pi
     cdef int npts
     cdef extern from "math.h":
         double cos(double _x)
         
+    pi = np.pi
+    
     npts = epochs.shape[0]
     arg_peri_rad = arg_peri_rv*(pi/180.0)
     
@@ -214,6 +216,7 @@ cdef void orbit_di(double [:] epochs, double long_an, double ecc, double to,
         double sqrt(double _x)
         double atan2(double _x,double _y)
 
+    pi = np.pi
     npts = epochs.shape[0]
     long_an_rad = long_an*(pi/180.0)
     arg_peri_rad = arg_peri_di*(pi/180.0)
@@ -256,7 +259,7 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
     # pars: [m1,m2,parallax,long_an, e/sqrte_sinomega,to/tc,p,inc,arg_peri/sqrte_cosomega,v1,v2...]
     # model_in_pars: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,arg_peri_di,arg_peri_rv,a_tot_au,K]
     
-    cdef double m1, m2, parallax, long_an, ecc, p, inc, arg_peri, tc, pi,sec_per_year
+    cdef double m1, m2, parallax, long_an, ecc, p, inc, arg_peri, tc, pi,sec_per_year, days_per_year
     cdef double sqrte_sinomega, sqrte_cosomega
     cdef double a_tot, top, arg_peri_di, arg_peri_rv
     cdef double ta_temp, half_ea, m_t_tc, delta_t
@@ -268,6 +271,10 @@ def model_input_pars(double [:] pars, bint low_ecc, bint tc_equal_to,
         double sqrt(double _x)
         double pow(double _x, double _y)
         
+    pi = np.pi
+    days_per_year = 365.2422
+    sec_per_year = 60*60*24*days_per_year
+    
     ## push pars in array into meaningful variables.
     ########### special conversions for specialty parametrizations ############
     ## Convert sqrt(e)sin(omega)&sqrt(e)cos(omega) => e and omega if required.

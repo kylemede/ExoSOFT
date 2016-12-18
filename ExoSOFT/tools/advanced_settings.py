@@ -3,15 +3,15 @@
 #######################
 advanced_settings_dict = {
 # full path to input astrometry data file. [string]
-'di_dataFile': './DIdata.dat'
+'di_dataFile': './DIdata.dat',
 # full path to input radial velocity data file. [string]
-'rv_dataFile': './RVdata.dat'
+'rv_dataFile': './RVdata.dat',
 
 # Run in Automatic mode? This will perform checks and select the stages to run automatically. [bool]
-'autoMode' : False
+'autoMode' : False,
 # If in autoMode, how strict should the initialization (SA & ST) be? [string]
 # choices ('loose','enough','tight')
-'initCrit' : 'tight'
+'initCrit' : 'tight',
 
 # Start all MCMC chains from the same best found during the SAST stages? [bool]
 'strtMCMCatBest': True,
@@ -63,6 +63,6 @@ advanced_settings_dict = {
 KMAX: 0,
 KMIN: 0,
 # Draw values for K directly, do NOT calculate it [bool]. Kills varying of Inclination.  Only possible in RV only mode.
-'Kdirect'  : False
+'Kdirect'  : False,
 }
 

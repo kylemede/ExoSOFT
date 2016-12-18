@@ -1,8 +1,6 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 from __future__ import absolute_import
 
-from . import constants
-
 from .model import ExoSOFTmodel
 from .model import ln_posterior
 

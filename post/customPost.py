@@ -1,7 +1,7 @@
 #@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
 from __future__ import print_function
-from . import tools
+from ExoSOFT import tools
 import sys
 import os
 import numpy as np
@@ -9,9 +9,9 @@ import glob
 import KMlogger
 from six.moves import range
 
-def custom_post(settings_in, priors_in):
+def custom_post(settings_in,advanced_settings_in, priors_in):
     ## load up settings that were passed in
-    settings = tools.startup(settings_in, priors_in,rePlot=True)
+    settings = tools.startup(settings_in, advanced_settings_in,priors_in,rePlot=True)
     log = KMlogger.getLogger('main',dr=settings['finalFolder'],lvl=100)
     skipBurnInStrip=True
     
