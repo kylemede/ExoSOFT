@@ -1742,7 +1742,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
             paramList = paramListUse
             bestVals = bestValsUse
             
-        log.info("will try to make a triangle plot for data of shape: "+repr(dataUse.shape))
+        log.info("will try to make a triangle/corner plot for data of shape: "+repr(dataUse.shape))
         
         bests=None
         if len(bestVals)==len(paramsToPlot)!=0:
@@ -1755,7 +1755,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
         log.debug('About to call corner func')
         tic=timeit.default_timer()
         ## Create empty figure to be filled up with plots
-        cornerfig = corner(dataUse, bins=50, range=None, color="k",
+        _ = corner(dataUse, bins=50, range=None, color="k",
                            smooth=smooth,labels=paramStrs,
                            truths=bests, truth_color="#4682b4",
                            verbose=False, fig=None,
@@ -1769,8 +1769,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
         log.debug('\nStarting to save corner figure:')
         if plotFilename!='':
             plt.savefig(plotFilename,format=plotFormat)
-            s= 'Corner plot saved to: '+plotFilename
-            log.info(s)
+            log.info('Corner plot saved to: '+plotFilename)
         plt.close()
         toc2 = timeit.default_timer()
         log.info("Saving took a total of "+timeStrMaker(toc2-toc))
