@@ -1679,7 +1679,8 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
     
 def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],smooth=True):
     """
-    make a triangle/corner plot using the same tool in EMCEE.
+    make a triangle/corner plot by using the corner package written by dfm:
+    https://github.com/dfm/corner.py
     NOTE: the contours of the density plots in here are [ 0.1175031 ,  0.39346934,  0.67534753,  0.86466472]
     """
     from corner import corner
