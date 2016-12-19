@@ -52,16 +52,8 @@
 # Operate in low eccenctricity mode? [bool]
 # Then step through in sqrt(e)sin(omega) and sqrt(e)cos(omega) instead of e & omega directly
 'low_ecc'   : True
-#best estimate of primary's mass, and error [double][Msun]
-'m1_est' : 0.0
-'m1_err' : 0.0
-#best estimate of secondary's mass, and error [double][Msun]
-'m2_est' : 0.0
-'m2_err' : 0.0
-#best estimate of parallax, and error [double][mas]
-'para_est'  : 50
-'para_err'  : 2.5
-# For ALL: False indicates a flat prior. True indicates to use defaults.
+### For ALL: False indicates a flat prior. True indicates to use defaults.
+# ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'.
 'ecc_prior'    : True
 'p_prior'    : True
 # For the inclination prior, use strings or booleans to inducate the specific 
@@ -72,6 +64,17 @@
 'm1_prior': True
 'm2_prior': True
 'para_prior' : True
+#### estimate and uncertainties for previously measured values for parallax, m1 and m2
+#best estimate of primary's mass, and error [double][Msun]
+'m1_est' : 0.0
+'m1_err' : 0.0
+#best estimate of secondary's mass, and error [double][Msun]
+'m2_est' : 0.0
+'m2_err' : 0.0
+#best estimate of parallax, and error [double][mas]
+'para_est'  : 50
+'para_err'  : 2.5
+
 
 ##############################################
 # Ranges for acceptable random number inputs #

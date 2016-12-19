@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 from __future__ import print_function
 import numpy as np
+from scipy import stats
 #from astropy import constants as const
 import sys
 #############################################################################
@@ -22,13 +23,41 @@ class ExoSOFTpriors(object):
     def __init__(self, ecc_prior=True, p_prior=True, inc_prior=True, 
                  m1_prior=True, m2_prior=True, para_prior=True, inc_min=0.0,
                  inc_max=180.0, p_min=0.0, p_max=300.0, para_est=0, 
-                 para_err=0, m1_est=0, m1_err=0, m2_est=0, m2_err=0):   
+                 para_err=0, m1_est=0, m1_err=0, m2_est=0, m2_err=0,
+                 ecc_min=0,ecc_max=0.98,ecc_beta_a=0.867, ecc_beta_b=3.03,ecc_J08_sig=0.3,
+                 ecc_Rexp_lamda=5.12,ecc_Rexp_a=0.781,ecc_Rexp_sig=0.272,
+                 ecc_ST08_a=4.33,ecc_ST08_k=0.2431):   
         # push in two manual constants
         self.days_per_year = 365.2422
         self.sec_per_year = 60*60*24*self.days_per_year
         ## choices   
-        # choices:2e  
+        # choices:'2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. 
         self.e_prior = ecc_prior
+        self.ecc_max = ecc_max
+        self.ecc_min = ecc_min
+        # `best-fit' alpha and beta from Kipping+2013
+        self.ecc_beta = stats.beta(ecc_beta_a,ecc_beta_b) #https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html
+        # 'best-fit' for the basic Rayleigh from Juric+2008
+        self.ecc_J08_sig = ecc_J08_sig### Put this into the advanced settings !!!!
+        # `best-fit' alpha, lambda and sig from Kipping+2013
+        self.ecc_Rexp_lamda = ecc_Rexp_lamda### Put this into the advanced settings !!!!
+        self.ecc_Rexp_a = ecc_Rexp_a### Put this into the advanced settings !!!!
+        self.ecc_Rexp_sig = ecc_Rexp_sig ### Put this into the advanced settings !!!!
+        self.ecc_R = stats.rayleigh() #https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.rayleigh.html#scipy.stats.rayleigh
+        self.ecc_exp = stats.expon()  #https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html
+        ## `best-fit' for the Shen&Turner 2008 pdf
+        self.ecc_ST08_a = ecc_ST08_a### Put this into the advanced settings !!!!
+        self.ecc_ST08_k = ecc_ST08_k     ### Put this into the advanced settings !!!!  
+
+        #self.ecc_norm = stats.norm
+        #self.ecc_norm_mean = ## 
+        #self.ecc_norm_sig = ##
+        #self.ecc_norm.pdf(ecc,loc=self.ecc_norm_mean, scale=self.ecc_norm_sig)
+        
+        ## For all with uniform priors!!
+        self.uniform = stats.uniform
+        #self.uniform.pdf(val,loc=val_min, scale=val_max)
+        
         # choices:log
         self.p_prior = p_prior
         # choices:sin, cos
@@ -129,9 +158,21 @@ class ExoSOFTpriors(object):
         ## UPGRADE TO INCLUDE FURTHER STRINGS TO INDICATE ECC PRIOR OPTIONS FROM KEPLER AND OTHER SURVEY RESULTS #$$$$$$$$$$$$$$$$$$$$
         ret = 1.0
         if ecc!=0:
-            if (self.e_prior == True) or (self.e_prior == '2e'):
+            if (self.e_prior == True) or (self.e_prior=='beta'):
+                ret = self.ecc_beta.pdf(ecc)
+            elif self.e_prior == '2e':
                 if (self.p_min*self.days_per_year)>1000.0:
                     ret = 2.0*ecc
+            elif self.e_prior=='STO8':
+                ret =(1.0/self.ecc_ST08_k)*(1.0/(1.0+ecc)**self.ecc_ST08_a)-(ecc/2.0**self.ecc_ST08_a)
+            elif self.e_prior=='J08':
+                ret = self.ecc_R.pdf(ecc,scale=self.ecc_R_sig)
+            elif self.e_prior=='RayExp':
+                A = self.ecc_Rexp_a*self.ecc_exp.pdf(ecc, scale=1.0/self.ecc_Rexp_lamda)
+                B = (1.0-self.ecc_Rexp_a)*self.ecc_R.pdf(ecc,scale=self.ecc_Rexp_sig)/self.ecc_Rexp_sig
+                ret = A+B
+            elif self.e_prior=='uniform':
+                ret = self.uniform.pdf(ecc,loc=self.ecc_min,scale=self.ecc_max)
         return ret
                   
     def p_prior_fn(self, p):
