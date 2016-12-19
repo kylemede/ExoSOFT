@@ -52,7 +52,7 @@ class ExoSOFTmodel(object):
              inc_max=self.sd['inc_max'], p_min=self.sd['p_min'], p_max=self.sd['p_max'],
              para_est=self.sd['para_est'], para_err=self.sd['para_err'], 
              m1_est=self.sd['m1_est'], m1_err=self.sd['m1_err'], m2_est=self.sd['m2_est'], 
-             m2_err=self.sd['m2_err'])
+             m2_err=self.sd['m2_err'],ecc_min=self.sd['ecc_min'],ecc_max=self.sd['ecc_max'])
     
 class ExoSOFTparams(object):
     """
