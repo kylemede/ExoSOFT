@@ -24,9 +24,9 @@ class ExoSOFTpriors(object):
                  m1_prior=True, m2_prior=True, para_prior=True, inc_min=0.0,
                  inc_max=180.0, p_min=0.0, p_max=300.0, para_est=0, 
                  para_err=0, m1_est=0, m1_err=0, m2_est=0, m2_err=0,
-                 ecc_min=0,ecc_max=0.98,ecc_beta_a=0.867, ecc_beta_b=3.03,ecc_J08_sig=0.3,
-                 ecc_Rexp_lamda=5.12,ecc_Rexp_a=0.781,ecc_Rexp_sig=0.272,
-                 ecc_ST08_a=4.33,ecc_ST08_k=0.2431):   
+                 ecc_min=0, ecc_max=0.98, ecc_beta_a=0.867, ecc_beta_b=3.03, 
+                 ecc_J08_sig=0.3, ecc_Rexp_lamda=5.12, ecc_Rexp_a=0.781,
+                 ecc_Rexp_sig=0.272, ecc_ST08_a=4.33, ecc_ST08_k=0.2431):   
         # push in two manual constants
         self.days_per_year = 365.2422
         self.sec_per_year = 60*60*24*self.days_per_year
