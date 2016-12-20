@@ -1,6 +1,6 @@
 ## MUST CHANGE 'OUTDIR' SETTING TO MATCH YOUR SYSTEM, ELSE OUTPUTS ARE WRITTEN TO CURRENT WORKING DIRECTORY!!
 # Directory where you want the output data folder to go [string, at least 2 chars long]
-'outDir' : '/mnt/Data1/Todai_Work/Data/data_ExoSOFT'
+'outDir' : './'
 
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
 'outRoot' : "ExoSOFT-TEST-Synthetic-Jupiter"
@@ -23,8 +23,8 @@
 'logLevel' : 25
 # data mode, choices {'RV','DI','3D'} [string]
 'data_mode' : '3D'
-# mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC'} [string]
-# NOTE: 'ST' and 'MCMC' modes need a full list of parameters for startParams, else they fail!
+# mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC','SAemcee','emcee'} [string] default is 'SASTMCMC'
+# NOTE: 'ST', 'MCMC','emcee' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
 'stages' : 'SASTMCMC'
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
@@ -53,18 +53,21 @@
 # Then step through in sqrt(e)sin(omega) and sqrt(e)cos(omega) instead of e & omega directly
 'low_ecc'   : True
 ### For ALL: False indicates a flat prior. True indicates to use defaults.
-# ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'.
+# ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. False indicates 'uniform'
 'ecc_prior'    : True
 'p_prior'    : True
 # For the inclination prior, use strings or booleans to inducate the specific 
-# function to use.  Either sin(i), cos(i) or flat.  True indicates sin(i).
+# function to use.  Options: 'sin', 'cos' or False (indicates to use uniform).  True indicates sin.
 'inc_prior'  : 'cos'
 # For m1 and m2: use strings to indicate specific prior function.
+# Options: 'PDMF', 'IMF'.  For m2 'CMF' is also an option.
 # m1 default is 'PDMF', m2 default is 'CMF'.
 'm1_prior': True
 'm2_prior': True
+# For parallax prior, Options: True, False.  
 'para_prior' : True
 #### estimate and uncertainties for previously measured values for parallax, m1 and m2
+# should both the est and err of these be non-zero, the previosly chosen priors will be combined with a Normal/Gaussian prior.
 #best estimate of primary's mass, and error [double][Msun]
 'm1_est' : 0.0
 'm1_err' : 0.0

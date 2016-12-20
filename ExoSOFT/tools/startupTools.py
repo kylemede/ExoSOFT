@@ -182,6 +182,23 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             ## set T range to [earliest Epoch-max period,earliest epoch]
             settings['t_max']=np.min(realData[:,0])
             settings['t_min']=np.min(realData[:,0])-settings['p_max']*daysPerYear
+        ## check data_mode setting makes sense
+        data_modes = ['3D','DI','RV']
+        dm = settings['data_mode']
+        if type(dm)!=str:
+            s = "Setting for 'data_mode' is not valid!!.\nAvailable choices are '3D','DI' and 'RV'."
+            s+="\nTrying a default of '3D', but might cause crash..."
+            log.critical(s)
+            dm = '3D'
+        elif dm.upper() not in data_modes:
+            s = "Setting for 'data_mode' is not valid!!.\nAvailable choices are '3D','DI' and 'RV'."
+            s+="\nTrying a default of '3D', but might cause crash..."
+            log.critical(s)
+            dm = '3D'
+        else:
+            dm = dm.upper()
+        settings['data_mode'] = dm
+        
         ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
         if settings['data_mode']=='DI':
             settings['m1_min']=settings['m1_min']+settings['m2_min']
@@ -310,6 +327,15 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                         eightMax = eight
                     if eight<eightMin:
                         eightMin = eight
+            # check values are within [-e_max,e_max] and push them into RAW arrays
+            if eightMax>rangeMaxs[4]:
+                eightMax = rangeMaxs[4]
+            if fourMax>rangeMaxs[4]:
+                fourMax = rangeMaxs[4]
+            if eightMin<(-1.0*rangeMaxs[4]):
+                eightMin = (-1.0*rangeMaxs[4])
+            if fourMin<(-1.0*rangeMaxs[4]):
+                fourMin = (-1.0*rangeMaxs[4])
             rangeMaxsRaw[8] = eightMax
             rangeMaxsRaw[4] = fourMax
             rangeMinsRaw[8] = eightMin
@@ -344,24 +370,140 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         settings['range_maxs'] = rangeMaxs
         settings['paramInts'] = np.array(paramInts)
         ## map some prior keys to updated values
+        eccDict = {True:'beta',False:'uniform',None:'uniform','2e':'2e','st08':'ST08','j08':'J08','rayexp':'RayExp','beta':'beta','uniform':'uniform'}
+        ecc_prior = settings['ecc_prior']
+        if type(ecc_prior)==str:
+            ecc_prior = ecc_prior.upper()
+        if ecc_prior not in eccDict:
+            ecc_prior = True
+        settings['ecc_prior'] = eccDict[ecc_prior]
         incDict = {True:'sin',False:False,None:False,'sin':'sin','cos':'cos'}
-        settings['inc_prior']=incDict[settings['inc_prior']]
+        inc_prior = settings['inc_prior']
+        if type(inc_prior)==str:
+            inc_prior = inc_prior.lower()
+        if inc_prior not in incDict:
+            inc_prior = True
+        settings['inc_prior'] = incDict[inc_prior]
         m1Dict = {True:'PDMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF'}
-        settings['m1_prior']=m1Dict[settings['m1_prior']]
+        m1_prior = settings['m1_prior']
+        if type(m1_prior)==str:
+            m1_prior = m1_prior.upper()
+        if m1_prior not in m1Dict:
+            m1_prior = True
+        settings['m1_prior']=m1Dict[m1_prior]
         m2Dict = {True:'CMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF','CMF':'CMF'}
-        settings['m2_prior']=m2Dict[settings['m2_prior']]
+        m2_prior = settings['m2_prior']
+        if type(m2_prior)==str:
+            m2_prior = m2_prior.upper()
+        if m2_prior not in m2Dict:
+            m2_prior = True
+        settings['m2_prior']=m2Dict[m2_prior]
+        ## for the basic True/False priors of period and parallax
+        boolDict = {True:True,False:False,None:False}
+        if settings['p_prior'] not in boolDict:
+            settings['p_prior'] = True
+        settings['p_prior'] = boolDict[settings['p_prior']]
+        if settings['para_prior'] not in boolDict:
+            settings['para_prior'] = True
+        settings['para_prior'] = boolDict[settings['para_prior']]
+        
+        ### Check all other flag (bool) settings
+        bool_setting_strs = ['pltDists','pltOrbit','delChains','delCombined','CalcBurn','rmBurn','calcCL','calcIAC','CalcGR','autoMode','strtMCMCatBest','pasa','vary_tc', 'tc_equal_to', 'Kdirect']
+        bool_defaults = [True,      True,       True,       True,           True,       True,   True,   True,     True,   False,        False,            False,   False,      True,           False,]
+        for i in range(len(bool_setting_strs)):
+            if settings[bool_setting_strs[i]] not in boolDict:
+                settings[bool_setting_strs[i]] = bool_defaults[i]
+            settings[bool_setting_strs[i]] = boolDict[bool_setting_strs[i]]
+                
+        ## Check all other number settings
+        num_setting_mins_dict = {'nSamples':1,\
+                                 'n_wlkrs':1,\
+                                 'logLevel':0,\
+                                 'chiMAX':0.0001,\
+                                 'chiMaxST':0.0001,\
+                                 'cMaxMCMC':0.0001,\
+                                 'saveInt':1,\
+                                 'n_emcee_burn':0,\
+                                 'thin_rate':0,\
+                                 'nSumry':0,\
+                                 'nGRcalc':1,\
+                                 'nSAsamp':1,\
+                                 'strtTemp':1,\
+                                 'tempInt':1,\
+                                 'maxUstd':0.01,\
+                                 'nSTsamp':1,\
+                                 'strtSig':0.001,\
+                                 'sigInt':1,\
+                                 'sigMin':0.0001,\
+                                 'dmpInt':1,\
+                                 'omega_offset_rv':-360,\
+                                 'omega_offset_di':-360,\
+                                 'KMAX':0,\
+                                 'KMIN':0}
+        num_setting_maxs_dict = {'nSamples':1e9,\
+                                 'n_wlkrs':1e4,\
+                                 'logLevel':100,\
+                                 'chiMAX':1e5,\
+                                 'chiMaxST':1e5,\
+                                 'cMaxMCMC':1e5,\
+                                 'saveInt':1e9,\
+                                 'n_emcee_burn':1e9,\
+                                 'thin_rate':1e9,\
+                                 'nSumry':100,\
+                                 'nGRcalc':1000,\
+                                 'nSAsamp':1e8,\
+                                 'strtTemp':1e5,\
+                                 'tempInt':1e9,\
+                                 'maxUstd':100,\
+                                 'nSTsamp':1e7,\
+                                 'strtSig':0.5,\
+                                 'sigInt':1e3,\
+                                 'sigMin':0.1,\
+                                 'dmpInt':1e9,\
+                                 'omega_offset_rv':360,\
+                                 'omega_offset_di':360,\
+                                 'KMAX':1e7,\
+                                 'KMIN':1e7}
+        ks = num_setting_maxs_dict.keys()
+        for i in range(len(ks)):
+            s = "Setting '"+ks[i]+"' value was out of range.\n"
+            if settings[ks[i]]<num_setting_mins_dict[ks[i]]:
+                s+= "So, it was changed from "+str(settings[ks[i]])+" to "+\
+                str(num_setting_mins_dict[ks[i]])
+                log.debug(s)
+                settings[ks[i]] = num_setting_mins_dict[ks[i]]
+            if settings[ks[i]]>num_setting_maxs_dict[ks[i]]:
+                s+= "So, it was changed from "+str(settings[ks[i]])+" to "+\
+                str(num_setting_maxs_dict[ks[i]])
+                log.debug(s)
+                settings[ks[i]] = num_setting_maxs_dict[ks[i]]
+            
+        ## Check other oddballs like 
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
         
         # load up # of cpus to use 
         ncpu = multiprocessing.cpu_count()
-        if settings['nCPUs']<0:
-            settings['nChains'] = ncpu-settings['nCPUs']
-            settings['nMCMCcns'] = ncpu-settings['nCPUs']
-        elif settings['nCPUs']>0:
-            settings['nChains'] = settings['nCPUs']
-            settings['nMCMCcns'] = settings['nCPUs']
+        if type(settings['nCPUs'])==int:
+            if settings['nCPUs']<0:
+                settings['nChains'] = ncpu-settings['nCPUs']
+                settings['nMCMCcns'] = ncpu-settings['nCPUs']
+            elif settings['nCPUs']>0:
+                settings['nChains'] = settings['nCPUs']
+                settings['nMCMCcns'] = settings['nCPUs']
+            else:
+                settings['nChains'] = ncpu
+                settings['nMCMCcns'] = ncpu
         else:
             settings['nChains'] = ncpu
             settings['nMCMCcns'] = ncpu
@@ -477,16 +619,37 @@ def modePrep(settings,sigmas):
     ##make list of stages to run
     stgLstDict = {'MC':['MC'],'SA':['SA'],'SAST':['SA','ST'],'ST':['ST'],\
                   'SASTMCMC':['SA','ST','MCMC'],'STMCMC':['ST','MCMC'],\
-                  'MCMC':['MCMC'],'SASTemcee':['SA','ST','emcee'],\
-                  'STemcee':['ST','emcee'],'emcee':['emcee']}
+                  'MCMC':['MCMC'],'SAemcee':['SA','emcee'],'emcee':['emcee']}
+    if settings['stages'] not in stgLstDict:
+        s = "Setting for 'stages' "+str(settings['stages'])+"was not valid."
+        s+="\n using the default of 'SASTMCMC'"
+        s+="\n Options are:'MC','SA','ST','SAST','SASTMCMC,'MCMC','SAemcee','emcee'"
+        settings['stages'] = 'SASTMCMC'
     stageList = stgLstDict[settings['stages']]
     ## take care of initialization settings if in autoMode
     if autoMode:
         uSTDdict = {'loose':0.1,'enough':0.05,'tight':0.02}
+        if settings['initCrit'] not in uSTDdict:
+            settings['initCrit'] = 'loose'
         settings['maxUstd'] = uSTDdict[settings['initCrit']]
         nSTsampDict = {'loose':10000,'enough':100000,'tight':500000}
         settings['nSTsamp']= nSTsampDict[settings['initCrit']]
         settings['commentsDict']['nSTsamp'] = "Num ST samples"
+    
+    ## Check on 'accRates' setting values
+    accRates = settings['accRates']
+    if type(accRates)!=list:
+        accRates = [0.25,0.35]
+    else:
+        if accRates[0]<0:
+            accRates[0] = 0
+        if accRates[0]>1:
+            accRates[0] = 1
+        if accRates[1]<0:
+            accRates[1] = 0
+        if accRates[1]>1:
+            accRates[1] = 1
+        
     
     if settings['thin_rate']==None:
         settings['thin_rate'] = 0

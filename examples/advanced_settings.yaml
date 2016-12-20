@@ -32,7 +32,7 @@
 'maxUstd': 0.5
 # number of samples to draw for sigma tuning stage [int].
 'nSTsamp' : 100000
-# Starting sigma size, ratio of parameter range, recommend [0.05,0.25].  [double]
+# Starting sigma size, ratio of parameter range, recommend [0.01,0.25].  [double]
 # After first trial of SA and ST, take ST output and use here.
 'strtSig' : 0.01
 # number of steps per varying parameter until calculating the acceptance rate and tuning sigmas. [int]
@@ -40,7 +40,7 @@
 'sigInt': 200
 # Minimum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
 'sigMin' : 0.001
-# Minimum and maximum allowed acceptance rates to tune parameter step sizes to meet.  [double,double]
+# Minimum and maximum allowed acceptance rates to tune parameter step sizes to meet. list of [double,double]
 'accRates' : [0.25,0.35]
 # Interval of saved values before write/dump the data to disk to avoid consuming too much RAM during long runs. They take 11MB/100000.
 'dmpInt'   : 100000
@@ -60,8 +60,8 @@
 'omega_offset_di' : 0.0
 
 # Advanced settings
-KMAX: 0
-KMIN: 0
+'KMAX': 0
+'KMIN': 0
 # Draw values for K directly, do NOT calculate it [bool]. Kills varying of Inclination.  Only possible in RV only mode.
 'Kdirect'  : False
 
