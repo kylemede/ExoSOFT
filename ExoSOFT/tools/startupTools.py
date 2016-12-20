@@ -226,8 +226,38 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                      settings['t_min'],\
                      settings['p_min'],\
                      settings['inc_min'],\
-                     settings['arg_peri_min']]
-        
+                     settings['arg_peri_min']]   
+        ## Check all range parameters have a suitable value     
+        rangeMaxs_check = [  10,\
+                             5,\
+                             300,\
+                             720,\
+                             0.98,\
+                             3000000,\
+                             3000,\
+                             180,\
+                             720]
+        rangeMins_check = [  0.00001,\
+                             0.000000001,\
+                             1,\
+                             -720,\
+                             0,\
+                             2000000,\
+                             0.00001,\
+                             -180,\
+                             -720] 
+        for i in range(len(rangeMaxs)):
+            if rangeMaxs[i]>rangeMaxs_check[i]:
+                s = "Max parameter value was out of range.\n So, it was"
+                s+= "changed from "+str(rangeMaxs[i])+" to "+str(rangeMaxs_check[i])
+                rangeMaxs[i]=rangeMaxs_check[i]
+                log.debug(s)
+            if rangeMins[i]<rangeMins_check[i]:
+                s = "Min parameter value was out of range.\n So, it was"
+                s+= "changed from "+str(rangeMins[i])+" to "+str(rangeMins_check[i])
+                rangeMins[i]=rangeMins_check[i]
+                log.debug(s)
+        ## load in RV instrument offsets and check their values are suitable
         if len(settings['offset_mins'])!=len(settings['offset_maxs']):
             log.critical("THE NUMBER OF offset_mins NOT EQUAL TO NUMBER OF offset_maxs!!!")
             #***************************************************************************************************
@@ -239,8 +269,20 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             #***************************************************************************************************
         settings['num_offsets'] = len(settings['offset_maxs'])
         for i in range(0,len(settings['offset_mins'])):
-            rangeMins.append(settings['offset_mins'][i])
-            rangeMaxs.append(settings['offset_maxs'][i])
+            v_min = settings['offset_mins'][i]
+            v_max = settings['offset_maxs'][i]
+            if v_min<-50000:
+                s = "Min velocity offset parameter #"+str(i)+" value was out of"
+                s+= " range.\nSo, it was changed from "+str(v_min)+" to "+str(-50000)
+                log.debug(s)
+                v_min = -50000
+            if v_max<50000:
+                s = "Max velocity offset parameter #"+str(i)+" value was out of"
+                s+= " range.\nSo, it was changed from "+str(v_min)+" to "+str(-50000)
+                log.debug(s)
+                v_max = 50000
+            rangeMins.append(v_min)
+            rangeMaxs.append(v_max)
         rangeMaxs = np.array(rangeMaxs)
         rangeMins = np.array(rangeMins)
         ##For low_ecc case, make Raw min/max vals for param drawing during MC mode

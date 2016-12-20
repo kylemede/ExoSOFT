@@ -179,6 +179,7 @@ class ExoSOFTpriors(object):
         ret = 1.0
         if p!=0.0:
             if (self.p_prior == True) or (self.p_prior == 'log'):
+                # A Jeffrey's prior based on Gregory 2005.
                 ret = 1.0 / ( p * np.log( self.p_max / self.p_min ) )
         return ret
         
