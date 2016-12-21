@@ -47,6 +47,42 @@ Installation
  
  $ python setup.py install
  
+** Solution to 'binary incompatible' error:**
+
+Depending on the install of the scientific python stack on your machine, you may get a 'binary incompatible' error.
+[This arrises from the copy of scipy currently installed having being built against a version of numpy<1.8, which does not catch the error thrown by Cython.](http://stackoverflow.com/questions/40845304/runtimewarning-numpy-dtype-size-changed-may-indicate-binary-incompatibility)  
+The solution is to uninstall and re-build numpy, scipy and scikit-learn.  It takes a while to build scipy especially, but this worked for me.  
+
+The commands in order are:
+
+ $pip uninstall -y numpy   
+ 
+ $pip uninstall -y scipy
+ 
+ $pip uninstall -y scikit-learn
+ 
+ $pip install numpy --ignore-installed --no-cache-dir --no-binary :all:
+ 
+ $pip install scipy --ignore-installed --no-cache-dir --no-binary :all:
+ 
+ $pip install scikit-learn --ignore-installed --no-cache-dir --no-binary :all:
+
+** Solution to problems with matplotlib **
+
+Again, depending on your installation of matplotlib, some errors can arise.  
+These include 'missing __init__.py in one of the matplotlib directories (mpl_toolkits in particular).
+Another is the inability to import matplotlib.pyplot.
+
+To fix this:
+
+ - Make sure there is now locally installed version of matplotlib in your home directory that could confuse the python path.
+ 
+ - re-install matplotlib from scratch
+ 
+ $ pip uninstall -y matplotlib
+ 
+ $ pip install matplotlib
+ 
 How to run ExoSOFT
 ==================
 
@@ -60,7 +96,6 @@ Then, from the directory containing the settings.py, simply start ExoSOFT with:
  $ ExoSOFT
  
 Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/ExoSOFT/tools/priors.py) and edit accordingly.
-
 
 Attribution
 ===========

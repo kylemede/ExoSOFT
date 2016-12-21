@@ -35,7 +35,7 @@ else:
 
 setup(    
     name='ExoSOFT', 
-    version="1.0.3", 
+    version="1.0.4", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
@@ -57,7 +57,7 @@ setup(
         'Programming Language :: Python'
         ],
     include_dirs = ['ExoSOFT','ExoSOFT/tools'],
-    install_requires = ['cython','numpy','scipy','matplotlib',\
+    install_requires = ['cython','numpy','scipy','matplotlib','jdcal',\
                         'astropy','KMlogger','emcee','pathos','corner','pyyaml'],
     # use cythonize to compile cython module cytools.pyx to both a .c and .so
     ext_modules = cythonize([Extension("ExoSOFT.tools.cytools",["./ExoSOFT/tools/cytools.pyx"])]),
