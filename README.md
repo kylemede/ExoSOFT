@@ -66,7 +66,7 @@ Should you wish to provide custom priors, a proper priors.py file must also be i
 Solutions to some install or runtime errors
 ===========================================
 
-** Solution to 'binary incompatible' error:**
+**Solution to 'binary incompatible' error:**
 
 Depending on the install of the scientific python stack on your machine, you may get a 'binary incompatible' error.
 [This arrises from the copy of scipy currently installed having being built against a version of numpy<1.8, which does not catch the error thrown by Cython.](http://stackoverflow.com/questions/40845304/runtimewarning-numpy-dtype-size-changed-may-indicate-binary-incompatibility)  
@@ -86,7 +86,7 @@ The commands in order are:
  
  $pip install scikit-learn --ignore-installed --no-cache-dir --no-binary :all:
 
-** Solution to problems with matplotlib **
+**Solution to problems with matplotlib**
 
 Again, depending on your installation of matplotlib, some errors can arise.  
 These include 'missing __init__.py in one of the matplotlib directories (mpl_toolkits in particular).
