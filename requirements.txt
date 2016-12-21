@@ -2,7 +2,6 @@ cython
 numpy
 scipy
 matplotlib
-psutil
 astropy
 corner
 KMlogger
