@@ -35,7 +35,7 @@ else:
 
 setup(    
     name='ExoSOFT', 
-    version="1.0.4", 
+    version="0.1.2", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
@@ -51,7 +51,7 @@ setup(
     scripts = ['scripts/ExoSOFT'],
     include_package_data=True,
     classifiers = [
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 3 - Alpha',#5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
         'Programming Language :: Python'

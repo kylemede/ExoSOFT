@@ -322,10 +322,10 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     if militaryTime:
         s+=" at about "+str(laterDate.hour)+":"+minute
     else:
-        ampm = 'AM'
+        ampm = 'AM '
         hr = laterDate.hour
         if laterDate.hour>12:
-            ampm='PM'
+            ampm='PM '
             hr = laterDate.hour-12
         s+=" at about "+str(hr)+":"+minute+" "+ampm
     return s
@@ -412,8 +412,12 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     else:
         f = open(summaryFname,'w')
     head = loadFits(finalFits,noData=True)
-    totalSamps = head['NSAMPLES']
-    (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=False,getALLpars=True)
+    try:
+        totalSamps = head['NSAMPLES']
+    except:
+        totalSamps = settings['nSamples']
+    
+    (_,paramStrs,_) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
     t = datetime.date.today()
     f.write("Date ExoSOFT completed this run: "+t.strftime('%b %d, %Y')+'\n')

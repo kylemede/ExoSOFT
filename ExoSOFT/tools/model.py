@@ -45,7 +45,7 @@ class ExoSOFTmodel(object):
         
         ExoSOFTpriors = self.sd['ExoSOFTpriors']
         
-        self.Priors = ExoSOFTpriors(const=const, ecc_prior=self.sd['ecc_prior'], 
+        self.Priors = ExoSOFTpriors(ecc_prior=self.sd['ecc_prior'], 
              p_prior=self.sd['p_prior'], inc_prior=self.sd['inc_prior'], 
              m1_prior=self.sd['m1_prior'], m2_prior=self.sd['m2_prior'], 
              para_prior=self.sd['para_prior'], inc_min=self.sd['inc_min'],

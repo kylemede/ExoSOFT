@@ -152,6 +152,8 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                     commentsDict[key] = settings[key][1]
                     settings[key] = settings[key][0]
         settings['commentsDict'] = commentsDict
+        #push in important settings to comments dict needed for later fits file headers
+        settings['commentsDict']['nSamples'] = 'number of samples'
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
@@ -305,41 +307,49 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         ##For low_ecc case, make Raw min/max vals for param drawing during MC mode
         rangeMaxsRaw = copy.deepcopy(rangeMaxs)
         rangeMinsRaw = copy.deepcopy(rangeMins)
+    
         if settings['low_ecc']:
-            ## run through the possible numbers for e and omega to find min/max for RAW versions
-            ## Only relevent for MC and the begining jumps of SA,  
-            ## Otherwise the values are converted back to omega and e and the original ranges are used for the check.
-            fourMin=1e6
-            fourMax=-1e6
-            eightMin=1e6
-            eightMax=-1e6
-            for omeg in range(int(rangeMins[9]*10),int(rangeMaxs[9]*10),1):
-                omega = float(omeg)/10.0
-                for e in range(int(rangeMins[4]*100),int(rangeMaxs[4]*100),1):
-                    ecc = float(e)/100.0
-                    four = np.sqrt(ecc)*np.sin((np.pi/180.0)*omega)
-                    eight = np.sqrt(ecc)*np.cos((np.pi/180.0)*omega)
-                    if four>fourMax:
-                        fourMax = four
-                    if four<fourMin:
-                        fourMin = four
-                    if eight>eightMax:
-                        eightMax = eight
-                    if eight<eightMin:
-                        eightMin = eight
-            # check values are within [-e_max,e_max] and push them into RAW arrays
-            if eightMax>rangeMaxs[4]:
-                eightMax = rangeMaxs[4]
-            if fourMax>rangeMaxs[4]:
-                fourMax = rangeMaxs[4]
-            if eightMin<(-1.0*rangeMaxs[4]):
-                eightMin = (-1.0*rangeMaxs[4])
-            if fourMin<(-1.0*rangeMaxs[4]):
-                fourMin = (-1.0*rangeMaxs[4])
-            rangeMaxsRaw[8] = eightMax
-            rangeMaxsRaw[4] = fourMax
-            rangeMinsRaw[8] = eightMin
-            rangeMinsRaw[4] = fourMin
+            rangeMaxsRaw[8] = rangeMaxs[4]
+            rangeMaxsRaw[4] = rangeMaxs[4]
+            rangeMinsRaw[8] = (-1.0*rangeMaxs[4])
+            rangeMinsRaw[4] = (-1.0*rangeMaxs[4])
+            #print(repr(rangeMinsRaw))
+            ## Cutting out this loop below as it is running very slow on pip installed version...
+            if False:
+                ## run through the possible numbers for e and omega to find min/max for RAW versions
+                ## Only relevent for MC and the begining jumps of SA,  
+                ## Otherwise the values are converted back to omega and e and the original ranges are used for the check.
+                fourMin=1e6
+                fourMax=-1e6
+                eightMin=1e6
+                eightMax=-1e6
+                for omeg in range(int(rangeMins[9]*10),int(rangeMaxs[9]*10),1):
+                    omega = float(omeg)/10.0
+                    for e in range(int(rangeMins[4]*100),int(rangeMaxs[4]*100),1):
+                        ecc = float(e)/100.0
+                        four = np.sqrt(ecc)*np.sin((np.pi/180.0)*omega)
+                        eight = np.sqrt(ecc)*np.cos((np.pi/180.0)*omega)
+                        if four>fourMax:
+                            fourMax = four
+                        if four<fourMin:
+                            fourMin = four
+                        if eight>eightMax:
+                            eightMax = eight
+                        if eight<eightMin:
+                            eightMin = eight
+                # check values are within [-e_max,e_max] and push them into RAW arrays
+                if eightMax>rangeMaxs[4]:
+                    eightMax = rangeMaxs[4]
+                if fourMax>rangeMaxs[4]:
+                    fourMax = rangeMaxs[4]
+                if eightMin<(-1.0*rangeMaxs[4]):
+                    eightMin = (-1.0*rangeMaxs[4])
+                if fourMin<(-1.0*rangeMaxs[4]):
+                    fourMin = (-1.0*rangeMaxs[4])
+                rangeMaxsRaw[8] = eightMax
+                rangeMaxsRaw[4] = fourMax
+                rangeMinsRaw[8] = eightMin
+                rangeMinsRaw[4] = fourMin
         ## figure out which parameters are varying in this run.
         ## basically, don't vary m1,m2,parallax if in RV mode
         paramInts = []
@@ -361,7 +371,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             sigmas[i]=(rangeMaxsRaw[i]-rangeMinsRaw[i])*settings['strtSig']
         # Maximum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
         settings['sigMax'] = 1.0
-        settings['commentsDict']['sigMax']= 'Max ratio of params range,for step size.'
+        #settings['commentsDict']['sigMax']= 'Max ratio of params range,for step size.'
         ## push all these important parameter related items into the dict for later use.
         settings['realData'] = realData
         settings['rangeMinsRaw'] = rangeMinsRaw
@@ -413,7 +423,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         for i in range(len(bool_setting_strs)):
             if settings[bool_setting_strs[i]] not in boolDict:
                 settings[bool_setting_strs[i]] = bool_defaults[i]
-            settings[bool_setting_strs[i]] = boolDict[bool_setting_strs[i]]
+            settings[bool_setting_strs[i]] = boolDict[settings[bool_setting_strs[i]]]
                 
         ## Check all other number settings
         num_setting_mins_dict = {'nSamples':1,\
@@ -478,16 +488,6 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 log.debug(s)
                 settings[ks[i]] = num_setting_maxs_dict[ks[i]]
             
-        ## Check other oddballs like 
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
@@ -634,7 +634,7 @@ def modePrep(settings,sigmas):
         settings['maxUstd'] = uSTDdict[settings['initCrit']]
         nSTsampDict = {'loose':10000,'enough':100000,'tight':500000}
         settings['nSTsamp']= nSTsampDict[settings['initCrit']]
-        settings['commentsDict']['nSTsamp'] = "Num ST samples"
+        #settings['commentsDict']['nSTsamp'] = "Num ST samples"
     
     ## Check on 'accRates' setting values
     accRates = settings['accRates']

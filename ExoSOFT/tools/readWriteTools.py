@@ -408,12 +408,13 @@ def load_settings(settings_in,advanced_settings_in,priors_in):
     if advanced_settings_in==None:
         log.debug("no advanced settings provided by user, loading in defaults.")
         from .advanced_settings import advanced_settings_dict
+        advanced_settings_in = advanced_settings_dict
 
     settings = settings_in
     
     # merge two settings dicts
-    for key in advanced_settings_dict:
-        settings[key] = advanced_settings_dict[key]
+    for key in advanced_settings_in:
+        settings[key] = advanced_settings_in[key]
     
     # push priors into settings
     settings['ExoSOFTpriors'] = priors_in
@@ -427,8 +428,8 @@ def load_settings(settings_in,advanced_settings_in,priors_in):
     ## Thus, there is a 180deg shift forced to account for this.
     omegaFrv=180.0
     #now update due to fixed argPeriPlus values
-    omegaFdi+=settings['omega_offset_di'][0]
-    omegaFrv+=settings['omega_offset_rv'][0]
+    omegaFdi+=settings['omega_offset_di']
+    omegaFrv+=settings['omega_offset_rv']
     settings['omegaFdi'] = (omegaFdi,"Total fixed val added to DI omega in model")
     settings['omegaFrv'] = (omegaFrv,"Total fixed val added to RV omega in model")
     log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
