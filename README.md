@@ -46,7 +46,26 @@ Installation
  -from its directory on your local machine, run:
  
  $ python setup.py install
+
  
+How to run ExoSOFT
+==================
+
+Make a valid settings.yaml file, matching the format in the [repository's examples directory](https://github.com/kylemede/ExoSOFT/tree/master/examples). 
+  Depending on the system you are investigating, you will also need to have data files of the correct format ([data format examples here](https://github.com/kylemede/ExoSOFT/tree/master/examples)).
+  
+** *Make sure to update the directory where ExoSOFT should write all output files to, as indicated by the 'outDir' setting in your local settings.py file.* **
+
+Then, from the directory containing the settings.yaml, simply start ExoSOFT with:
+
+ $ ExoSOFT
+ 
+Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/ExoSOFT/tools/priors.py) and edit accordingly.
+
+
+Solutions to some install or runtime errors
+===========================================
+
 ** Solution to 'binary incompatible' error:**
 
 Depending on the install of the scientific python stack on your machine, you may get a 'binary incompatible' error.
@@ -79,23 +98,10 @@ To fix this:
  
  - re-install matplotlib from scratch
  
- $ pip uninstall -y matplotlib
+ $pip uninstall -y matplotlib
  
- $ pip install matplotlib
+ $pip install matplotlib
  
-How to run ExoSOFT
-==================
-
-Make a valid settings.py file, matching the format in the [repository's examples directory](https://github.com/kylemede/ExoSOFT/tree/master/examples). 
-  Depending on the system you are investigating, you will also need to have data files of the correct format ([data format examples here](https://github.com/kylemede/ExoSOFT/tree/master/examples)).
-  
-** *Make sure to update the directory where ExoSOFT should write all output files to, as indicated by the 'outDir' setting in your local settings.py file.* **
-
-Then, from the directory containing the settings.py, simply start ExoSOFT with:
-
- $ ExoSOFT
- 
-Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/ExoSOFT/tools/priors.py) and edit accordingly.
 
 Attribution
 ===========
