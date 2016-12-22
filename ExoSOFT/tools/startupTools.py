@@ -266,6 +266,11 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                              -180,\
                              -720] 
         for i in range(len(rangeMaxs)):
+            ## force cast all range values to floats just to be sure
+            rangeMaxs[i] = float(rangeMaxs[i])
+            rangeMins[i] = float(rangeMins[i])
+            rangeMins_check[i] = float(rangeMins_check[i])
+            rangeMaxs_check[i] = float(rangeMaxs_check[i])
             if rangeMaxs[i]>rangeMaxs_check[i]:
                 s = "Max parameter value was out of range.\n So, it was"
                 s+= "changed from "+str(rangeMaxs[i])+" to "+str(rangeMaxs_check[i])
@@ -295,9 +300,9 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 s+= " range.\nSo, it was changed from "+str(v_min)+" to "+str(-50000)
                 log.debug(s)
                 v_min = -50000
-            if v_max<50000:
+            if v_max>50000:
                 s = "Max velocity offset parameter #"+str(i)+" value was out of"
-                s+= " range.\nSo, it was changed from "+str(v_min)+" to "+str(-50000)
+                s+= " range.\nSo, it was changed from "+str(v_min)+" to "+str(50000)
                 log.debug(s)
                 v_max = 50000
             rangeMins.append(v_min)
@@ -662,8 +667,9 @@ def modePrep(settings,sigmas):
     if settings['n_emcee_burn']==None:
         settings['n_emcee_burn'] = 0
     if settings['n_emcee_burn']>=settings['nSamples']/settings['n_wlkrs']:
-        log.critical("n_emcee_burn was greater than nSamples/n_wlkers.  "+\
-                         "Thus, n_emcee_burn was set to 0.")
+        if 'emcee' in stageList:
+            log.critical("n_emcee_burn was greater than nSamples/n_wlkers.  "+\
+                             "Thus, n_emcee_burn was set to 0.")
         settings['n_emcee_burn'] = 0
         
     settings['startParams'] = startParams

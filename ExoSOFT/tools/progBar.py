@@ -33,5 +33,5 @@ class ProgBar(object):
         sys.stdout.write('\r%s %s %s%s %s' % (prefix, bar, percents, '%', suffix))
         sys.stdout.flush()
         if iteration == self.total:
-            sys.stdout.write('\n')
+            #sys.stdout.write('\n')  #$$  Might want to un-comment this in the future
             sys.stdout.flush()

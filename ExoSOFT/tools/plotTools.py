@@ -571,7 +571,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         ## Save file if requested.
         log.debug('\nStarting to save stacked param hist figure:')
         if plotFilename!='':
-            plt.savefig(plotFilename+'.'+plotFormat,format=plotFormat)
+            plt.savefig(plotFilename+'.'+plotFormat,fl_format=plotFormat)
             s= 'stacked hist plot saved to: '+plotFilename+'.'+plotFormat
             log.info(s)
         plt.close()
@@ -620,7 +620,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
         s=s+ '\nInput plotfilename:\n'+plotFilename
         log.info(s)
         
-        ## check if the passed in value for plotFilename includes format extension
+        ## check if the passed in value for plotFilename includes fl_format extension
         if '.'+plotFormat not in plotFilename:
             plotFilename = plotFilename+"."+plotFormat
             log.debug('updating plotFilename to:\n'+plotFilename)
@@ -775,7 +775,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
         ## Save file if requested.
         log.debug('\nStarting to save param hist figure:')
         if plotFilename!='':
-            plt.savefig(plotFilename,format=plotFormat)
+            plt.savefig(plotFilename,fl_format=plotFormat)
             s= 'Summary plot saved to: '+plotFilename
             log.info(s)
         plt.close()
@@ -826,7 +826,7 @@ def epochsToPhases(epochs,Tc,P_yrs, halfOrbit=False):
             print('phase = ',phase)  
     return phases
 
-def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVlims=[],diErrMult=1,diLnThk=1.0,legendStrs=[]):
+def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],RVlims=[],diErrMult=1,diLnThk=1.0,legendStrs=[]):
     """
     Make both the DI and RV plots.
     '-DI.png' and/or '-RV.png' will be added to end of plotFnameBase 
@@ -996,7 +996,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
                     hFit = hPredicted = '[x,y]'
                 residualDIdata = []
                 if pasa:
-                    (xcenters, E_error, ycenters, N_error)= PASAtoEN(real_rapa[:],0,real_decsa[:],0)
+                    (xcenters, _, ycenters, _)= PASAtoEN(real_rapa[:],0,real_decsa[:],0)
                     for i in range(0,len(real_epochs_di)):
                         residualDIdata.append([xcenters[i]-predicted_rapa_model[i],ycenters[i]-predicted_decsa_model[i]])
                 else:
@@ -1118,16 +1118,16 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         if len(legendStrs)>0:
             diMain.legend()
         ##
-        ## Save full size fig, then cropped to file and maybe convert to pdf if format=='eps'
+        ## Save full size fig, then cropped to file and maybe convert to pdf if fl_format=='eps'
         ##
         #plt.tight_layout()
         orientStr = 'landscape'
-        if format=='eps':
+        if fl_format=='eps':
             orientStr = 'portrait'
         # save full size            
         diMain.axes.set_xlim((xLimsFull[1],xLimsFull[0]))
         diMain.axes.set_ylim(yLimsFull)
-        plotFilenameFull = plotFnameBase+'-DI.'+format
+        plotFilenameFull = plotFnameBase+'-DI.'+fl_format
         
         if plotCustomInsets:
             #######################################################
@@ -1188,12 +1188,12 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         ##crop to limits of data and save
         diMain.axes.set_xlim((xLimsCrop[1],xLimsCrop[0]))
         diMain.axes.set_ylim(yLimsCrop)
-        plotFilenameCrop = plotFnameBase+'-DI-cropped.'+format
+        plotFilenameCrop = plotFnameBase+'-DI-cropped.'+fl_format
         if plotFilenameCrop!='':
             plt.savefig(plotFilenameCrop, dpi=800, orientation=orientStr)
             log.info("DI orbit plot (cropped) saved to:\n"+plotFilenameCrop)
         plt.close()
-        if (format=='eps')and True:
+        if (fl_format=='eps')and True:
             log.debug('converting to PDF as well')
             try:
                     os.system("epstopdf "+plotFilenameFull)
@@ -1223,13 +1223,13 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
         Model = ExoSOFTmodel(settingsRV)
         paramsRV = copy.deepcopy(params)
         paramsRVraw = copy.deepcopy(Model.Params.stored_to_direct(paramsRV))
-        #real_epochs_rv = copy.deepcopy(Model.Data.epochs_rv)
-        #real_rv = copy.deepcopy(Model.Data.rv)
+        real_epochs_rv = copy.deepcopy(Model.Data.epochs_rv)
+        real_rv = copy.deepcopy(Model.Data.rv)
         #real_rv_err = copy.deepcopy(Model.Data.rv_err)
         # ExoSOFTmodel will calculate predicted/ExoSOFTmodel data for each epoch in Model.Data.epochs_di
         ## calculate the fit locations for the DI epochs to calculate 0-C
         _ = ln_posterior(paramsRVraw, Model)
-        predicted_rv_model = copy.deepcopy(Model.Data.decsa_model)
+        predicted_rv_model = copy.deepcopy(Model.Data.rv_model)
         
         ##Make ExoSOFTmodel data for 100~1000 points for plotting fit
         nPts = 500
@@ -1296,7 +1296,13 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             residualData = copy.deepcopy(realDataRV)
             #residualData[:,5]-= predicted_rv_model[:]
             for i in range(0,len(predicted_rv_model)):
-                residualData[i,5]-= predicted_rv_model[i]
+                epoch_i = residualData[i,0]
+                ## Silly, but the new RVs are in a different order than those in 'realDataRv'.
+                ## So, need to search for proper index in new array.
+                for j in range(0,len(predicted_rv_model)):
+                    if epoch_i == real_epochs_rv[j]:
+                        break
+                residualData[i,5]-= predicted_rv_model[j]
             
             ##plot fit epochsORphases,RVs,RVerrs
             fitPlot.plot(phasesFit,fit_rv_model[:]*kmConversion,c='Blue',linewidth=diLnThk*0.8,alpha=1.0)
@@ -1394,17 +1400,17 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",format='png',DIlims=[],RVli
             residualsPlot.spines['top'].set_linewidth(1.0)
             residualsPlot.spines['left'].set_linewidth(1.0)
     
-            ## save fig to file and maybe convert to pdf if format=='eps'
+            ## save fig to file and maybe convert to pdf if fl_format=='eps'
             #plt.tight_layout()
             orientStr = 'landscape'
-            if format=='eps':
+            if fl_format=='eps':
                 orientStr = 'portrait'
-            plotFilename = plotFnameBase+'-RV.'+format
+            plotFilename = plotFnameBase+'-RV.'+fl_format
             if plotFilename!='':
                 plt.savefig(plotFilename, dpi=300, orientation=orientStr)
                 log.info("RV orbit plot saved to:\n"+plotFilename)
             plt.close()
-            if (format=='eps')and True:
+            if (fl_format=='eps')and True:
                 log.debug('converting to PDF as well')
                 try:
                     os.system("epstopdf "+plotFilename)
@@ -1490,7 +1496,7 @@ def densityContourFunc(xdata, ydata, nbins, ax=None,ranges=None,bests=None):
     #levels7lvls = [four_sigma,three_sigma, two_sigma, one_sigma, oneHalf_sigma, oneQuarter_sigma, ptone_sigma]
     c = []
     c2 = []
-    for i in range(len(levels3sigs)+1):
+    for _ in range(len(levels3sigs)+1):
         c.append('k')
         c2.append('g')
     (black_cmap,n) = from_levels_and_colors(levels3sigs,c,extend='both')
@@ -1555,7 +1561,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
             else:
                 plotFilename = plotFilename
             ## Get strings representing axes titles and plot filenames in latex and standard formats
-            (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+            (_,paramStrs,_) = getParStrs(head,latex=latex,getALLpars=True)
             ## modify x labels to account for DI only situations where M1=Mtotal
             if np.var(data[:,1])==0:
                 paramStrs[0] = r'$m_{total}$ [$M_{\odot}$]'
@@ -1664,7 +1670,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                         plotnm = plotFilename[:-4]+'-rectangular.eps'
                     elif sqBool:
                         plotnm = plotFilename[:-4]+'-squareRanges.eps'
-                    plt.savefig(plotnm,format=plotFormat)
+                    plt.savefig(plotnm,fl_format=plotFormat)
                     s= 'density contour plot saved to: '+plotnm
                     log.info(s)
                 plt.close()
@@ -1706,7 +1712,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
         s=s+ '\nInput plotfilename:\n'+plotFilename
         log.info(s)
         
-        ## check if the passed in value for plotFilename includes format extension
+        ## check if the passed in value for plotFilename includes fl_format extension
         if '.'+plotFormat not in plotFilename:
             plotFilename = plotFilename+"."+plotFormat
             log.debug('updating plotFilename to:\n'+plotFilename)
@@ -1769,7 +1775,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
         ## Save file if requested.
         log.debug('\nStarting to save corner figure:')
         if plotFilename!='':
-            plt.savefig(plotFilename,format=plotFormat)
+            plt.savefig(plotFilename,fl_format=plotFormat)
             log.info('Corner plot saved to: '+plotFilename)
         plt.close()
         toc2 = timeit.default_timer()
@@ -1824,15 +1830,15 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         bestPars = findBestOrbit(outputDataFilename,bestToFile=False,by_ln_prob=emcee_stage)
         #print('back from findBestOrbit')
         
-        ## check if the passed in value for plotFilename includes format extension
+        ## check if the passed in value for plotFilename includes fl_format extension
         if '.'+plotFormat not in plotFilename:
             plotFilename = plotFilename+"."+plotFormat
             log.debug('updating plotFilename to:\n'+plotFilename)
         else:
             plotFilename = plotFilename
                 
-        (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
-        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
+        (_,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
+        (_,paramStrs2,_) = getParStrs(head,latex=False,getALLpars=True)
         nu =  head['NU']
         
         ## modify y labels to account for DI only situations where M1=Mtotal
@@ -1845,7 +1851,7 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
             if np.max(data[:,1])<0.02:
                 data[:,1]=data[:,paramToPlot]*(const.M_sun.value/const.M_jup.value)
                 bestPars[1] = bestPars[1]*(const.M_sun.value/const.M_jup.value)
-                valRange = np.max(data[:,1])-np.min(data[:,1])
+                #valRange = np.max(data[:,1])-np.min(data[:,1])
                 paramStrs2[1]='m2 [Mjupiter]'
                 paramStrs[1]='$m_2$ [$M_{J}$]'
 
@@ -1930,7 +1936,7 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
         ## Save file if requested.
         log.debug('\nStarting to save param progress figure:')
         if plotFilename!='':
-            plt.savefig(plotFilename,format=plotFormat)
+            plt.savefig(plotFilename,fl_format=plotFormat)
             s= 'progress plot saved to: '+plotFilename
             log.info(s)
         plt.close()

@@ -29,7 +29,7 @@ advanced_settings_dict = {
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : 50,
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
-'maxUstd': 0.5,
+'maxUstd': 0.1,
 # number of samples to draw for sigma tuning stage [int].
 'nSTsamp' : 100000,
 # Starting sigma size, ratio of parameter range, recommend [0.05,0.25].  [double]
@@ -59,9 +59,10 @@ advanced_settings_dict = {
 # force adding a value in degrees to argument of periapsis used in DI orbit fit [double]
 'omega_offset_di' : 0.0,
 
+## OLD settings for kdirect mode that is now invalid, but might bring back someday
 # Advanced settings
-KMAX: 0,
-KMIN: 0,
+'KMAX': 0,
+'KMIN': 0,
 # Draw values for K directly, do NOT calculate it [bool]. Kills varying of Inclination.  Only possible in RV only mode.
 'Kdirect'  : False,
 }

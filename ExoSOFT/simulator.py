@@ -48,6 +48,7 @@ class Simulator(object):
         self.seed = int(timeit.default_timer())
         np.random.seed(self.seed)
         self.tmpDataFile = os.path.join(self.settings['finalFolder'],"tmpOutdata-"+str(self.chainNum)+".npy")
+        #import code; code.interact(local=locals())  #$$ NOTE:  THIS IS THE INTERACTIVE DEBUGGER THAT CHRIS RECOMMENDS. AT THIS LINE IT OPENS UP AN INTERACTIVE PYTHON TERMINAL WITH THE CURRENT V
         
     def starter(self):
         """
@@ -402,7 +403,7 @@ class Simulator(object):
         self.chainNum = chainNum
         self.resetTracked(stage)
         bar = tools.ProgBar(total=100,barLength=0)
-        modelData = np.zeros((len(self.realData),3))
+        #modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
         strtTemp = temp      
         endDatetime = ''
@@ -410,10 +411,14 @@ class Simulator(object):
         ## if valid startSigmas provided, start with them, else use defaults.
         if (type(startSigmas)==list)or(type(startSigmas)==np.ndarray):
             if len(startSigmas)>0:
+                if type(startSigmas)==list:
+                    startSigmas = np.array(startSigmas)
                 sigmas = copy.deepcopy(startSigmas)
         ## if valid startParams provided, start there, else start at random point.
         if (type(startParams)==list)or(type(startParams)==np.ndarray):
             if len(startParams)>0:
+                if type(startParams)==list:
+                    startParams = np.array(startParams)
                 #convert 'stored' to 'direct/raw' versions
                 paramsLast = copy.deepcopy(self.Model.Params.stored_to_direct(startParams))
                 self.log.debug('initial/latest pars have reduced chi sqr of '+str(startParams[11]/self.nu))
@@ -425,7 +430,7 @@ class Simulator(object):
         latestParsRaw = copy.deepcopy(paramsLast)
         proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
         ## convert from Raw form if in lowEcc mode     
-        ln_post = tools.ln_posterior(latestParsRaw,self.Model)       
+        ln_post = tools.ln_posterior(proposedParsRaw,self.Model)       
         paramsLast = copy.deepcopy(self.Model.Params.stored_pars)
         self.log.debug('proposed pars have reduced chi sqr of '+str(paramsLast[11]/self.nu))
         self.paramsLast = paramsLast
@@ -484,11 +489,13 @@ class Simulator(object):
             use_pathos_pool = True
             if use_pathos_pool:
                 ## Pathos way ##
+                self.log.info("using the pathos processing pool for emcee")
                 p = mp.ProcessingPool(ncpu)
                 sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
                                                         args=[self.Model], threads=ncpu, pool=p)
             else:
                 ## emcee Default way ##
+                self.log.info("using the standard multiprocessing processing pool for emcee")
                 sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
                                                 args=[self.Model], threads=ncpu)
             
@@ -601,7 +608,10 @@ class Simulator(object):
                     self.log.debug("sigmasInRangeCounter>10 so breaking sample loop.")
                     break
             if self.settings['logLevel']<30:
-                bar.render(100,suffix=stage+str(chainNum)+' Complete!\n')
+                end_str = ' Complete!'
+                if self.settings['logLevel']<20:
+                    end_str = str(chainNum)+' Complete!\n'
+                bar.render(100,suffix=stage+end_str)
             self.log.debug(stage+" took: "+tools.timeStrMaker(timeit.default_timer()-tic))
             avgAcceptRate = self.endSummary(temp,sigmas,stage)
             #print str(avgAcceptRate)+'\n'

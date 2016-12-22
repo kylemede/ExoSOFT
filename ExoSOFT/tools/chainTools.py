@@ -270,7 +270,7 @@ class multiProcObj(object):
         for procNumber in range(self.numProcs):
             master[procNumber].join()  
         toc=timeit.default_timer()
-        s = "ALL "+str(self.numProcs)+" chains of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
+        s = "\nALL "+str(self.numProcs)+" chains of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
         retStr =s+"\n"
         log.info(s)
         self._loadUpArys(master)
@@ -287,7 +287,6 @@ def iterativeSA(settings,Sim,internalTemp=None):
     """
     Perform SA with multiProc nSAiters times, droping the starting temperature each time by strtTemp/nSAiters.
     """
-    testing=False
     tic=timeit.default_timer()
     numProcs = settings['nChains']
     nSAiters = 7
@@ -298,42 +297,37 @@ def iterativeSA(settings,Sim,internalTemp=None):
     strtsigmas = list(range(numProcs))
     SAmultiProc = multiProcObj(settings,Sim,'SA')
     uSTD = 1e6
-    iter = -1
+    iter_int = -1
     if internalTemp==None:
         internalTemp = settings['strtTemp']
     temp = internalTemp
     while uSTD>settings['maxUstd']:
-        iter+=1
-        if iter>0:
-            if (iter>nSAstrtIters)and(chisForCalc==None):
+        iter_int+=1
+        if iter_int>0:
+            if (iter_int>nSAstrtIters)and(chisForCalc==None):
                 ## Try SA again from the start
                 rwTools.rmFiles(SAmultiProc.outFnames)
                 s = "3 itterations of SA failed to find a suitable starting point."
                 s+= " So starting it again at double the initial temperature."
                 log.critical(s)
                 iterativeSA(settings,Sim,internalTemp=internalTemp*2.0)
-            elif iter<=nSAiters:
+            elif iter_int<=nSAiters:
                 temp -= internalTemp/nSAiters
-        if iter>max_nSAiters:
+        if iter_int>max_nSAiters:
             s = "iterativeSA took more than "+str(max_nSAiters)+", so process was terminated!!!"
             log.raisemsg(s)
             raise  RuntimeError('\n\n'+s)
             
-        log.info("\nIteration #"+str(iter+1))
-        SAmultiProc.retStr +="Iteration #"+str(iter+1)+"\n"
+        log.info("\nIteration #"+str(iter_int+1))
+        SAmultiProc.retStr +="Iteration #"+str(iter_int+1)+"\n"
         ## run multiProc for this temperature, kill bad chains 
         ## and get best as start positions of next iteration.
         SAmultiProc.run(params=strtPars,sigmas=strtsigmas,strtTemp=temp)
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
         SAmultiProc.killBadOnes(settings['chiMaxST'])
-        (pars,sigs,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
+        (pars,_,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
         #print 'so far top chis are: '+repr(chisForCalc) 
-        if testing:
-            print('so far top chis are: '+repr(chisForCalc))   
-            if outFnms!=None:     
-                print('matching file names are: ')
-                for n in outFnms:
-                    print(n)
+        
         if pars==None:
             strtPars = list(range(numProcs))
         else:
@@ -345,11 +339,11 @@ def iterativeSA(settings,Sim,internalTemp=None):
                 worked=False
                 try:
                     curNm = outFnms[i]
-                    outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter)+"-"+str(i)+".fits")
+                    outNm = os.path.join(os.path.dirname(curNm),"SAtempData-"+str(iter_int)+"-"+str(i)+".fits")
                     rwTools.renameFits(curNm,outNm,killInput=True)
                     worked=True
                 except:
-                    log.critical("\nfailed to rename file during iteration "+str(iter)+" of SA")
+                    log.critical("\nfailed to rename file during iteration "+str(iter_int)+" of SA")
                     s="\ncurNm = "+curNm+"\noutNm = "+outNm+"\nSAmultiProc.outFnames = "
                     for n in SAmultiProc.outFnames:
                         s+="\n"+n
@@ -358,27 +352,18 @@ def iterativeSA(settings,Sim,internalTemp=None):
                     for j in range(len(SAmultiProc.outFnames)):
                         if SAmultiProc.outFnames[j]==curNm:
                             SAmultiProc.outFnames[j] = outNm
-                            if testing:
-                                print('outfile renamed to '+SAmultiProc.outFnames[j])
-            (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
+            (pars,_,_,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
             strtPars = pars
             ## Calc 'uniform' STD and make final msgs for this iteration          
             log.debug(str(len(strtPars))+' sets of starting parameters being passed to next iteration.')
             if len(chisForCalc)==numProcs:
                 uSTD = genTools.unitlessSTD(chisForCalc)
-            log.importantinfo("After iteration #"+str(iter+1)+" the top "+str(len(chisForCalc))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
+            log.importantinfo("After iteration #"+str(iter_int+1)+" the top "+str(len(chisForCalc))+" solutions with reduced chiSquared < "+str(settings['chiMaxST'])+" have a unitless STD of "+str(uSTD))
             SAmultiProc.retStr +="The latest top "+str(len(chisForCalc))+" reduced chiSquareds had a unitless STD of "+str(uSTD)+'\n'
     #############
     ## wrap up ##
     #############
-    (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])   
-    #$$$$$$$$$$$ Debug $$$$$$$$$$$$$$$$
-    if testing:
-        (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
-        print('\nFINAL before renaming\nchis = '+repr(chis)+'\noutFnms = ')
-        for n in SAmultiProc.outFnames:
-            print(n)
-    #$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    (pars,_,_,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])   
     #rename final data files to standard SA convention
     if len(outFnms)>1:
         for i in range(len(outFnms)):
@@ -388,17 +373,10 @@ def iterativeSA(settings,Sim,internalTemp=None):
             for j in range(len(SAmultiProc.outFnames)):
                 if SAmultiProc.outFnames[j]==curNm:
                     SAmultiProc.outFnames[j] = outNm    
-    #$$$$$$$$$$$ Debug $$$$$$$$$$$$$$$$
-    if testing:
-        (pars,sigs,chis,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
-        print('\nFINAL after renaming\noutFnms = ')
-        for n in SAmultiProc.outFnames:
-            print(n)
-    #$$$$$$$$$$$$$$$$$$$$$$$$$$$
         
     SAmultiProc.writeBest()
     toc=timeit.default_timer()
-    s = "ALL "+str(iter+1)+" iterations of SA took a total of "+genTools.timeStrMaker(int(toc-tic))
+    s = "ALL "+str(iter_int+1)+" iterations of SA took a total of "+genTools.timeStrMaker(int(toc-tic))
     SAmultiProc.retStr +=s+"\n"
     log.warning(s)
     return SAmultiProc            

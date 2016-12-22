@@ -184,7 +184,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         ## orbit plots?
         if settings['pltOrbit'] and os.path.exists(allFname):
             plotFnameBase = os.path.join(os.path.dirname(allFname),'orbitPlot'+FINALmpo.stage)
-            tools.orbitPlotter(bestFit,settings,plotFnameBase,format='eps')
+            tools.orbitPlotter(bestFit,settings,plotFnameBase,fl_format='eps')
         ## plot posteriors?
         if settings['pltDists'] and os.path.exists(allFname):
             plotFilename = os.path.join(os.path.dirname(allFname),'summaryPlot'+FINALmpo.stage)
