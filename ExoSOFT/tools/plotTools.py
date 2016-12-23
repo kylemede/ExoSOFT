@@ -1816,7 +1816,7 @@ def progressPlotter(outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims =
     Make sure to set emcee_stage=True if plotting results from emcee.
     """
     downSample = True # down sample the data to clean up plot
-    cutDownBy = 1000 # down sample by using ever #th data point
+    cutDownBy = 1 # down sample by using ever #th data point
     scatter = True
     bigFig = True
     latex=True

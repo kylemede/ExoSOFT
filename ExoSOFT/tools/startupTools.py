@@ -154,6 +154,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         settings['commentsDict'] = commentsDict
         #push in important settings to comments dict needed for later fits file headers
         settings['commentsDict']['nSamples'] = 'number of samples'
+        settings['commentsDict']['saveInt'] = 'rate pars saved'
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
