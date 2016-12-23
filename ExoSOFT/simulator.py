@@ -486,18 +486,17 @@ class Simulator(object):
             #        just to be safe.  
             # ALTHOUGH, SOME TESTING HAS INDICATED IT MIGHT BE SLOWER THAN THE 
             # MODIFIED PYTHON POOL USED BY EMCEE BY DEFAULT...
-            use_pathos_pool = True
-            if use_pathos_pool:
+            try:
+                ## emcee Default way ##
+                self.log.info("using the standard multiprocessing processing pool for emcee")
+                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
+                                                args=[self.Model], threads=ncpu)
+            except:
                 ## Pathos way ##
                 self.log.info("using the pathos processing pool for emcee")
                 p = mp.ProcessingPool(ncpu)
                 sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
                                                         args=[self.Model], threads=ncpu, pool=p)
-            else:
-                ## emcee Default way ##
-                self.log.info("using the standard multiprocessing processing pool for emcee")
-                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
-                                                args=[self.Model], threads=ncpu)
             
             ## Start the emcee ensemble sampler
             sampler.run_mcmc(starting_guesses, nsteps)
