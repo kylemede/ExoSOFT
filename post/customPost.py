@@ -1,6 +1,9 @@
 #@Author: Kyle Mede, kylemede@gmail.com
 from __future__ import absolute_import
 from __future__ import print_function
+import matplotlib
+# Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
+matplotlib.use('Agg') 
 from ExoSOFT import tools
 import sys
 import os
@@ -63,7 +66,7 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
                      "modify the customPost.py script as needed.")
     ## combine the individual chain data files needed
     if (len(outFiles)>0) and (allFname==''):
-        print('about to combine data files together')
+        log.importantinfo('about to combine data files together')
         if 'BIstripped' in outFiles[0]:
             allFname = os.path.join(os.path.dirname(outFiles[0]),\
                                     "combined-BIstripped-MCMCdata.fits")
@@ -76,7 +79,7 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
     burnInStr = ''
     if True:
         if skipBurnInStrip==False:
-            print('about to strip burn-in')
+            log.importantinfo('about to strip burn-in')
             if (len(outFiles)>1)and(settings['CalcBurn'] and\
                                     (settings['stageList'][-1]=='MCMC')):
                 (burnInStr,burnInLengths) = tools.burnInCalc(outFiles,allFname)    
@@ -93,77 +96,100 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
         
     ## find best fit
     if True:
-        print('about to find best orbit')
+        log.importantinfo('about to find best orbit')
         bestFit = tools.findBestOrbit(allFname,bestToFile=False,findAgain=False)
     else:
         bestFit = np.array([0.9892581,0.0009696,49.4824152,101.82462,0.05706358,2450656.61,2450656.61,12.012219,44.5819933,0.1945267,5.227630,46.908327,8.916892,-0.04136662])
     if True:
-        print('about to make orbit plots')
+        log.importantinfo('about to make orbit plots')
         ##for reference: DIlims=[[[xMin,xMax],[yMin,yMax]],[[xCropMin,xCropMax],[yCropMin,yCropMax]]]   [[[,],[,]],[[,],[]]]
         ##               RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
         plotFnameBase = os.path.join(settings['finalFolder'],'orbPlot-Manual')
         tools.orbitPlotter(bestFit,settings,plotFnameBase,fl_format='eps',DIlims=[],RVlims=[])
         
     clStr=''
-    if False:
-        print('about to plot posteriors')
+    if True:
+        log.importantinfo('about to plot posteriors')
         plotFilename = os.path.join(settings['finalFolder'],'posteriors')
         clStr = tools.summaryPlotter(allFname, plotFilename,paramsToPlot=[],xLims=[],bestVals=bestFit,stage=settings['stageList'][-1], shadeConfLevels=True,forceRecalc=True,plotALLpars=True)
         
-    if False: 
-        print('about to make 2D density plot')
-        plotFilename = os.path.join(settings['finalFolder'],'m1m2-densPlot-Dec23PASAfit-151226-autoRanges')
+    if True: 
+        log.importantinfo('about to make 2D density plot')
+        plotFilename = os.path.join(settings['finalFolder'],'m1m2-densPlot')
         #ranges=[[xMin,xMax],[yMin,yMax]]
         tools.densityPlotter2D(allFname, plotFilename,paramsToPlot=[0,1],bestVals=[bestFit[0],bestFit[1]])
         
-    if False:
-        print(' about to make progress plots')
-        #make progress plot
+    if True:
+        log.importantinfo('about to make progress plots')        
+        ##make progress plot
         for stgStr in ['SA','ST','MCMC']:
-            for procNum in range(0,4):
+            emcee_stage = False
+            if stgStr=='emcee':
+                emcee_stage = True
+            for procNum in range(0,2):
                 dataFname = os.path.join(settings['finalFolder'],'outputData'+stgStr+str(procNum)+'.fits')
-                for parNum in [1,4,8]:
-                    plotFilename = os.path.join(settings['finalFolder'],'progressPlot-'+stgStr+str(procNum)+'-'+str(parNum))
-                    try:
-                        tools.progressPlotter(dataFname,plotFilename,parNum,yLims=[],bestVals=[])
-                    except:
-                        print('could not make plot for proc# '+str(procNum)+', and par# '+str(parNum))
+                if os.path.exists(dataFname):
+                    log.info("About to make progress plots for file: "+dataFname)
+                    for parNum in [1,4,8]:
+                        plotFilename = os.path.join(settings['finalFolder'],'progressPlot-'+stgStr+str(procNum)+'-'+str(parNum))
+                        try:
+                            #outputDataFilename,plotFilename,paramToPlot,yLims=[],xLims = [],expectedVal=None,emcee_stage=False,downSample=True
+                            tools.progressPlotter(dataFname,plotFilename,parNum,yLims=[],xLims = [],expectedVal=None,emcee_stage=emcee_stage,downSample=False)
+                        except:
+                            log.importantinfo('could not make plot for proc# '+str(procNum)+', and par# '+str(parNum))
     ##calc R?
     grStr = ''
-    if False:
-        print('about to calc GR')
+    if True:
+        log.importantinfo('about to calc GR')
         if (len(outFiles)>1) and (settings['CalcGR'] and (settings['stageList'][-1]=='MCMC')):
             grStr = tools.gelmanRubinCalc(outFiles,settings['nSamples'])
+            log.info(grStr)
         
     ## custom re check of the orbit fit     
     if False: 
-        print('about to calculate predicted location for custom date')
+        log.importantinfo('about to calculate predicted location for custom date')
         orbParams = bestFit
         epochs=[2457327.500]
         tools.predictLocation(orbParams,settings,epochs)
     
     ## calc correlation length & number effective points? 
     effPtsStr = ''
-    if False:
-        print('about to calc # effective points')
+    if True:
+        log.importantinfo('about to calc # effective points')
         if ((len(outFiles)>1)and(settings['stageList'][-1]=='MCMC'))and (settings['calcCL'] and os.path.exists(allFname)):
             effPtsStr = tools.mcmcEffPtsCalc(allFname)
-            print(effPtsStr)
-    
+            log.info(effPtsStr)
+            
+    ## calc auto-correlation time using tools from the emcee package
+    if True:
+        log.importantinfo('about to calc integrated autocorr time')
+        if ((settings['stageList'][-1]=='emcee')or(settings['stageList'][-1]=='MCMC')) and (settings['calcIAC'] and os.path.exists(allFname)):
+            #print("\n about to call autocorr")
+            iacStr = tools.autocorr(allFname)
+            log.info(iacStr)
     ## following post-processing stages can take a long time, so write the current
     ## summary information to the summary file and add the rest later
-    if False:
+    if True:
         if os.path.exists(allFname):
-            print('about to make summary file')
-            tools.summaryFile(settings,settings['stageList'],allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,1,1,'',None,None,None,None)
+            log.importantinfo('about to make summary file')
+            tools.summaryFile(settings,settings['stageList'],allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,iacStr,1,1,'',None,None,None,None,None)
+            ##FULL VERSION IN EXOSOFT, but not all available to customPost
+            #tools.summaryFile(settings,stageList,allFname,clStr,burnInStr,bestFit,grStr,effPtsStr,iacStr,allTime,postTime,durationStrings,MCmpo,SAmpo,STmpo,MCMCmpo,emcee_mpo)
         
+    ## CAUTION!!  This way of cleaning is permenant!!
+    ## Double check your settings and that this is what you want first!!
     ##clean up files (move to folders or delete them)
     if False:
-        print('about to clean up output directory')
+        log.importantinfo('about to clean up output directory')
         tools.cleanUp(settings,settings['stageList'],allFname)
+        
+    ## copy to dropbox is a legacy function that will be repurposed or killed later 
     if False and settings['CopyToDB']:
-        print('about to copy files to dropbox')
+        log.importantinfo('about to copy files to dropbox')
         tools.copyToDB(settings)
+        
+    ### DONE customPost
+    print("\ncustomPost script complete :-D\n")
         
 if __name__ == '__main__':
     settings_in = None
@@ -178,7 +204,7 @@ if __name__ == '__main__':
         advanced_settings_in = yaml.load(f)
         f.close()
     if os.path.exists('./priors.py'):
-        from .priors import ExoSOFTpriors as priors_in
+        from priors import ExoSOFTpriors as priors_in
     
     custom_post(settings_in,advanced_settings_in, priors_in)
 #END OF FILE
