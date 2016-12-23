@@ -1572,8 +1572,18 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                 for par in paramsToPlot:
                     paramStrsUse.append(paramStrs[par])
                 paramStrs = paramStrsUse
+                
+            ## convert m2 to Mjup if necessary
+            in_m_jup = False
+            if 1 in paramsToPlot:
+                if np.max(data[:,1])<0.02:
+                    data[:,1] = data[:,1]*(const.M_sun.value/const.M_jup.value)
+                    bestVals[1] = bestVals[1]*(const.M_sun.value/const.M_jup.value)
+                    in_m_jup = True
+                    
             xdata = data[:,paramsToPlot[0]]
-            ydata = data[:,paramsToPlot[1]]
+            ydata = data[:,paramsToPlot[1]]           
+            
             nbins=50
             ## update lims with custom values if provided
             if ranges!=None:
@@ -1634,10 +1644,21 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                 fsize=34
                 fsizeY = fsize
                 fsizeX = fsize
+                ## update font size for ecc label
                 if xLabel in ['e','$e$']:
                     fsizeX =fsize+10
                 elif yLabel in ['e','$e$']:
                     fsizeY =fsize+10
+                ## update label for m2 if it is in mjup
+                if in_m_jup:
+                    if xLabel in ['m2','$m_2{\rm [M}_{\odot}{\rm ]}$']:
+                        xLabel='m2 [Mjupiter]'
+                        if latex:
+                            xLabel=r'$m_2$ [$M_{J}$]'
+                    elif yLabel in ['m2','$m_2{\rm [M}_{\odot}{\rm ]}$']:
+                        yLabel='m2 [Mjupiter]'
+                        if latex:
+                            yLabel=r'$m_2$ [$M_{J}$]'
                 if latex:
                     subPlot.axes.set_xlabel(xLabel,fontsize=fsizeX)
                     subPlot.axes.set_ylabel(yLabel,fontsize=fsizeY)
@@ -1670,7 +1691,7 @@ def densityPlotter2D(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=No
                         plotnm = plotFilename[:-4]+'-rectangular.eps'
                     elif sqBool:
                         plotnm = plotFilename[:-4]+'-squareRanges.eps'
-                    plt.savefig(plotnm,fl_format=plotFormat)
+                    plt.savefig(plotnm,format=plotFormat)
                     s= 'density contour plot saved to: '+plotnm
                     log.info(s)
                 plt.close()
