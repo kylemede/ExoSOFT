@@ -5,9 +5,24 @@ from ExoSOFT import tools
 import sys
 import os
 import numpy as np
+import yaml
 import glob
 import KMlogger
 from six.moves import range
+
+
+"""
+ The function to re-run the post-analysis routines of ExoSOFT, either with 
+ their default values, or your own custom ones.
+ 
+ PLACE A COPY OF THIS FILE INTO THE SAME DIRECTORY AS YOUR SETTINGS AND DATA FILES!!
+ 
+ Make any changes to the input plotting and other post-processing         
+ functions necessary to get them perfectly ready for your publishing.     
+                                                                          
+ Then, start with :                                                       
+ $python customPost.py                                                    
+"""
 
 def custom_post(settings_in,advanced_settings_in, priors_in):
     ## load up settings that were passed in
@@ -77,17 +92,17 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
                         allFname = strippedAllFname
         
     ## find best fit
-    if False:
+    if True:
         print('about to find best orbit')
         bestFit = tools.findBestOrbit(allFname,bestToFile=False,findAgain=False)
     else:
-        bestFit = np.array([0.989258173441,0.000969607646338,49.4824152464,101.824621571,0.0570635830548,2450656.6178,2450656.6178,12.0122193117,44.5819933928,0.194526776635,5.22763017736,46.9083271473,8.91689222077,-0.0413666288362],)
+        bestFit = np.array([0.9892581,0.0009696,49.4824152,101.82462,0.05706358,2450656.61,2450656.61,12.012219,44.5819933,0.1945267,5.227630,46.908327,8.916892,-0.04136662])
     if True:
         print('about to make orbit plots')
         ##for reference: DIlims=[[[xMin,xMax],[yMin,yMax]],[[xCropMin,xCropMax],[yCropMin,yCropMax]]]   [[[,],[,]],[[,],[]]]
         ##               RVlims=[[yMin,yMax],[yResidMin,yResidMax],[xMin,xMax]]
         plotFnameBase = os.path.join(settings['finalFolder'],'orbPlot-Manual')
-        tools.orbitPlotter(bestFit,settings,plotFnameBase,format='eps',DIlims=[],RVlims=[])
+        tools.orbitPlotter(bestFit,settings,plotFnameBase,fl_format='eps',DIlims=[],RVlims=[])
         
     clStr=''
     if False:
@@ -124,7 +139,7 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
     if False: 
         print('about to calculate predicted location for custom date')
         orbParams = bestFit
-        epochs=[ 2457327.500]
+        epochs=[2457327.500]
         tools.predictLocation(orbParams,settings,epochs)
     
     ## calc correlation length & number effective points? 
@@ -149,4 +164,21 @@ def custom_post(settings_in,advanced_settings_in, priors_in):
     if False and settings['CopyToDB']:
         print('about to copy files to dropbox')
         tools.copyToDB(settings)
+        
+if __name__ == '__main__':
+    settings_in = None
+    priors_in = None
+    advanced_settings_in = None
+    if os.path.exists('./settings.yaml'):
+        f = open('./settings.yaml','r')
+        settings_in = yaml.load(f)
+        f.close()
+    if os.path.exists('./advanced_settings.yaml'):
+        f = open('./advanced_settings.yaml','r')
+        advanced_settings_in = yaml.load(f)
+        f.close()
+    if os.path.exists('./priors.py'):
+        from .priors import ExoSOFTpriors as priors_in
+    
+    custom_post(settings_in,advanced_settings_in, priors_in)
 #END OF FILE
