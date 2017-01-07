@@ -13,7 +13,7 @@ import KMlogger
 from six.moves import range
 
 warnings.simplefilter("error")
-log = KMlogger.getLogger('main.rwTools',lvl=100,addFH=False)  
+log = KMlogger.getLogger('main.rwTools',lvl=100,addFH=False)
 
 
 def nparyTolistStr(ary,brackets=True,dmtr=','):
@@ -26,14 +26,14 @@ def nparyTolistStr(ary,brackets=True,dmtr=','):
     if brackets:
         s+=']'
     return s
-    
+
 def copytree(src, dst):
     """
     Recursively copy a directory and its contents to another directory.
-    
-    WARNING: this is not advised for higher level folders as it can also copy subfolders 
+
+    WARNING: this is not advised for higher level folders as it can also copy subfolders
     thus leading to a very large copy command if not careful.
-    
+
     Code taken and simplified from:
     http://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
     """
@@ -49,7 +49,7 @@ def copytree(src, dst):
                 log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
         else:
             try:
-                #Check if filepath contains one of the skip 
+                #Check if filepath contains one of the skip
                 #strs and copy only if it is fine.
                 fine = True
                 for skipStr in skipStrs:
@@ -59,7 +59,7 @@ def copytree(src, dst):
                     shutil.copy2(s, d)
                     log.debug("Copying file:\n "+repr(s)+'\nto:\n'+repr(d))
             except:
-                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))      
+                log.error('FAILED while copying:\n'+repr(s)+'\nto:\n'+repr(d))
 
 def copyCodeFiles(src, dst,settingsFiles=None):
     """
@@ -90,15 +90,15 @@ def dataReader(filename, colNum=0):
         verboseInternal = False
         ## First get ranges of param and ChiSquared values
         log.debug('\nOpening and finding ranges for data in column # '+str(colNum))
-        
+
         ## Check if file has useful data for that column#
         (head,data) = loadFits(filename)
         if head!=False:
             TotalSamples=data.shape[0]
             dataAry = data[:,colNum]
             chiSquareds = data[:,11]
-            bestDataVal = dataAry[np.where(chiSquareds==np.min(chiSquareds))][0]          
-            return (dataAry,chiSquareds,[bestDataVal,np.median(dataAry),dataAry[0],dataAry[len(dataAry)//2],dataAry[-1]])  
+            bestDataVal = dataAry[np.where(chiSquareds==np.min(chiSquareds))][0]
+            return (dataAry,chiSquareds,[bestDataVal,np.median(dataAry),dataAry[0],dataAry[len(dataAry)//2],dataAry[-1]])
     except:
         log.critical("a problem occured while trying to load data file:\n"+filename)
         return False
@@ -106,15 +106,15 @@ def dataReader(filename, colNum=0):
 def loadDIdata(filename):
     """
     Load the astrometry data into a numpy array.
-    
+
     file format:
-    title 
+    title
     column headers
     data
     .
     .
     .
-    
+
     Data must be in the columns:
     obsDate[JD] x["] x_error["] y["] y_error["]
     OR if pasa key in settingsAdvanced ==True, then:
@@ -132,7 +132,7 @@ def loadDIdata(filename):
             #log.debug("line was:'"+line+"'")#$$$$$$$$$$$$$$$$$$$$$$$$
             if len(line.split())>2:
                 if line.split()[0].replace('.','',1).isdigit() and line.split()[3].replace('.','',1).replace('-','',1).isdigit():
-                    diData.append([float(line.split()[0]),float(line.split()[1]),float(line.split()[2]),float(line.split()[3]),float(line.split()[4])])  
+                    diData.append([float(line.split()[0]),float(line.split()[1]),float(line.split()[2]),float(line.split()[3]),float(line.split()[4])])
                     #print repr([float(line.split()[0]),float(line.split()[1]),float(line.split()[2]),float(line.split()[3]),float(line.split()[4])])
         diData = np.array(diData)
     except:
@@ -142,15 +142,15 @@ def loadDIdata(filename):
 def loadDIdata_cy(filename):
     """
     Load the astrometry data into a numpy array.
-    
+
     file format:
-    title 
+    title
     column headers
     data
     .
     .
     .
-    
+
     Data must be in the columns:
     obsDate[JD] x["] x_error["] y["] y_error["]
     OR if pasa key in settingsAdvanced ==True, then:
@@ -186,14 +186,14 @@ def loadDIdata_cy(filename):
     except:
         log.critical("a problem occured while trying to load DI data. \nPlease check it is formatted correctly.")
     return (epochs_di, rapa, rapa_err, decsa, decsa_err)
-    
+
 def loadRVdata(filename):
     """
-    Load the radial velocity data into a numpy array.  Provided jitter values will be added in quadrature with 
+    Load the radial velocity data into a numpy array.  Provided jitter values will be added in quadrature with
     the errors.
-    
+
     file format:
-    title 
+    title
     column headers
     data
     .
@@ -202,7 +202,7 @@ def loadRVdata(filename):
     data
     .
     .
-    
+
     Data must be in the columns:
     obsDate[JD] RV[m/s] RV_error[m/s] jitter[m/s] datasetNumber[int]
     NOTE: datasetNumber is optional, if not provided they will be automatically set to 0,1,2... following the order of the data in the file.
@@ -255,11 +255,11 @@ def loadRVdata(filename):
 
 def loadRVdata_cy(filename):
     """
-    Load the radial velocity data into a numpy array.  Provided jitter values 
+    Load the radial velocity data into a numpy array.  Provided jitter values
     will be added in quadrature with the errors.
-    
+
     file format:
-    title 
+    title
     column headers
     data
     .
@@ -268,7 +268,7 @@ def loadRVdata_cy(filename):
     data
     .
     .
-    
+
     Data must be in the columns:
     obsDate[JD] RV[m/s] RV_error[m/s] jitter[m/s] datasetNumber[int]
     NOTE: datasetNumber is optional, if not provided they will be automatically set to 0,1,2... following the order of the data in the file.
@@ -322,7 +322,7 @@ def loadRVdata_cy(filename):
     except:
         log.critical("a problem occured while trying to load RV data.  \nPlease check it is formatted correctly.")
     return (epochs_rv, rv, rv_err, rv_inst_num)
-    
+
 def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
     """
     Load the observed real data into a numpy array.
@@ -334,7 +334,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         diEpochs = []
         rvEpochs = []
         if dataMode!='RV':
-            #print 'using diFilename = '+diFilename        
+            #print 'using diFilename = '+diFilename
             if os.path.exists(diFilename):
                 diData = loadDIdata(diFilename)
                 diEpochs = diData[:,0]
@@ -375,7 +375,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
                         log.critical('More than 1 set of DI data for epoch '+\
                                      str(epochs[i])+'.  Only using first!!')
                     realData[i,1:5]=diData[pos,1:]
-            
+
             if len(rvEpochs)>0:
                 if epochs[i] in rvData[:,0]:
                     pos = np.where(rvData[:,0]==epochs[i])[0]
@@ -390,50 +390,35 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
     except:
         log.critical("An error occured while trying to load data!!")
     return realData
-            
+
 def load_settings(settings_in,advanced_settings_in,priors_in):
-    """  
-    This is to load the settings file from the path provided, then load in the 
-    ExoSOFTpriors object.  It will first see if there is a priors.py in same 
-    folder as the settings.py, else, this will load the default priors.py 
+    """
+    This is to load the settings file from the path provided, then load in the
+    ExoSOFTpriors object.  It will first see if there is a priors.py in same
+    folder as the settings.py, else, this will load the default priors.py
     packaged with ExoSOFT.
     NOTE: filenames must be exactly settings.py and priors.py.
     """
-    
+
     if priors_in==None:
         ## load the default priors object
         from .priors import ExoSOFTpriors as priors_in
         #print(repr(ExoSOFTpriors))
-        
+
     if advanced_settings_in==None:
         log.debug("no advanced settings provided by user, loading in defaults.")
         from .advanced_settings import advanced_settings_dict
         advanced_settings_in = advanced_settings_dict
 
     settings = settings_in
-    
+
     # merge two settings dicts
     for key in advanced_settings_in:
         settings[key] = advanced_settings_in[key]
-    
+
     # push priors into settings
     settings['ExoSOFTpriors'] = priors_in
-            
-    #######################################################
-    ## determine argPeriOffsetRV and argPeriOffsetDI values
-    #######################################################
-    omegaFdi = 0
-    ## ExoSOFT assumes the RV data was measured from the primary's spectra, and 
-    ## the orbit of the companion is being fit, NOT the orbit of the primary.
-    ## Thus, there is a 180deg shift forced to account for this.
-    omegaFrv=180.0
-    #now update due to fixed argPeriPlus values
-    omegaFdi+=settings['omega_offset_di']
-    omegaFrv+=settings['omega_offset_rv']
-    settings['omegaFdi'] = (omegaFdi,"Total fixed val added to DI omega in model")
-    settings['omegaFrv'] = (omegaFrv,"Total fixed val added to RV omega in model")
-    log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
-    
+
     #for key in settings:
     #    print(key+' = '+repr(settings[key]))
     #sys.exit('shirt')
@@ -461,13 +446,13 @@ def loadFits(filename,noData=False):
 def writeFits(baseFilename,data,settings,clob=False):
     """
     Data will be written to a fits file with a single PrimaryHDU,
-    with the .header loaded up with the tuples from the settings 
+    with the .header loaded up with the tuples from the settings
     and .data = provided data.
     File will be stored in the 'finalFolder' directory from the settings.
-    If data variable is a string, this function will assume it is a filename 
+    If data variable is a string, this function will assume it is a filename
     of where the data is stored in a .npy file, and load it in.
-    
-    NOTE: lots of error msg checking that can be removed if further testing 
+
+    NOTE: lots of error msg checking that can be removed if further testing
           does not show same issues that caused me to put them in.
     """
     outFname=''
@@ -515,12 +500,12 @@ def writeFits(baseFilename,data,settings,clob=False):
             commentsDict = settings['commentsDict']
             #print repr(commentsDict)
             for key in settings:
-                if key in commentsDict:  
+                if key in commentsDict:
                     good_key = True
                     #print repr(key)
                     #print key+' = '+repr(settings[key])
-                    #try to store key as is, else store as a string          
-                    try:    
+                    #try to store key as is, else store as a string
+                    try:
                         #print 'trying straight up'
                         header[key]=settings[key]
                     except:
@@ -607,7 +592,7 @@ def periodicDataDump(filename,d):
                         #outfile.write(re.sub("\n ","\n",re.sub("[\\[\\]]","",np.array2string(d))))
                         #print nparyTolistStr(d[i],brackets=False,dmtr=' ')
                     #raise IOError('\n\n'+s)
-                
+
 
 
 def pklIt(settings,dataObj, rootFnm):
@@ -659,7 +644,7 @@ def combineFits(filenames,outFname):
     hdulist.writeto(outFname)
     hdulist.close()
     log.info("output file written to:below\n"+outFname)
-        
+
 def renameFits(filenameIn,filenameOut,killInput=True,overwrite=True):
     """
     Load input into a new fits HDU, write to output name, close, rm input file.
@@ -683,7 +668,7 @@ def renameFits(filenameIn,filenameOut,killInput=True,overwrite=True):
         log.info("output file written to:below\n"+filenameOut)
         if killInput:
             rmFiles([filenameIn])
-    
+
 def rmFiles(files):
     if type(files)==str:
         files = [files]
@@ -693,12 +678,12 @@ def rmFiles(files):
             try:
                 if os.path.exists(fname):
                     log.debug('Deleting file: '+os.path.basename(fname))
-                    os.remove(fname) 
+                    os.remove(fname)
             except:
                 log.error('Failed to delete file: '+os.path.basename(fname))
     else:
         log.debug("files passed into rmFiles was not of list or str type")
-    
+
 def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
 
     filename = os.path.join(settings['finalFolder'],'best'+stage+'paramsAndSigs.txt')
@@ -722,7 +707,7 @@ def writeBestsFile(settings,pars,sigs,bstChiSqr,stage):
             log.debug("Failed to zero non-varying sigmas, but no biggie. It's a benign bug.")
     f.write(nparyTolistStr(sigs_out)+'\n')
     f.close()
-    log.info("Best fit params and sigmas from "+stage+" stage were written to :\n"+filename)    
-    
-    
+    log.info("Best fit params and sigmas from "+stage+" stage were written to :\n"+filename)
+
+
 #END OF FILE

@@ -20,18 +20,19 @@ class ExoSOFTpriors(object):
     mass of companion: (None,True, 'IMF','PDMF','CMF') True indicates default of 'CMF'
     parallax: (None,True) True indicates default of 'gauss'
     """
-    def __init__(self, ecc_prior=True, p_prior=True, inc_prior=True, 
+    def __init__(self, ecc_prior=True, p_prior=True, inc_prior=True,
                  m1_prior=True, m2_prior=True, para_prior=True, inc_min=0.0,
-                 inc_max=180.0, p_min=0.0, p_max=300.0, para_est=0, 
+                 inc_max=180.0, p_min=0.0, p_max=300.0, para_est=0,
                  para_err=0, m1_est=0, m1_err=0, m2_est=0, m2_err=0,
-                 ecc_min=0, ecc_max=0.98, ecc_beta_a=0.867, ecc_beta_b=3.03, 
+                 ecc_min=0, ecc_max=0.98, ecc_beta_a=0.867, ecc_beta_b=3.03,
                  ecc_J08_sig=0.3, ecc_Rexp_lamda=5.12, ecc_Rexp_a=0.781,
-                 ecc_Rexp_sig=0.272, ecc_ST08_a=4.33, ecc_ST08_k=0.2431):   
+                 ecc_Rexp_sig=0.272, ecc_ST08_a=4.33, ecc_ST08_k=0.2431,p_gamma=-0.7):
         # push in two manual constants
+        #print("\n\nUSING NEW PRIORS\n\n")
         self.days_per_year = 365.2422
         self.sec_per_year = 60*60*24*self.days_per_year
-        ## choices   
-        # choices:'2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. 
+        ## choices
+        # choices:'2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'.
         self.e_prior = ecc_prior
         self.ecc_max = ecc_max
         self.ecc_min = ecc_min
@@ -47,19 +48,20 @@ class ExoSOFTpriors(object):
         self.ecc_exp = stats.expon()  #https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.expon.html
         ## `best-fit' for the Shen&Turner 2008 pdf
         self.ecc_ST08_a = ecc_ST08_a### Put this into the advanced settings !!!!
-        self.ecc_ST08_k = ecc_ST08_k     ### Put this into the advanced settings !!!!  
+        self.ecc_ST08_k = ecc_ST08_k     ### Put this into the advanced settings !!!!
 
         #self.ecc_norm = stats.norm
-        #self.ecc_norm_mean = ## 
+        #self.ecc_norm_mean = ##
         #self.ecc_norm_sig = ##
         #self.ecc_norm.pdf(ecc,loc=self.ecc_norm_mean, scale=self.ecc_norm_sig)
-        
+
         ## For all with uniform priors!!
         self.uniform = stats.uniform
         #self.uniform.pdf(val,loc=val_min, scale=val_max)
-        
-        # choices:log
+
+        # choices: power-law, Jeffrey's
         self.p_prior = p_prior
+        self.p_gamma = p_gamma
         # choices:sin, cos
         self.inc_prior = inc_prior
         # choices:IMF, PDMF
@@ -79,21 +81,21 @@ class ExoSOFTpriors(object):
         self.m1_err = m1_err
         self.m2_est = m2_est
         self.m2_err = m2_err
-        
+
     def test_priors(self, pars_prop, pars_last):
         """Just for testing no errors occur while trying to caculate the
         priors ratio.  Nothing returned. """
         val = self.combinedPriors(pars_prop, pars_last)
         if False:
             print('test priors ratio value = '+str(val))
-                
+
     def priors_ratio(self, pars_prop, pars_last):
         """
         Calculates the priors ratio.
-        
+
         Input arrays need the first elements to be:
         [m1, m2, parallax, long_an, e, to, tc, p, inc, arg_peri]
-        This can be the full 'model_in_pars' or a truncated version with 
+        This can be the full 'model_in_pars' or a truncated version with
         just these parameters.
         """
         try:
@@ -102,22 +104,23 @@ class ExoSOFTpriors(object):
         except:
             print("An error occured while trying to calculate the priors ratio.")
             sys.exit(0)
-        
+
     def priors(self, pars):
         """
-        Combined priors for a single step in the chain.  This can be called 
-        to form the priors ratio OR when accounting for the priors when 
+        Combined priors for a single step in the chain.  This can be called
+        to form the priors ratio OR when accounting for the priors when
         producing the posteriors during post-processing.
-        
+
         Input array needs the first elements to be:
         [m1, m2, parallax, long_an, e, to, tc, p, inc, arg_peri]
-        This can be the full 'model_in_pars', 'stored_pars' or a truncated 
+        This can be the full 'model_in_pars', 'stored_pars' or a truncated
         version with just these parameters.
         """
         # model_in_params: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,arg_peri_di,arg_peri_rv,a_tot_au,K]
         # stored_pars: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,a_tot_au,chi_sqr,K,v1,v2...]
         comboPriors = 1.0
         try:
+            #print("\nEach prior was:\n")
             if self.e_prior:
                 #print('ePrior before')#$$$$$$$$$$
                 comboPriors*=self.ecc_prior_fn(pars[4])
@@ -149,11 +152,11 @@ class ExoSOFTpriors(object):
         except:
             print("An error occured while trying to calculate the combined sigle priors.")
             sys.exit(0)
-        
+
     ##########################################################################
     ####### Not to those who wish to write their own prior functions #########
-    # Only change the code and not the name of the functions or their inputs.#  
-    ##########################################################################          
+    # Only change the code and not the name of the functions or their inputs.#
+    ##########################################################################
     def ecc_prior_fn(self, ecc):
         ## UPGRADE TO INCLUDE FURTHER STRINGS TO INDICATE ECC PRIOR OPTIONS FROM KEPLER AND OTHER SURVEY RESULTS #$$$$$$$$$$$$$$$$$$$$
         ret = 1.0
@@ -174,15 +177,17 @@ class ExoSOFTpriors(object):
             elif self.e_prior=='uniform':
                 ret = self.uniform.pdf(ecc,loc=self.ecc_min,scale=self.ecc_max)
         return ret
-                  
+
     def p_prior_fn(self, p):
         ret = 1.0
         if p!=0.0:
-            if (self.p_prior == True) or (self.p_prior == 'log'):
+            if (self.p_prior == True) or (self.p_prior == 'jeffrey'):
                 # A Jeffrey's prior based on Gregory 2005.
                 ret = 1.0 / ( p * np.log( self.p_max / self.p_min ) )
+            elif self.p_prior == 'power-law':
+                ret = p **(self.p_gamma)
         return ret
-        
+
     def inc_prior_fn(self, inc):
         ret = 1.0
         if inc not in [0.0,90.0,180.0]:
@@ -193,9 +198,9 @@ class ExoSOFTpriors(object):
                 ret = np.sin(inc_rad) / np.abs(np.cos(mn)-np.cos(mx))
             elif self.inc_prior == 'cos':
                 ret =  np.cos(inc_rad) / np.abs(np.cos(mn)-np.cos(mx))
-                
+
         return ret
-        
+
     def m1_prior_fn(self, mass):
         ret = 1.0
         if mass!=0:
@@ -207,9 +212,9 @@ class ExoSOFTpriors(object):
                 ret*=self.pdmf_prior(mass)
             elif self.m1_prior == "IMF":
                 ret*=self.imf_prior(mass)
-                
+
         return ret
-        
+
     def m2_prior_fn(self, m2, m1):
         ret = 1.0
         if 0.0 not in [m2,m1]:
@@ -223,9 +228,9 @@ class ExoSOFTpriors(object):
                 ret*=self.pdmf_prior(m2)
             elif self.m2_prior == "IMF":
                 ret*=self.imf_prior(m2)
-                
+
         return ret
-            
+
     def para_prior_fn(self, para):
         ret = 1.0
         if para!=0.0:
@@ -234,13 +239,13 @@ class ExoSOFTpriors(object):
             #print('before gauss '+repr(ret))
             #print('para 1/**4 ',1.0/(para**4.0))
             if 0 not in [self.para_est,self.para_err]:
-                ## a Gaussian prior centered on hipparcos and width of 
+                ## a Gaussian prior centered on hipparcos and width of
                 #  hipparcos estimated error
-                
+
                 ret*=self.gaussian(para, self.para_est, self.para_err)
                 #print('para gauss ',self.gaussian(para, self.para_est, self.para_err))
         return ret
-            
+
     def imf_prior(self, m):
         """From table 1 of Chabrier et al. 2003"""
         a = 0.068618528140713786
@@ -252,7 +257,7 @@ class ExoSOFTpriors(object):
         else:
             d = 0.019239245548314052*(m**(-2.3))
         return d
-    
+
     def pdmf_prior(self, m):
         """From table 1 of Chabrier et al. 2003"""
         a = 0.068618528140713786
@@ -268,13 +273,13 @@ class ExoSOFTpriors(object):
         else:
             d = 0.00010857362047581295*(m**(-3.11))
         return d
-    
+
     def cmf_prior(self, m2, m1):
         """from equation 8 of Metchev & Hillenbrand 2009"""
         beta = -0.39
         d = (m2**(beta)) * (m1**(-1.0*beta-1.0))
         return d
-    
+
     def gaussian(self,x,mu,sig):
         return np.exp( (-(x - mu)*(x - mu)) / (2.0*(sig*sig)) )
 

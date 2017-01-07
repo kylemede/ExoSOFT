@@ -22,35 +22,35 @@ daysPerYear = 365.2422
 #secPerYear = 60*60*24*daysPerYear
 
 warnings.simplefilter("error")
-log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False) 
+log = KMlogger.getLogger('main.suTools',lvl=100,addFH=False)
 
 def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
     """
     Ways to start ExoSOFT:
     If shebang at top of ExoSOFT.py matches your system and location of ExoSOFT/ExoSOFT
     has been added to your PATH, then follow type 'a' below.  Else, use 'b' version.
-    
+
     1. Provide full path to settings file.
         a: $ExoSOFT.py /path/you/want/settings.py
-        b: cd into /../ExoSOFT/ExoSOFT/ first, then: 
+        b: cd into /../ExoSOFT/ExoSOFT/ first, then:
            $python ExoSOFT.py /path/you/want/settings.py
-    
-    2. From current directory where custom settings files exist.  
+
+    2. From current directory where custom settings files exist.
        Replace 'settingsfilename' with name of file you want to run.
         a: $ExoSOFT.py settingsfilename.py
         b: $python /../ExoSOFT/ExoSOFT/ExoSOFT.py settingsfilename.py
-        
-    3. Basic.  User will be prompted to select example 
-       ExoSOFT/examples/settings.py, or provide full path to specific settings 
+
+    3. Basic.  User will be prompted to select example
+       ExoSOFT/examples/settings.py, or provide full path to specific settings
        file.
         a:  $ExoSOFT.py
         b: cd into /../ExoSOFT/ExoSOFT/ first, then: $python ExoSOFT.py
             For both 'a' and 'b':
             To use example: type 'y' and press enter.
-            Else, type 'n' and press enter, then type 
+            Else, type 'n' and press enter, then type
             '/path/you/want/settings.py' and press enter.
-        
-    
+
+
     Perform the following vital start up steps (and return filled out and cleaned up settings):
     -Figure out important directories
     -Copy settings files to temp directory to combine them into the master settings dict
@@ -58,13 +58,13 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
     -Make output folder
     -Remake the SWIG tools?
     -Copy all ExoSOFT code into output dir for emergencies.
-    -check data exists    
+    -check data exists
     -push all comments from tuples into a sub dictionary with key 'commentsDict'
     -Check range min and max values, including updates for 'lowecc' mode.
     -find which parameters will be varying.
     -Check if start startParams and startSigmas in dictionary make sense.
     NOTE: have ExoSOFTdir handled with setup.py??
-    """    
+    """
     #settFilePath = getSettFilePath(sett_file_path)
     # extra double check file exists
     #if os.path.exists(settFilePath)==False:
@@ -144,7 +144,25 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             ## make folder for later copying pickle files for recovery if error
             ## or customPost work needs them.
             os.mkdir(pklDir)
-        ## push all comments from tuples into a sub dictionary to ensure all  
+
+        ## copy the settings used for this run to a subdirectory in the output directory
+        if True:
+            settDir = os.path.join(settings['finalFolder'],'settingsUsed')
+            os.mkdir(settDir)
+            fs = [settings_in['settings_in_path'],\
+                advanced_settings_in['advanced_settings_in_path'],\
+                settings_in['priors_in_path'],
+                settings['rv_dataFile'],\
+                settings['di_dataFile']
+                ]
+            for f in fs:
+                try:
+                    n = os.path.basename(f)
+                    shutil.copy(f,os.path.join(settDir,n))
+                except:
+                    log.fileonly('Not important, but one of the settings files trying to be copied to the outdir existed')
+
+        ## push all comments from tuples into a sub dictionary to ensure all
         ## values for requested keys are just the value with no comments.
         commentsDict = {}
         for key in settings:
@@ -201,7 +219,24 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         else:
             dm = dm.upper()
         settings['data_mode'] = dm
-        
+
+        #######################################################
+        ## determine argPeriOffsetRV and argPeriOffsetDI values
+        #######################################################
+        omegaFdi = 0
+        ## ExoSOFT assumes the RV data was measured from the primary's spectra, and
+        ## the orbit of the companion is being fit, NOT the orbit of the primary.
+        ## Thus, there is a 180deg shift forced to account for this.
+        omegaFrv=180.0
+        #now update due to fixed argPeriPlus values
+        omegaFdi+=settings['omega_offset_di']
+        omegaFrv+=settings['omega_offset_rv']
+        settings['omegaFdi'] = omegaFdi
+        settings['omegaFrv'] = omegaFrv
+        settings['commentsDict']['omegaFdi'] = "Total fixed val added to DI omega in model"
+        settings['commentsDict']['omegaFrv'] = "Total fixed val added to RV omega in model"
+        log.debug("Setting fixed omega offsets to:\nomegaFdi = "+str(omegaFdi)+"\nomegaFrv = "+str(omegaFrv))
+
         ##In DI mode can only find Mtotal, thus push all mass into M1 and kill M2
         if settings['data_mode']=='DI':
             settings['m1_min']=settings['m1_min']+settings['m2_min']
@@ -216,14 +251,14 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 settings['long_an_max'] = 360.0
             else:
                 settings['long_an_max'] = 180.0
-        if settings['ecc_min']==None:  
+        if settings['ecc_min']==None:
             settings['ecc_min'] = 0.0
         if settings['ecc_max']==None:
             settings['ecc_max'] = 0.98
         if settings['inc_min']==None:
             settings['inc_min'] = 0.0
         if settings['inc_max']==None:
-            settings['inc_max'] = 180.0  
+            settings['inc_max'] = 180.0
         if settings['arg_peri_min']==None:
             settings['arg_peri_min'] = 0.0
         if settings['arg_peri_max']==None:
@@ -246,8 +281,8 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                      settings['t_min'],\
                      settings['p_min'],\
                      settings['inc_min'],\
-                     settings['arg_peri_min']]   
-        ## Check all range parameters have a suitable value     
+                     settings['arg_peri_min']]
+        ## Check all range parameters have a suitable value
         rangeMaxs_check = [  10,\
                              5,\
                              300,\
@@ -265,7 +300,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                              2000000,\
                              0.00001,\
                              -180,\
-                             -720] 
+                             -720]
         for i in range(len(rangeMaxs)):
             ## force cast all range values to floats just to be sure
             rangeMaxs[i] = float(rangeMaxs[i])
@@ -313,7 +348,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         ##For low_ecc case, make Raw min/max vals for param drawing during MC mode
         rangeMaxsRaw = copy.deepcopy(rangeMaxs)
         rangeMinsRaw = copy.deepcopy(rangeMins)
-    
+
         if settings['low_ecc']:
             rangeMaxsRaw[8] = rangeMaxs[4]
             rangeMaxsRaw[4] = rangeMaxs[4]
@@ -323,7 +358,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             ## Cutting out this loop below as it is running very slow on pip installed version...
             if False:
                 ## run through the possible numbers for e and omega to find min/max for RAW versions
-                ## Only relevent for MC and the begining jumps of SA,  
+                ## Only relevent for MC and the begining jumps of SA,
                 ## Otherwise the values are converted back to omega and e and the original ranges are used for the check.
                 fourMin=1e6
                 fourMax=-1e6
@@ -364,7 +399,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 # Only add Velocity offsets to varied params if NOT in DI mode
                 if settings['data_mode']!='DI':
                     if rangeMaxs[i]!=0:
-                        paramInts.append(i)                                         
+                        paramInts.append(i)
             elif (i in [2,3]) and (settings['data_mode']!='RV'):
                 # Don't vary parallax or Long_an if in RV mode
                 if(rangeMaxs[i]!=0):
@@ -386,6 +421,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         settings['range_maxs'] = rangeMaxs
         settings['paramInts'] = np.array(paramInts)
         ## map some prior keys to updated values
+        # eccentricity prior
         eccDict = {True:'beta',False:'uniform',None:'uniform','2e':'2e','st08':'ST08','j08':'J08','rayexp':'RayExp','beta':'beta','uniform':'uniform'}
         ecc_prior = settings['ecc_prior']
         if type(ecc_prior)==str:
@@ -393,6 +429,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         if ecc_prior not in eccDict:
             ecc_prior = True
         settings['ecc_prior'] = eccDict[ecc_prior]
+        # inclination prior
         incDict = {True:'sin',False:False,None:False,'sin':'sin','cos':'cos'}
         inc_prior = settings['inc_prior']
         if type(inc_prior)==str:
@@ -400,6 +437,15 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         if inc_prior not in incDict:
             inc_prior = True
         settings['inc_prior'] = incDict[inc_prior]
+        # period prior
+        pDict = {True:'jeffrey',False:False,None:False,'jeffrey':'jeffrey','power-law':'power-law'}
+        p_prior = settings['p_prior']
+        if type(p_prior)==str:
+            p_prior = p_prior.lower()
+        if p_prior not in pDict:
+            p_prior = True
+        settings['p_prior'] = pDict[p_prior]
+        # m1 prior
         m1Dict = {True:'PDMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF'}
         m1_prior = settings['m1_prior']
         if type(m1_prior)==str:
@@ -407,6 +453,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         if m1_prior not in m1Dict:
             m1_prior = True
         settings['m1_prior']=m1Dict[m1_prior]
+        # m2 prior
         m2Dict = {True:'CMF',False:False,None:False,'IMF':'IMF','PDMF':'PDMF','CMF':'CMF'}
         m2_prior = settings['m2_prior']
         if type(m2_prior)==str:
@@ -416,13 +463,10 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         settings['m2_prior']=m2Dict[m2_prior]
         ## for the basic True/False priors of period and parallax
         boolDict = {True:True,False:False,None:False}
-        if settings['p_prior'] not in boolDict:
-            settings['p_prior'] = True
-        settings['p_prior'] = boolDict[settings['p_prior']]
         if settings['para_prior'] not in boolDict:
             settings['para_prior'] = True
         settings['para_prior'] = boolDict[settings['para_prior']]
-        
+
         ### Check all other flag (bool) settings
         bool_setting_strs = ['pltDists','pltOrbit','delChains','delCombined','CalcBurn','rmBurn','calcCL','calcIAC','CalcGR','autoMode','strtMCMCatBest','pasa','vary_tc', 'tc_equal_to', 'Kdirect']
         bool_defaults = [True,      True,       True,       True,           True,       True,   True,   True,     True,   False,        False,            False,   False,      True,           False,]
@@ -430,7 +474,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             if settings[bool_setting_strs[i]] not in boolDict:
                 settings[bool_setting_strs[i]] = bool_defaults[i]
             settings[bool_setting_strs[i]] = boolDict[settings[bool_setting_strs[i]]]
-                
+
         ## Check all other number settings
         num_setting_mins_dict = {'nSamples':1,\
                                  'n_wlkrs':1,\
@@ -493,12 +537,11 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 str(num_setting_maxs_dict[ks[i]])
                 log.debug(s)
                 settings[ks[i]] = num_setting_maxs_dict[ks[i]]
-            
-        
+
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)
-        
-        # load up # of cpus to use 
+
+        # load up # of cpus to use
         ncpu = multiprocessing.cpu_count()
         if type(settings['nCPUs'])==int:
             if settings['nCPUs']<0:
@@ -513,16 +556,25 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         else:
             settings['nChains'] = ncpu
             settings['nMCMCcns'] = ncpu
-        
+
+        ## take care of a critica error that crashes ExoSOFT during any requested
+        ## plotting if running in a 'screen' like environment that doesn't have a 'display' for use by matplotlib.
+        #if settings['screen_session'] == True:
+        #   import matplotlib
+        #    matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
+        #    import matplotlib.pyplot as plt
+        #    plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
+
+        ## DONE!
         return settings
-        
+
 
 def modePrep(settings,sigmas):
     """
     Check if start startParams and startSigmas in dictionary make sense.
-    Arrays must exist, be the right length, and have non-zeros values for all varying parameters.     
+    Arrays must exist, be the right length, and have non-zeros values for all varying parameters.
     Mode logic:
-    
+
     """
     startParams = settings['startParams']
     startSigmas = settings['startSigmas']
@@ -532,7 +584,7 @@ def modePrep(settings,sigmas):
     #rangeMaxs = settings['range_maxs']
     autoMode = settings['autoMode']
     num_params_stored = 13+settings['num_offsets']
-    
+
     ##check if startParams in settings file are useful
     gotParams = False
     #print("startParams in settings originally: "+repr(startParams))
@@ -565,7 +617,7 @@ def modePrep(settings,sigmas):
                         gotSigmas=False
                 i+=1
         else:
-            gotSigmas=False       
+            gotSigmas=False
     ## check out logic between provided parameters and requested mode/stages
     if gotParams==False:
         if autoMode==False:
@@ -582,7 +634,7 @@ def modePrep(settings,sigmas):
         else:
             if settings['stages']!='SASTMCMC':
                 log.critical("Auto mode and no params provided, so run default stages: SASTMCMC.")
-                settings['stages']='SASTMCMC'  
+                settings['stages']='SASTMCMC'
         if gotSigmas==False:
             startSigmas = sigmas
     elif gotSigmas==False:
@@ -621,7 +673,7 @@ def modePrep(settings,sigmas):
             startSigmas[i] = 0
     if type(startSigmas)!=np.ndarray:
         startSigmas = np.array(startSigmas)
-        
+
     ##make list of stages to run
     stgLstDict = {'MC':['MC'],'SA':['SA'],'SAST':['SA','ST'],'ST':['ST'],\
                   'SASTMCMC':['SA','ST','MCMC'],'STMCMC':['ST','MCMC'],\
@@ -641,7 +693,7 @@ def modePrep(settings,sigmas):
         nSTsampDict = {'loose':10000,'enough':100000,'tight':500000}
         settings['nSTsamp']= nSTsampDict[settings['initCrit']]
         #settings['commentsDict']['nSTsamp'] = "Num ST samples"
-    
+
     ## Check on 'accRates' setting values
     accRates = settings['accRates']
     if type(accRates)!=list:
@@ -655,16 +707,16 @@ def modePrep(settings,sigmas):
             accRates[1] = 0
         if accRates[1]>1:
             accRates[1] = 1
-        
-    
+
+
     if settings['thin_rate']==None:
         settings['thin_rate'] = 0
-    if settings['thin_rate']<=settings['nSamples']/settings['n_wlkrs']:
+    if settings['thin_rate']>=settings['nSamples']/settings['n_wlkrs']:
         if 'emcee' in stageList:
-            log.critical("thin_rate was less than nSamples/n_wlkers.  "+\
-                         "Thus, thin_rate was set to 0.")
+            log.error("thin_rate was equal or greater than nSamples/n_wlkers.  "+\
+                         "Thus, emcee thinning was turned off.")
             settings['thin_rate'] = 0
-    
+
     if settings['n_emcee_burn']==None:
         settings['n_emcee_burn'] = 0
     if settings['n_emcee_burn']>=settings['nSamples']/settings['n_wlkrs']:
@@ -672,11 +724,11 @@ def modePrep(settings,sigmas):
             log.critical("n_emcee_burn was greater than nSamples/n_wlkers.  "+\
                              "Thus, n_emcee_burn was set to 0.")
         settings['n_emcee_burn'] = 0
-        
+
     settings['startParams'] = startParams
     settings['startSigmas'] = startSigmas
     settings['stageList'] = stageList
-    
+
     return settings
 
 def getSettFilePath(sett_file_path):
@@ -686,7 +738,7 @@ def getSettFilePath(sett_file_path):
         try:
             inArg =sett_file_path
         except:
-            print('\nWarning: Only able to handle a single argument on the cmd !!\n')    
+            print('\nWarning: Only able to handle a single argument on the cmd !!\n')
     if inArg=='--help':
         s ="\nWays to start ExoSOFT\n"+'-'*50
         s+="\nIf shebang at top of ExoSOFT.py matches "
@@ -695,7 +747,7 @@ def getSettFilePath(sett_file_path):
         s+="\n1. Provide full path to settings file.\n      a: $ExoSOFT.py "
         s+="/path/you/want/settings.py\n      b: cd into /../ExoSOFT/ExoSOFT/ "
         s+="first, then: \n      $python ExoSOFT.py /path/you/want/settings.py"
-        s+="\n\n2. From current directory where custom settings files exist.\n" 
+        s+="\n\n2. From current directory where custom settings files exist.\n"
         s+="   Replace 'settingsfilename' with name of file you want to run.\n"
         s+="      a: $ExoSOFT.py settingsfilename.py\n      b: $python "
         s+="/../ExoSOFT/ExoSOFT/ExoSOFT.py settingsfilename.py\n\n"
@@ -709,10 +761,10 @@ def getSettFilePath(sett_file_path):
         s= '\n'+'*'*50+'\n'+s+'\n'+'*'*50+'\n'
         log.raisemsg(s)
         raise IOError('\n\n'+s)
-            
-    else: 
+
+    else:
         ## Load up the required specific directory paths in dict
-        # Starting method #1, provide full path to settings file          
+        # Starting method #1, provide full path to settings file
         if '/' in inArg:
             #assume full path
             settFilePath = inArg
@@ -759,7 +811,7 @@ def getSettFilePath(sett_file_path):
                     print('*'*35)
                     log.debug("Starting ExoSOFT by method #2")
             if gotIt==False:
-                # Starting method #3, prompt user to use defaults or provide a 
+                # Starting method #3, prompt user to use defaults or provide a
                 # settings file path.
                 print('*'*50)
                 print('* No settings file provided.  ')
@@ -798,7 +850,7 @@ def getSettFilePath(sett_file_path):
                         raise IOError('\n\n'+s)
                     else:
                         print('*'*50)
-                        log.debug("Starting ExoSOFT by method #3 with user provided file and path") 
+                        log.debug("Starting ExoSOFT by method #3 with user provided file and path")
         return settFilePath
 
 #END OF FILE

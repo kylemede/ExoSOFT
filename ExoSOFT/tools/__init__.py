@@ -1,12 +1,12 @@
 #@Author: Kyle Mede, kylemede@astron.s.u-tokyo.ac.jp  or kylemede@gmail.com
 from __future__ import absolute_import
 
+from .startupTools import startup
+
 from .model import ExoSOFTmodel
 from .model import ln_posterior
 
 from .cytools import mean_corr_len
-
-from .startupTools import startup
 
 from . import readWriteTools
 from .readWriteTools import loadRealData

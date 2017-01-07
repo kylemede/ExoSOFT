@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 #import matplotlib
 # Force matplotlib to not use any Xwindows backend, to further avoid Display issues or when ExoSOFT is ran through ssh without -X.
-#matplotlib.use('Agg') 
+#matplotlib.use('Agg')
 #import sys
 import os
 import timeit
@@ -14,10 +14,10 @@ from . import tools
 from . import simulator
 
 """
-    This is the 'main' of ExoSOFT. 
-    It will start things off, call the appropriate set of 
+    This is the 'main' of ExoSOFT.
+    It will start things off, call the appropriate set of
     simulation and post-processing steps.
-""" 
+"""
 def exoSOFT(settings_in, advanced_settings_in, priors_in):
     ## Call startup to get dict and load up final directories into it.
     #settings = tools.startup(sett_file_path)
@@ -26,11 +26,11 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
     log.logDict(settings)
     #log.debug("Prepend string passed in was '"+settings['prepend']+"'")
     Sim = simulator.Simulator(settings)
-       
+
     ###########################################
     # Run nChains for MC/SA/ST mode requested #
     #  Then up to nMCMCcns if MCMC requested  #
-    ###########################################     
+    ###########################################
     tic=timeit.default_timer()
     stageList = settings['stageList']
     durationStrings = ''
@@ -118,15 +118,15 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         if stgsPassed:
             durationStrings+='** emcee stage **\n'+emcee_mpo.latestRetStr
         log.warning(emcee_mpo.latestRetStr)
-    
-    ## Done all stages 
+
+    ## Done all stages
     toc=tic2=timeit.default_timer()
     s = "ALL stages took a total of "+tools.timeStrMaker(int(toc-tic))
     durationStrings+=s+'\n'
     log.info(s)
-    
+
     ###################
-    # Post-processing # 
+    # Post-processing #
     ###################
     log.warning("Starting Post-Processing")
     FINALmpo = None
@@ -152,7 +152,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         tools.pklIt(settings, FINALmpo.resultsOnly(),'FINALmpoRO')
     else:
         log.critical("\nNo FINALmpo exists!!! \nExoSOFT failed to complete any of the requested stages!!")
-    
+
     if FINALmpo!=None:
         outFiles = FINALmpo.outFnames
         [allFname,burnInStr,clStr,grStr,effPtsStr,iacStr,postTime,allTime] = ['','','','','','','','']
@@ -165,7 +165,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         ## calc and strip burn-in?
         if (len(outFiles)>1)and(settings['CalcBurn'] and (FINALmpo.stage=='MCMC')):
-            (burnInStr,burnInLengths) = tools.burnInCalc(outFiles,allFname)    
+            (burnInStr,burnInLengths) = tools.burnInCalc(outFiles,allFname)
             if settings['rmBurn']:
                 strippedFnames = tools.burnInStripper(outFiles,burnInLengths)
                 outFiles = strippedFnames
@@ -180,7 +180,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         if os.path.exists(allFname):
             bestFit = tools.findBestOrbit(allFname,by_ln_prob= FINALmpo.stage=="emcee")
             #bestFit = tools.findBestOrbit(allFname)
-            
+
         ## orbit plots?
         if settings['pltOrbit'] and os.path.exists(allFname):
             plotFnameBase = os.path.join(os.path.dirname(allFname),'orbitPlot'+FINALmpo.stage)
@@ -190,26 +190,27 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
             plotFilename = os.path.join(os.path.dirname(allFname),'summaryPlot'+FINALmpo.stage)
             clStr = tools.summaryPlotter(allFname,plotFilename,bestVals=bestFit,stage=FINALmpo.stage,shadeConfLevels=True,plotALLpars=True)
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
+
         ##calc Gelman-Rubin convergence statistics?
         if (len(outFiles)>1) and (settings['CalcGR'] and (FINALmpo.stage=='MCMC')):
             grStr = tools.gelmanRubinCalc(outFiles,settings['nSamples'])
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
-        
+
         ## progress plots?  INCLUDE?? maybe kill this one. Function exists, but not decided how to use it here.
-        
-        ## calc mean correlation length & number effective points? 
+
+        ## calc mean correlation length & number effective points?
         if settings['calcCL'] and os.path.exists(allFname):
             if ((len(outFiles)>1)and(FINALmpo.stage=='MCMC'))or(FINALmpo.stage=='emcee'):
                 effPtsStr = tools.mcmcEffPtsCalc(allFname)
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,allTime,postTime,durationStrings],'finalSummaryStrs')
-        
+
         ## calc auto-correlation time using tools from the emcee package
         if ((FINALmpo.stage=='emcee')or(FINALmpo.stage=='MCMC')) and (settings['calcIAC'] and os.path.exists(allFname)):
             #print("\n about to call autocorr")
             iacStr = tools.autocorr(allFname)
         #print("iacStr = "+iacStr)
-        
-        ## Make a summary file of results 
+
+        ## Make a summary file of results
         toc=timeit.default_timer()
         postTime = toc-tic2
         allTime = toc-tic
@@ -218,18 +219,18 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
         ## pickle final versions of all the results
         tools.pklIt(settings,[allFname,outFiles,stageList,clStr,burnInStr,bestFit,grStr,effPtsStr,iacStr,allTime,postTime,durationStrings],'finalSummaryStrs')
         tools.pklIt(settings,settings,'settings')
-        
+
         ##clean up files (move to folders or delete them)
         tools.cleanUp(settings,stageList,allFname)
         try:
-            if settings['CopyToDB']:
+            if settings['copyToDB']:
                 tools.copyToDB(settings)
         except:
             s = " \nAn error occured while trying to copy files to dropbox."
             s+= " \nThis could have happend if the key doesn't exist in your settings dictionary."
             s+= " \nNo biggie as this function will most likely be removed prior to going public."
             log.debug(s)
-            
+
         ## Final log messages and end
         log.debug("Post-processing took a total of "+tools.timeStrMaker(postTime))
         log.warning(" ExoSOFT is Done :-)\n EVERYTHING took a total of "+tools.timeStrMaker(allTime)+'\n')

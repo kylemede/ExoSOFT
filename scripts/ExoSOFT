@@ -9,20 +9,36 @@ import os
 #cwd = os.getenv('PWD')
 #os.getcwd()
 #os.system('ls')
+
+## Load in any available settings, advanced settings and priors available in the CWD.
+## Then push the path to those available to dictionary keys for later use.
 settings_in = None
 priors_in = None
 advanced_settings_in = None
+pf = None
 if os.path.exists('./settings.yaml'):
     f = open('./settings.yaml','r')
     settings_in = yaml.load(f)
     f.close()
+    sf = os.path.join(os.getcwd(),'settings.yaml')
+    settings_in['settings_in_path'] = sf
 if os.path.exists('./advanced_settings.yaml'):
     f = open('./advanced_settings.yaml','r')
     advanced_settings_in = yaml.load(f)
     f.close()
+    asf = os.path.join(os.getcwd(),'advanced_settings.yaml')
+    advanced_settings_in['advanced_settings_in_path'] = asf
+    if 'screen_session' in advanced_settings_in:
+        if advanced_settings_in['screen_session']==True:
+            import matplotlib
+            matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
+            import matplotlib.pyplot as plt
+            plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 if os.path.exists('./priors.py'):
     from priors import ExoSOFTpriors as priors_in
-    
+    pf = os.path.join(os.getcwd(),'priors.py')
+    if settings_in != None:
+        settings_in['priors_in_path'] = pf
 
 exoSOFT(settings_in,advanced_settings_in, priors_in)
-
+#EOF

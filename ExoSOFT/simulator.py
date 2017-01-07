@@ -17,8 +17,8 @@ from six.moves import range
 class Simulator(object):
     """
     The primary 'Simulator' class/object for ExoSOFT.
-    It contains the functions to perform basic 'shotgun' Monte Carlo, 
-    Simulated Annealing, Sigma Tunning, pure MCMC, and ensemble mcmc 
+    It contains the functions to perform basic 'shotgun' Monte Carlo,
+    Simulated Annealing, Sigma Tunning, pure MCMC, and ensemble mcmc
     (using emcee) simulations.
     """
     def __init__(self,settings):
@@ -43,23 +43,23 @@ class Simulator(object):
         self.log.logSystemInfo()
         self.Model = tools.ExoSOFTmodel(self.settings)
         self.priors_last = 1
-        (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV) = self.starter() 
+        (self.realData,self.rangeMaxsRaw,self.rangeMinsRaw,self.rangeMaxs,self.rangeMins,self.starterSigmas,self.paramInts,self.nu,self.nuDI,self.nuRV) = self.starter()
         #Just initial seed val, reset in resetTracked() to be unique for each chain.
         self.seed = int(timeit.default_timer())
         np.random.seed(self.seed)
         self.tmpDataFile = os.path.join(self.settings['finalFolder'],"tmpOutdata-"+str(self.chainNum)+".npy")
         #import code; code.interact(local=locals())  #$$ NOTE:  THIS IS THE INTERACTIVE DEBUGGER THAT CHRIS RECOMMENDS. AT THIS LINE IT OPENS UP AN INTERACTIVE PYTHON TERMINAL WITH THE CURRENT V
-        
+
     def starter(self):
         """
-        Things needed by all simulator modes that can be internal, but 
+        Things needed by all simulator modes that can be internal, but
         need code to load them up.
         """
         ## Recover parameter related items in the settings put there during startup
         realData = self.settings['realData']
         sigmas = self.settings['startSigmas']
         rangeMinsRaw = self.settings['rangeMinsRaw']
-        rangeMaxsRaw = self.settings['rangeMaxsRaw'] 
+        rangeMaxsRaw = self.settings['rangeMaxsRaw']
         rangeMins = self.settings['range_mins']
         rangeMaxs = self.settings['range_maxs']
         paramInts = self.settings['paramInts']
@@ -131,7 +131,7 @@ class Simulator(object):
         self.settings['3DVars'] = allVars
         self.settings['DIvars'] = diVars
         self.settings['RVvars'] = rvVars
-        
+
         sigMaxs = np.zeros(rangeMinsRaw.shape)
         sigMins = np.zeros(rangeMinsRaw.shape)
         for i in paramInts:
@@ -143,9 +143,9 @@ class Simulator(object):
         ## will return the value if all good, or call for sys.exit() if not.
         _ = self.Model.Priors.priors_ratio(rangeMins,rangeMins)
         self.log.debug("priors ratio function completed with no errors.")
-        
+
         return (realData,rangeMaxsRaw,rangeMinsRaw,rangeMaxs,rangeMins,sigmas,paramInts,nu,nuDI,nuRV)
-    
+
     def increment(self,pars=[],sigs=[],stage=''):
         """
         Increment all varying parameters if MC.
@@ -154,7 +154,7 @@ class Simulator(object):
         parsOut = copy.deepcopy(pars)
         varyInt=0
         sig = 0
-        ## vary all the params if MC, 
+        ## vary all the params if MC,
         ##(or special cases at beginning of SA where this func is called pretending to be MC.)
         if  (('MCMC' not in stage) and (stage=='MC')) or (stage=='SA'and(self.acceptCount==0)):
             for i in range(0,len(pars)):
@@ -166,21 +166,21 @@ class Simulator(object):
             self.parIntVaryAry.append(varyInt)
             sig = sigs[varyInt]
             ## Draw from a uniform proposal distribution
-            #parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)   
+            #parsOut[varyInt]=np.random.uniform(pars[varyInt]-sig,pars[varyInt]+sig)
             ## Draw from a normal distribution
-            parsOut[varyInt]=np.random.normal(pars[varyInt],sig)    
-            
+            parsOut[varyInt]=np.random.normal(pars[varyInt],sig)
+
         return parsOut
-    
+
     def accept(self,sample,pars,ln_post=1,temp=1.0,stage=''):
         """
         First this will calculate chi squared for model vs real data.
-        
-        For mcOnly it performs simple chisquared cut-off acceptance 
+
+        For mcOnly it performs simple chisquared cut-off acceptance
         based on 'chiMAX' value in settings.
-        Else, it will calculate the priors and accept based on 
-        the Metropolis-Hastings algorithm. The temp factor will 
-        be set to 1.0 for MCMC and Sigma Tuning, and should be provided 
+        Else, it will calculate the priors and accept based on
+        the Metropolis-Hastings algorithm. The temp factor will
+        be set to 1.0 for MCMC and Sigma Tuning, and should be provided
         for Simulated Annealing.
         """
         paramsOut = copy.deepcopy(pars) #stored versions
@@ -210,7 +210,7 @@ class Simulator(object):
                 accept=True
         else:
             ## For SA after first sample, MCMC, and ST
-            try:               
+            try:
                 likelihoodRatio = np.exp((self.paramsLast[11] - raw3D)/(2.0*temp))
                 priorsRatio = self.Model.prior/self.priors_last
                 ############################################################
@@ -232,7 +232,7 @@ class Simulator(object):
             self.latestSumStr = stage+" chain #"+str(self.chainNum)+\
             ' Latest accepted reduced chiSquareds: [total,DI,RV] = ['+\
             str(reduced3D)+", "+str(reducedDI)+", "+str(reducedRV)+"]"
-            
+
         else:
             self.acceptBoolAry.append(0)
         ##log a status summary?
@@ -244,21 +244,21 @@ class Simulator(object):
                 str(self.settings[self.stgNsampDict[stage]])+" = "+str(perc)+"%, Current T: "+str(temp)+"\n"
                 sumStr+=self.latestSumStr+'\n'+self.bestSumStr+'\n'
                 self.log.debug(sumStr)
-        
-        
+
+
         paramsOut2 = copy.deepcopy(paramsOut)
         ## enabling this would make the 11th column of both all algorithm outputs be the same.
         if False:
             ## Replace 3D chi squared with posterior probability
             paramsOut2[11] = ln_post#np.exp(ln_post)
-        
+
         return (accept,paramsOut2)
-    
+
     def tempDrop(self,sample,strtTemp,temp,stage=''):
         """
         Determine if it is time to drop the temp, and drop if it is.
-        Total temperature range is [strtTemp,0.01), so the minimum 
-        temperature is actually <1.0 meaning the last few temperature drops 
+        Total temperature range is [strtTemp,0.01), so the minimum
+        temperature is actually <1.0 meaning the last few temperature drops
         will really push the currently found minimum towards its peak.
         There will be a fixed number of temperature steps = 'nTmpStps'.
         """
@@ -266,13 +266,13 @@ class Simulator(object):
             if sample%self.settings['tempInt']==0:
                 temp-=(strtTemp-0.01)*(float(self.settings['tempInt'])/float(self.settings['nSAsamp']))
         return temp
-    
+
     def sigTune(self,sample,sigs=[],stage=''):
         """
         Check if it is time to calculate the acceptance rate.
         If stage is ST, then it will also tune the sigmas.
-        If MCMC then it will just calculate the acceptance 
-        rate.  In both cases, 'nSigStps' throughout the simulation 
+        If MCMC then it will just calculate the acceptance
+        rate.  In both cases, 'nSigStps' throughout the simulation
         a summary message will also be written to the log.
         """
         sigmasOut = copy.deepcopy(sigs)
@@ -321,13 +321,13 @@ class Simulator(object):
                 if accRatesInRange:
                     self.sigmasInRangeCounter+=1
                 else:
-                    self.sigmasInRangeCounter=0                
+                    self.sigmasInRangeCounter=0
         else:
             #No need to track these, so reset them to empty to save any RAM they are using
             self.acceptBoolAry = []
             self.parIntVaryAry = []
         return sigmasOut
-    
+
     def endSummary(self,temp,sigmas,stage=''):
         """
         Make a final summary of important statistics for the chain.
@@ -347,7 +347,7 @@ class Simulator(object):
         sumStr+='\n'+'='*70+'\n'
         self.log.info(sumStr)
         return float(self.acceptCount)/float(self.settings[self.stgNsampDict[stage]])
-    
+
     def resetTracked(self,stage):
         """
         Reset the internal strings, arys and counters.
@@ -366,7 +366,7 @@ class Simulator(object):
         self.settings['commentsDict']['nDIepoch'] = "chain number"
         self.settings['curStg']= stage
         self.settings['commentsDict']['curStg'] = 'Current stage either [SA,ST,MCMC or MC]'
-        # make a very random seed value to ensure each chain is different.  
+        # make a very random seed value to ensure each chain is different.
         # Should we make this value an optional input and pass on as a return value to keep a process number using the same seed?? $$$
         # if so, it needs to be pushed into the results file as well.
         t = np.random.uniform(1,1e6)
@@ -377,20 +377,20 @@ class Simulator(object):
         if os.path.exists(self.tmpDataFile):
             os.remove(self.tmpDataFile)
             self.log.debug("just removed data file from disk:\n"+self.tmpDataFile)
-    
+
     def startSummary(self,pars,sigs,stage):
         startStr=stage+" chain #"+str(self.chainNum)+' VALS AT START OF '+stage+' SIM:\n'
-        startStr+= 'params = '+repr(pars)+'\n'   
+        startStr+= 'params = '+repr(pars)+'\n'
         startStr+= 'rangeMins = '+repr(self.rangeMins)+'\n'
         startStr+= 'rangeMaxs = '+repr(self.rangeMaxs)+'\n'
         if self.settings['low_ecc']:
             startStr+= 'rangeMinsRaw = '+repr(self.rangeMinsRaw)+'\n'
-            startStr+= 'rangeMaxsRaw = '+repr(self.rangeMaxsRaw)+'\n' 
+            startStr+= 'rangeMaxsRaw = '+repr(self.rangeMaxsRaw)+'\n'
         startStr+= 'sigmas = '+repr(sigs)+'\n'
-        startStr+= 'paramInts = '+repr(self.paramInts)+'\n'  
+        startStr+= 'paramInts = '+repr(self.paramInts)+'\n'
         startStr+= '[nu,nuDI,nuRV] = ['+str(self.nu)+', '+str(self.nuDI)+', '+str(self.nuRV)+']\n'
         self.log.debug(startStr)
-        
+
     def simulatorFunc(self,stage='',chainNum=1,startParams=[],startSigmas=[],temp=1.0):
         """
         The core function to perform the requested stage of the simulation ('MC','SA','ST','MCMC').
@@ -405,7 +405,7 @@ class Simulator(object):
         bar = tools.ProgBar(total=100,barLength=0)
         #modelData = np.zeros((len(self.realData),3))
         acceptedParams = []
-        strtTemp = temp      
+        strtTemp = temp
         endDatetime = ''
         sigmas = copy.deepcopy(self.starterSigmas)
         ## if valid startSigmas provided, start with them, else use defaults.
@@ -422,15 +422,15 @@ class Simulator(object):
                 #convert 'stored' to 'direct/raw' versions
                 paramsLast = copy.deepcopy(self.Model.Params.stored_to_direct(startParams))
                 self.log.debug('initial/latest pars have reduced chi sqr of '+str(startParams[11]/self.nu))
-            else: 
+            else:
                 paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
-        else: 
-            paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')    
+        else:
+            paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
         ## load up starting params as 'latest' and perform first increment from these to start loop with.
         latestParsRaw = copy.deepcopy(paramsLast)
         proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
-        ## convert from Raw form if in lowEcc mode     
-        ln_post = tools.ln_posterior(proposedParsRaw,self.Model)       
+        ## convert from Raw form if in lowEcc mode
+        ln_post = tools.ln_posterior(proposedParsRaw,self.Model)
         paramsLast = copy.deepcopy(self.Model.Params.stored_pars)
         self.log.debug('proposed pars have reduced chi sqr of '+str(paramsLast[11]/self.nu))
         self.paramsLast = paramsLast
@@ -439,11 +439,11 @@ class Simulator(object):
         #if stage =='MCMC':
         #    #load starting point to make accepted numbers match perfect to requested samples
         #    acceptedParams.append(self.paramsLast)
-        #    self.nSaved += 1 
+        #    self.nSaved += 1
         #    self.nSavedPeriodic+=1
         #    self.acceptBoolAry.append(0)
-    
-        
+
+
         ############################################################################
         ##  All the general ExoSOFT inputs are now ready to go.  Next, either      #
         ##  prepare, call, and wrap-up the use of emcee, OR do a loop over the     #
@@ -457,7 +457,7 @@ class Simulator(object):
             ndim_raw = len(self.settings['rangeMinsRaw']) # number of parameters in the model, in 'raw'/'direct' format
             nwalkers = self.settings['n_wlkrs']
             nsteps = int(float(self.settings['nSamples'])/float(nwalkers))  ##$$$ leave this way, or add to settings dict?
-            
+
             if nsteps<=self.settings['n_emcee_burn']:
                 ## There will be no samples kept after removing burn-in!
                 ## Thus, don't run emcee.
@@ -467,90 +467,92 @@ class Simulator(object):
                 s+= str(self.settings['n_emcee_burn'])+'!!\n'
                 s+= "Thus, all steps emcee takes will be deleted.\n"
                 s+= "Options:\n-shorten 'n_emcee_burn'\n-increase 'nSamples'\n"
-                s+= "-decrease 'n_walkers'\n-change 'rmBurn' to False\n" 
+                s+= "-decrease 'n_walkers'\n-change 'rmBurn' to False\n"
                 s+= "\nExoSOFT will exit after this message.\nPlease make one of"
-                s+=" the recomended changes to the settings file and try again.\n"               
+                s+=" the recomended changes to the settings file and try again.\n"
                 self.log.raisemsg(s)
                 sys.exit()
-                
+
             ## Form a set of starting guesses centered on those provided.
             ## Note: there is a function to do this in emcee (emcee.utils.sample_ball)
             ##       but the in/out are different so using this custom one for now.
             starting_guesses = tools.make_starting_params(latestParsRaw,nwalkers,scale=0.01)
-            
+
             self.log.importantinfo("\nObjects and inputs prepared, now calling emcee.")
-            
-            ## NOTE: To avoid an error that arises when trying to pickle a 
-            #        'module', even though none are passed into emcee, here 
-            #        a pathos pool object will be instantiated and passed in 
-            #        just to be safe.  
-            # ALTHOUGH, SOME TESTING HAS INDICATED IT MIGHT BE SLOWER THAN THE 
+
+            ## NOTE: To avoid an error that arises when trying to pickle a
+            #        'module', even though none are passed into emcee, here
+            #        a pathos pool object will be instantiated and passed in
+            #        just to be safe.
+            # ALTHOUGH, SOME TESTING HAS INDICATED IT MIGHT BE SLOWER THAN THE
             # MODIFIED PYTHON POOL USED BY EMCEE BY DEFAULT...
             try:
                 ## emcee Default way ##
                 self.log.info("using the standard multiprocessing processing pool for emcee")
-                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
+                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior,
                                                 args=[self.Model], threads=ncpu)
             except:
                 ## Pathos way ##
                 self.log.info("using the pathos processing pool for emcee")
                 p = mp.ProcessingPool(ncpu)
-                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior, 
+                sampler = emcee.EnsembleSampler(nwalkers, ndim_raw, tools.ln_posterior,
                                                         args=[self.Model], threads=ncpu, pool=p)
-            
+
             ## Start the emcee ensemble sampler
             sampler.run_mcmc(starting_guesses, nsteps)
             #sampler = test_emcee(nwalkers, ndim_raw, tools.ln_posterior, self.Model, ncpu,starting_guesses, nsteps)
             self.log.importantinfo("ensamble sampling with emcee complete.\n")
-            
+
             ################################################################
             ### Refactor emcee trace/chain into ExoSOFT stored params format
             ################################################################
             # chain is of shape (nwalkers, nsteps, ndim)
-            # discard burn-in points and reshape
+            ## discard burn-in points
             trace = sampler.chain
             lnprobs = sampler.lnprobability
             self.log.importantinfo("Before burn-in strip")
             self.log.importantinfo("trace.shape = "+repr(trace.shape))
-            self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))    
+            self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
             if self.settings['rmBurn']:
                 trace = trace[:, self.settings['n_emcee_burn']:, :]
                 lnprobs = lnprobs[:, self.settings['n_emcee_burn']:]
             self.log.importantinfo("\nAfter burn-in strip")
             self.log.importantinfo("trace.shape = "+repr(trace.shape))
             self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
-            
-            ## Thin the resulting chains to reduce disk space wasted 
+
+            ## Thin the resulting chains to reduce disk space wasted
             ## storing highly correlated steps
-            if self.settings['thin_rate']>0:
+            if self.settings['thin_rate']>1:
                 trace = trace[:, ::self.settings['thin_rate'], :]
                 lnprobs = lnprobs[:, ::self.settings['thin_rate']]
             self.log.importantinfo("\nAfter burn-in strip AND thinning")
             self.log.importantinfo("trace.shape = "+repr(trace.shape))
             self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
+
+            ## reshape to put all walkers together
             lnprobs = lnprobs.reshape(-1)
             trace = trace.reshape(-1, ndim_raw)
-            
+
             ## Now the trace shape is (nwalkers*nsteps, ndim)
-            ## Go through every sample output by emcee and convert to 
+            ## Go through every sample output by emcee and convert to
             ## 'stored' format for later use by ExoSOFT
             acceptedParams = np.ones((trace.shape[0],ndim))
             for i in range(trace.shape[0]):
                 acceptedParams[i] = self.Model.Params.direct_to_stored(trace[i])
             ## push probability = np.exp(lnprob) into chi squared column
-            acceptedParams[:,11] = lnprobs#np.exp(probs)
-            
+            acceptedParams[:,11] = lnprobs#np.exp(lnprobs)
+
             ## Write accepted parameters array to disk
             tools.periodicDataDump(self.tmpDataFile,acceptedParams)
-                        
+
             self.acceptStr = "Mean acceptance fraction: {0:.3f}".format(np.mean(sampler.acceptance_fraction))
             avgAcceptRate = np.mean(sampler.acceptance_fraction)
-            
+
         else:
             ###################################################################
-            ##loop through each sample 
+            ##loop through each sample
             ##Follows these steps: in Range?,calc model,accept?,Store?,
-            ##                     increment,lower temp?,tune sigmas? 
+            ##                     increment,lower temp?,tune sigmas?
             ##                     dump data to disk? DONE ->write output data
             ###################################################################
             sample=0
@@ -570,12 +572,12 @@ class Simulator(object):
                         if ('MCMC' not in stage)and(stage in ['MC','SA','ST']):
                             acceptedParams.append(paramsOut)
                             self.nSaved+=1
-                            self.nSavedPeriodic+=1                 
+                            self.nSavedPeriodic+=1
                 else:
                     self.acceptBoolAry.append(0)
                 if (stage in ['MCMC']) and (sample%self.settings['saveInt']) == 0:
                     acceptedParams.append(self.paramsLast)
-                    self.nSaved += 1 
+                    self.nSaved += 1
                     self.nSavedPeriodic+=1
                 proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
                 temp = self.tempDrop(sample,strtTemp,temp,stage)
@@ -602,7 +604,7 @@ class Simulator(object):
                         bar.render(perc, suffix=stage+str(chainNum)+' '+endDatetime)#timeStr)
                 if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
                     #push predicted completion time log file
-                    self.log.fileonly(stage+str(chainNum)+' '+endDatetime)            
+                    self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
                 if (stage=='ST') and ((self.sigmasInRangeCounter>10)and(self.nSaved>1)):
                     self.log.debug("sigmasInRangeCounter>10 so breaking sample loop.")
                     break
@@ -615,11 +617,11 @@ class Simulator(object):
             avgAcceptRate = self.endSummary(temp,sigmas,stage)
             #print str(avgAcceptRate)+'\n'
             tools.periodicDataDump(self.tmpDataFile,np.array(acceptedParams))
-            
+
             if stage=='SA':
                 ##start ST at the best location with tight sigmas, and it will tune to ideal sigmas
                 sigmas = self.settings['sigMins']
-                
+
         clobber = False
         if self.settings['curStg']=="SA":
             clobber = True
@@ -627,6 +629,6 @@ class Simulator(object):
         ## A couple extra wrap-up tasks needed to adapt emcee outputs to match ExoSOFT later stages
         if stage=='emcee':
             self.paramsBestStored = tools.findBestOrbit(outFname,bestToFile=True,findAgain=False,by_ln_prob=True)
-                
+
         return (outFname,self.paramsBestStored,sigmas,self.bestRedChiSqr,avgAcceptRate,self.acceptStr)
-#END OF FILE      
+#END OF FILE

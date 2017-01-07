@@ -29,16 +29,16 @@ days_per_year = 365.2422
 sec_per_year = 60*60*24*days_per_year
 
 warnings.simplefilter("error")
-log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)  
-    
+log = KMlogger.getLogger('main.genTools',lvl=100,addFH=False)
+
 def mcmcEffPtsCalc(outputDataFilename):
     """
-    Calculate average correlation length and the number of effective steps for each parameter 
+    Calculate average correlation length and the number of effective steps for each parameter
     that was varying during the simulation.  The results are put into the log.
-    
-    Using Correlation Length based on Tegmark2004.  This is the number of steps until the 
+
+    Using Correlation Length based on Tegmark2004.  This is the number of steps until the
     variance (aka correlation) is half that of the total chain.  We perform this in a "box car"
-    style that starts calculating it again on the step just after the previously found correlation 
+    style that starts calculating it again on the step just after the previously found correlation
     length step.  This way it produces an average value that is more reliable.
     """
     log.info("Starting to calculate correlation lengths")
@@ -52,7 +52,7 @@ def mcmcEffPtsCalc(outputDataFilename):
         completeStr+= ' -> total # of steps/mean correlation length = number of effective points\n'
         for i in range(0,len(paramList)):
             log.debug( "*"*60+"\n"+'starting to mean calculate corr length for '+paramStrs[i]+' with CPP')
-            
+
             if False:
                 print("\n"+paramStrs[i]+":")
                 meanCorrLength = np.cov(data[:,paramList[i]])
@@ -62,7 +62,7 @@ def mcmcEffPtsCalc(outputDataFilename):
                 #print("Calling cy mean_corr_len")
                 meanCorrLength = mean_corr_len(dataC)
                 #print(" cy output = "+str(meanCorrLength))
-            
+
             currParamStr = str(paramList[i])+', '+paramStrs[i]+", "+str(meanCorrLength)
             currParamStr+=    ' -> '+str(numSteps)+'/'+str(meanCorrLength)+' = '+str(numSteps/meanCorrLength)+'\n'
             completeStr+=currParamStr
@@ -75,7 +75,7 @@ def mcmcEffPtsCalc(outputDataFilename):
 def autocorr(outputDataFilename,fast=True):
     """
     This directly calls the integrated_time function from the emcee package.
-    
+
     https://github.com/dfm/emcee/blob/master/emcee/autocorr.py
     ' This estimate uses the iterative procedure described on page 16 of `Sokal's
     notes <http://www.stat.unc.edu/faculty/cji/Sokal.pdf>`_ to determine a
@@ -87,7 +87,7 @@ def autocorr(outputDataFilename,fast=True):
     (paramList,paramStrs,_) = getParStrs(head,latex=False)
     completeStr=""
     completeStr+= '\n'+'-'*63+'\nThe longest integrated autocorrelation times of all params are:\n'+"(using emcee.autocorr.integrated_time)\n"+'-'*63+'\n'
-    
+
     all_passed = True
     #print("\n\n in autocorr \n\n")
     for i in range(0,len(paramList)):
@@ -117,17 +117,17 @@ def autocorr(outputDataFilename,fast=True):
 
 def burnInCalc(mcmcFnames,combinedFname):
     """
-    NOTE: ExoSOFT was designed to start the full MCMC chain from the last point of the 
+    NOTE: ExoSOFT was designed to start the full MCMC chain from the last point of the
         Sigma Tuning stage.  As this stage effectively acts as a form of burn-in period
         the burn-in value found from the pure MCMC tends to be very short.
- 
+
     Calculate the burn in for a set of MCMC chains following the formulation of Tegmark.
-     
-    Burn-in is defined as the first point in a chain where the likelihood is greater than 
+
+    Burn-in is defined as the first point in a chain where the likelihood is greater than
     the median value of all the chains.  Thus, there MUST be more than 1 chain to perform this calculation.
     """
     log.info("Starting to calculate burn-in.")
-     
+
     #chiSquaredsALL = np.array([])
     burnInLengths = []
     # calculate median of combined data ary
@@ -139,7 +139,7 @@ def burnInCalc(mcmcFnames,combinedFname):
     likelihoods = np.exp(-chiSqs/2.0)
     log.debug("likelihoodsALL min = "+repr(np.min(likelihoods)))
     log.debug("likelihoodsALL max = "+repr(np.max(likelihoods)))
-    medainALL = np.median(likelihoods)         
+    medainALL = np.median(likelihoods)
     log.debug("medainALL = "+str(medainALL))
     s =21*'-'+'\nBurn-In lengths were:\n'+21*'-'
     s+='\nmedian value for all chains = '+str(medainALL)
@@ -177,8 +177,8 @@ def burnInStripper(mcmcFnames,burnInLengths):
         burnIn = burnInLengths[i]
         if os.path.exists(filename):
             (head,data) = loadFits(filename)
-            ##strip burn-in and write to new fits     
-            log.debug("Before stripping burn-in, file had "+str(len(data[:,0]))+" samples")        
+            ##strip burn-in and write to new fits
+            log.debug("Before stripping burn-in, file had "+str(len(data[:,0]))+" samples")
             hdu = pyfits.PrimaryHDU(data[burnIn:,:])
             hdulist = pyfits.HDUList([hdu])
             newHead = hdulist[0].header
@@ -209,12 +209,12 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
             ###########################################################
             ## stage 1 ->  load up values for each param in each chain.
             ## allStg1vals = [chain#, param#, (mean,variance,Lc)]
-            ## stage 2 ->  Use them to compare between chains 
+            ## stage 2 ->  Use them to compare between chains
             ##             then calc R and T.
             ###########################################################
             (head,data) = loadFits(mcmcFileList[0])
             (paramList,paramStrs,_) = getParStrs(head,latex=False)
-            
+
             Nc = len(mcmcFileList)
             ##start stage 1
             allStg1vals=np.zeros((Nc,len(paramList),3))
@@ -226,9 +226,9 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
                     log.debug("calculating stage 1 of GR for chain #"+str(i)+", param: "+paramStrs[j])
                     allStg1vals[i,j,0]=np.mean(data[:,paramList[j]])
                     allStg1vals[i,j,1]=np.var(data[:,paramList[j]])
-            ##start stage 2         
+            ##start stage 2
             rHighest = 0
-            tLowest = 1e9       
+            tLowest = 1e9
             rHighStr = ''
             tLowStr = ''
             for j in range(0,len(paramList)):
@@ -254,7 +254,7 @@ def gelmanRubinCalc(mcmcFileList,nMCMCsamp=1,returnStrOnly=True):
                     if B!=0:
                         #T = np.mean(allStg1vals[:,j,2])*Ncfloat*np.min([(V/B),1.0])
                         T = Lcfloat*Ncfloat*np.min([(V/B),1.0])
-                    Ts.append(T)       
+                    Ts.append(T)
                     grStr+=paramStrs[j]+" had R = "+str(R)+", T = "+str(T)+'\n'
                     if T<tLowest:
                         tLowest=T
@@ -278,7 +278,7 @@ def jdToGcal(jd):
     (y,m,d,s) = jdcal.jd2gcal(2400000.5, jd-2400000.5)
     yrs = float('%.2f'%(y+(m/12.0)+(d/days_per_year)+(s/sec_per_year)))
     return yrs
-    
+
 def timeStrMaker(deltaT):
     """
     Convert a time in seconds into a nicer string.
@@ -300,7 +300,7 @@ def timeStrMaker(deltaT):
 def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     """
     Returns now+numberSecondsLater in a nice string.
-    
+
     param now: datetime.datetime object
     """
     extra = datetime.timedelta(seconds=numberSecondsLater)
@@ -333,11 +333,11 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
 def getParStrs(head,latex=True,getALLpars=False):
     """
     Return matching paramList, paramStrs, paramFileStrs for provided header.
-    
+
     latex=True will return latex formated strs for use in Python code.
     getALLpars=True will signal to get all params, not just the ones that were varying.
     """
-    paramList = getParInts(head)    
+    paramList = getParInts(head)
     paramFileStrs = ['m1','m2','parallax','Omega','e','To', 'Tc','P','i','omega','a_total','chiSquared','K']
     paramStrs = ['m1 [Msun]','m2 [Msun]','Parallax [mas]','Omega [deg]','e','To [JD]', 'Tc [JD]','P [Yrs]','i [deg]','omega [deg]','a_total [AU]','Probability','K [m/s]']
     #paramStrs = ['m1 [Msun]','m2 [Msun]','Parallax [mas]','Omega [deg]','e','To [JD]', 'Tc [JD]','P [Yrs]','i [deg]','omega [deg]','a_total [AU]','chiSquared','K [m/s]']
@@ -350,8 +350,8 @@ def getParStrs(head,latex=True,getALLpars=False):
             if latex:
                 paramStrs.append(r"$\gamma_{{\rm "+str(dataset)+"}}{\\rm [m/s]}$")
             else:
-                paramStrs.append('offset '+str(dataset)+' [m/s]')        
-    ## clean up lists if not returning ALL   
+                paramStrs.append('offset '+str(dataset)+' [m/s]')
+    ## clean up lists if not returning ALL
     ## else set paramList to contain its for ALL params
     if (len(paramFileStrs)>len(paramList))and(getALLpars==False):
             paramStrsUse = []
@@ -360,22 +360,22 @@ def getParStrs(head,latex=True,getALLpars=False):
                 paramStrsUse.append(paramStrs[par])
                 paramFileStrsUse.append(paramFileStrs[par])
             paramStrs = paramStrsUse
-            paramFileStrs = paramFileStrsUse 
+            paramFileStrs = paramFileStrsUse
     elif getALLpars:
         paramList=np.arange(0,len(paramStrs))
     return (paramList,paramStrs,paramFileStrs)
-    
+
 def cleanUp(settings,stageList,allFname):
     """
     Clean up final directory after simulation completes
     """
     #os.mkdir(settings['finalFolder'])
-    
+
     ## write best orbit to a fits file for minimal customPost.py plotting
     bst = findBestOrbit(allFname, bestToFile=False, findAgain=False,by_ln_prob=stageList[-1]=='emcee')
     outFname = os.path.join(settings['finalFolder'],'bestFit.fits')
     writeFits(outFname,bst,settings,clob=False)
-    
+
     delFiles = []
     fnames = glob.glob(os.path.join(settings['finalFolder'],"pklTemp-*"))
     for i in range(0,len(fnames)):
@@ -398,10 +398,10 @@ def cleanUp(settings,stageList,allFname):
         nm = os.path.join(os.path.dirname(allFname),'combinedMCMCdata.fits')
         if os.path.exists(nm):
             delFiles.append(nm)
-            
+
     ##try to delete files
     rmFiles(delFiles)
-    
+
 def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPtsStr,iacStr,allTime,postTime,durationStrings,MCmpo,SAmpo,STmpo,MCMCmpo,emcee_mpo):
     """
     Make a txt file that summarizes the results nicely.
@@ -416,7 +416,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         totalSamps = head['NSAMPLES']
     except:
         totalSamps = settings['nSamples']
-    
+
     (_,paramStrs,_) = getParStrs(head,latex=False,getALLpars=True)
     (paramListCleaned,paramStrsCleaned,paramFileStrsCleaned) = getParStrs(head,latex=False)
     t = datetime.date.today()
@@ -457,10 +457,10 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
             if len(fnames)>0:
                 chiSquaredsStr+=stage+" = ["
                 flSzStr+=stage+" = ["
-                for fname in fnames: 
+                for fname in fnames:
                     try:
                         bestFit2 = findBestOrbit(fname,bestToFile=False,findAgain=True,by_ln_prob=stage=='emcee')
-                        
+
                         #### calc chi squared for these params
                         Model = ExoSOFTmodel(settings)
                         paramsLast = copy.deepcopy(Model.Params.stored_to_direct(bestFit2))
@@ -494,7 +494,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
         reducedDI = Model.chi_squared_di/head['NUDI']
         reducedRV = Model.chi_squared_rv/head['NURV']
         reduced3D = Model.chi_squared_3d/head['NU']
-        
+
         for i in range(len(bestFit)):
             if i==2:
                 bestStr+=paramStrs[2]+" = "+str(bestFit[2])
@@ -542,12 +542,13 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('\n'+clStr)
     f.write('\n'+burnInStr)
     f.write('\n'+grStr)
-    ## Add note about GR validity if starting all MCMC chains at same position.
-    if (settings['stages']=='MCMC') or (settings['strtMCMCatBest']==True):
-        s ="\n NOTE: as the MCMC chains were all started at the same position, "+\
-        "it questions the validity of the resulting Gelman-Rubin statistics.  "+\
-        "\nThus, they must only be considered a loose indicator/estimator of convergence." 
-        f.write(s)
+    if grStr!='':
+        ## Add note about GR validity if starting all MCMC chains at same position.
+        if (settings['stages']=='MCMC') or (settings['strtMCMCatBest']==True):
+            s ="\n NOTE: as the MCMC chains were all started at the same position, "+\
+            "it questions the validity of the resulting Gelman-Rubin statistics.  "+\
+            "\nThus, they must only be considered a loose indicator/estimator of convergence."
+            f.write(s)
     f.write(effPtsStr)
     f.write('\n'+iacStr)
     f.write('\n'+'-'*40+'\nAverage acceptance rates for each stage:\n'+'-'*40+'\n')
@@ -570,7 +571,7 @@ def summaryFile(settings,stageList,finalFits,clStr,burnInStr,bestFit,grStr,effPt
     f.write('Total simulation took: '+timeStrMaker(allTime)+'\n')
     f.write('\n\nEND OF RESULTS :-D')
     f.close()
-    log.info("Summary file written to:\n"+summaryFname)  
+    log.info("Summary file written to:\n"+summaryFname)
 
 def fileSizeHR(filename):
     """
@@ -590,7 +591,7 @@ def fileSizeHR(filename):
 
 def keplersThird(p=0,atot=0,mtot=0):
     """
-    Kepler's Third rule.  
+    Kepler's Third rule.
     Find the missing value provided you know 2 of them.
     p in [years]
     atot in [AU]
@@ -605,9 +606,9 @@ def keplersThird(p=0,atot=0,mtot=0):
         p = np.sqrt((((atot*const.au.value)**3)*4.0*(np.pi**2))/(const.G.value*mtot*(sec_per_year**2)*const.M_sun.value))
     else:
         log.critical('More than 1 parameter was zero, so I can not calc K3')
-    
+
     return (p,atot,mtot)
-    
+
 def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
     if finalFits!='':
         (head,data) = loadFits(finalFits)
@@ -623,8 +624,8 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
         nu = 1.0
         nuDI = 1.0
         nuRV = 1.0
-        
-        
+
+
     ############################################
     ## calculate chi squareds for the best fit #
     ############################################
@@ -634,8 +635,8 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
     raw3D = Model.chi_squared_3d
     reducedDI = Model.chi_squared_di/nuDI
     reducedRV = Model.chi_squared_rv/nuRV
-    reduced3D = Model.chi_squared_3d/nu  
-        
+    reduced3D = Model.chi_squared_3d/nu
+
     ## OLD WAY below, delete it soon! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #     ##get the real data
 #     realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode=settings['data_mode'])
@@ -659,15 +660,15 @@ def recheckFit3D(orbParams,settings,finalFits='',nus=[]):
 #     (raw3D, reducedDI, reducedRV, reduced3D) = chiSquaredCalc3D(realData,predictedData,nuDI,nuRV,nu)
 
     print('(raw3D, reducedDI, reducedRV, reduced3D) = ',repr((raw3D, reducedDI, reducedRV, reduced3D)))
-    
+
 def predictLocation(orbParams,settings,epochs=[]):
-    
-    
+
+
     ############################################
     ## calculate chi squareds for the best fit #
     ############################################
     Model = ExoSOFTmodel(settings)
-    
+
     ## make empty inputs for measured data
     nPts = len(epochs)
     predEpochs = np.array(epochs,dtype=np.dtype('d'))
@@ -684,16 +685,16 @@ def predictLocation(orbParams,settings,epochs=[]):
     Model.Data.rv_model = np.ones((nPts),dtype=np.dtype('d'))
     Model.Data.rv_inst_num = np.zeros((nPts),dtype=np.dtype('i'))
     Model.Data.epochs_rv = predEpochs
-    
+
     ## call model to predict data for given epochs
     _params = copy.deepcopy(Model.Params.stored_to_direct(orbParams))
     _ = ln_posterior(_params, Model)
-    
+
     ## resulting measurable astrometry and rv for those epochs and orbital elements
     fit_decsa_model = copy.deepcopy(Model.Data.decsa_model)
     fit_rapa_model = copy.deepcopy(Model.Data.rapa_model)
     fit_rv_model = copy.deepcopy(Model.Data.rv_model)
-    
+
     ## OLD WAY, delete soon!! $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #     ##get the real data
 #     realData = loadRealData(diFilename=settings['di_dataFile'],rvFilename=settings['rv_dataFile'],dataMode= settings['data_mode'])
@@ -724,17 +725,17 @@ def predictLocation(orbParams,settings,epochs=[]):
     print("Astrometry (RA or PA, depending on 'pasa' setting): "+repr(fit_rapa_model))
     print("Radial Velocity: "+repr(fit_rv_model))
 
-    
-def chiSquaredCalc3D(realData,modelData,nuDI,nuRV,nu3D,pasa=False): 
+
+def chiSquaredCalc3D(realData,modelData,nuDI,nuRV,nu3D,pasa=False):
     """
     Based on definition, chiSquared=sum((modelVal_i-dataVal_i)^2/(dataError_i^2)) over all values of 'i'.
     This function will do so for DI, RV and 3D sets of data and provide the reduced chi squared for each.
     The raw 3D value will also be returned.
-    NOTES: realData is the standard 7 parameter format from loadRealData function, and modelData is 
+    NOTES: realData is the standard 7 parameter format from loadRealData function, and modelData is
            the standard 3 param format.
-           
+
     returned (raw3D, reducedDI, reducedRV, reduced3D)
-    """   
+    """
     ## convert E,N to SA,PA?
     if pasa:
         (PA,PA_error,SA,SA_error) = ENtoPASA(modelData[:,0], 0, modelData[:,1], 0)
@@ -774,24 +775,24 @@ def copyToDB(settings):
         except:
             log.error('failed to move file:\n'+f+'\nintto DB folder:\n'+dbDir)
     log.info("vital results files copied to DB folder:\n"+dbDir)
-    
+
 def getParInts(head):
     """
     convert string version of paramInts into a list again.
     """
-    s = head['parInts'] 
+    s = head['parInts']
     ints = s.split("[")[1].split("]")[0].split(',')
     parInts = []
     for i in ints:
-        parInts.append(int(i))  
-    return parInts        
+        parInts.append(int(i))
+    return parInts
 
 def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, normed=False, parRange=False,retHist=False):
     """
-    This will make a matplotlib histogram using the input settings, then writing the resulting  
+    This will make a matplotlib histogram using the input settings, then writing the resulting
     centers of the bins and number of data points in said bin values to disk, with '.dat' extension
     if not added already.
-    
+
     This function is designed to work with a follow up like histLoadAndPlot_** to produce publication worthy plots.
     """
     #print('data :\n'+repr(data))
@@ -800,7 +801,7 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
         ## use the likelihoods as the weights
         theWeights = np.exp(-chiSquareds/2.0)
     else:
-        theWeights = np.ones(len(data))      
+        theWeights = np.ones(len(data))
     if parRange==False:
         (hst,bin_edges) = np.histogram(data,bins=nbins,normed=False,weights=theWeights,density=None)
     elif len(parRange)==2:
@@ -821,18 +822,18 @@ def histMakeAndDump(chiSquareds,data,outFilename='',nbins=100,weight=False, norm
         np.savetxt(outFilename,histData)
     if retHist:
         return histData
-        
+
 def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=False, returnBestDataVal=False):
     """
-    A function to find the 68.3 and 95.4% confidence levels in a given output data file's column 
+    A function to find the 68.3 and 95.4% confidence levels in a given output data file's column
     centered on the median value.
-    
+
     return [[68.3% minimum, 68.3% maximum],[95.5% minimum, 95.5% maximum]]
-    
-    columnNum must be an int.    
-    
+
+    columnNum must be an int.
+
     NOTE: This function calculates the confidence levels based on the median, while the
-          more common standard is to centere it on the mean.  Doing that though requires a 
+          more common standard is to centere it on the mean.  Doing that though requires a
           time consuming loop over the data to total up that around the mean...
           Can't think of any faster way, so not doing it for now.
     """
@@ -847,14 +848,14 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
             #print 'ln690:confLevelFinder'
             [conf68Vals,conf95Vals,range99,range100] = histConfLevels(histAry)
             #print 'ln692:confLevelFinder'
-            
+
 #             #Convert data array to a sorted numpy array
 #             dataAry = np.sort(dataAry)
 #             size = dataAry.size
 #             mid=size//2
 #             minVal = np.min(dataAry)
 #             maxVal = np.max(dataAry)
-#                 
+#
 #             minLoc68=mid-int(float(size)*0.683)//2
 #             if minLoc68<0:
 #                 minLoc68 = 0
@@ -867,12 +868,12 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
 #             maxLoc95= mid+int(float(size)*0.958)//2
 #             if maxLoc95>(size-1):
 #                 maxLoc95 = size
-#             
+#
 #             conf68Vals = [dataAry[minLoc68],dataAry[maxLoc68]]
 #             conf95Vals = [dataAry[minLoc95],dataAry[maxLoc95]]
 #             conf68ValsRough=[]
 #             conf95ValsRough=[]
-#             
+#
 #             if ((len(conf68Vals)==0) or (len(conf95Vals)==0)):
 #                 if (len(conf68Vals)==0):
 #                     log.error('confLevelFinder: ERROR!!! No FINE 68.3% confidence levels were found')
@@ -881,7 +882,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
 #                         conf68Vals = [0,0]
 #                     else:
 #                         conf68Vals = conf68ValsRough
-#                         log.error("confLevelFinder: Had to use ROUGH 68% [68,69] as no FINE 68.3% was found. So, using range "+repr(conf68Vals))                
+#                         log.error("confLevelFinder: Had to use ROUGH 68% [68,69] as no FINE 68.3% was found. So, using range "+repr(conf68Vals))
 #                 if (len(conf95Vals)==0):
 #                     log.error('confLevelFinder: ERROR!!! No FINE 95.4% confidence levels were found')
 #                     if (len(conf95ValsRough)==0):
@@ -938,18 +939,18 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
         elif ((returnData==False)and(returnChiSquareds==False) and (returnBestDataVal==False)):
             returnList =   [conf68Vals,conf95Vals]
         #print 'ln800:confLevelFinder'
-        return returnList 
-        
+        return returnList
+
     else:
-        log.critical( "confLevelFinder: ERROR!!!! file doesn't exist")            
-         
+        log.critical( "confLevelFinder: ERROR!!!! file doesn't exist")
+
 def histConfLevels(histAry):
     """
     Calculates the locations on the x-axis where 68.5% and 95.4% of the data
-    lie above a certain probability.  
+    lie above a certain probability.
     x-axis points need to be centered on the middle of the bins, rather than
     the edges.
-    
+
     Returns the min and max of the data points for both percentages.
     [range68,range95,range100]
     """
@@ -960,7 +961,7 @@ def histConfLevels(histAry):
     halfStepSize = round((histAry[1,0]-histAry[0,0])*0.5,12)
     res = abs(histAry[1,0]-histAry[0,0])/100.0
     xs=np.arange(histAry[0,0],histAry[-1,0],res)
-    
+
     ## interpolate
     f = interpolate.interp1d(histAry[:,0], histAry[:,1],kind='cubic')
     if xs[-1]>np.max(histAry[:,0]):
@@ -1003,23 +1004,23 @@ def histConfLevels(histAry):
             retAry[i][1]=halfStepSize+histAry[-1,0]
     #print 'ln862:histConfLevels'
     return retAry
-             
-def findBestOrbit(filename,bestToFile=True,findAgain=False, by_ln_prob=True):        
+
+def findBestOrbit(filename,bestToFile=True,findAgain=False, by_ln_prob=True):
     """
     Find the orbital elements for the best fit in a ExoSOFT format fits file.
-    """             
+    """
     bestFname = os.path.join(os.path.dirname(filename),'bestOrbitParams.txt')
     #print   bestFname
     gotIt = False
     if os.path.exists(bestFname)and(findAgain==False):
         try:
             orbBest = np.loadtxt(bestFname,delimiter=',')
-            log.debug("Using previously found best orbit in file:\n"+bestFname)   
+            log.debug("Using previously found best orbit in file:\n"+bestFname)
             gotIt=True
         except:
             log.error("Tried to load previously found best orbit from file, but failed, so will find it from data again.")
     if gotIt==False:
-        log.debug("trying to find best orbit in file:\n"+filename)   
+        log.debug("trying to find best orbit in file:\n"+filename)
         (head,data) = loadFits(filename)
         if by_ln_prob:
             probBest = np.max(data[:,11])
@@ -1035,7 +1036,7 @@ def findBestOrbit(filename,bestToFile=True,findAgain=False, by_ln_prob=True):
             f.close()
             log.info("Best fit params written to :\n"+bestFname)
     return orbBest
-                            
+
 def unitlessSTD(ary):
     """
     Calculate the bias corrected standard deviation, then divide by the mean to make it unitless.
@@ -1074,7 +1075,7 @@ def ENtoPASA(E, E_error, N, N_error):
     """
     verbose = False
     PA = np.degrees(np.arctan2(E,N))
-    #NOTE: both math.atan2 and np.arctan2 tried with same results, both produce negatives rather than continuous 0-360 
+    #NOTE: both math.atan2 and np.arctan2 tried with same results, both produce negatives rather than continuous 0-360
     #thus, must correct for negative outputs
     if type(PA)!=np.ndarray:
         if PA<0:
@@ -1083,9 +1084,9 @@ def ENtoPASA(E, E_error, N, N_error):
         for i in range(0,len(PA)):
             if PA[i]<0:
                 PA[i]=PA[i]+360.0
-    
+
     SA = np.sqrt(E**2.0 + N**2.0)
-    
+
     PA_error=0
     SA_error=0
     if (E_error==0)or(N_error==0):
@@ -1100,27 +1101,27 @@ def ENtoPASA(E, E_error, N, N_error):
         btm = E**2.0+N**2.0
         SA_error = abs(top/btm)
     if verbose:
-        print(repr((E, E_error, N, N_error))+" -> "+repr((PA,PA_error,SA,SA_error)))   
+        print(repr((E, E_error, N, N_error))+" -> "+repr((PA,PA_error,SA,SA_error)))
     return (PA,PA_error,SA,SA_error)
 
 def PASAtoEN(PA,PA_error,SA,SA_error):
     """
-    Convert provided Position Angle and Separation Angle, and their errors, into 
-    RA and DEC with errors.  These are the same equations for calculating 
-    x and y in the Thiele-Innes orbit fitting.  Remember that x and y are 
-    flipped in that fitting approach due to how Thiele defined the coord 
+    Convert provided Position Angle and Separation Angle, and their errors, into
+    RA and DEC with errors.  These are the same equations for calculating
+    x and y in the Thiele-Innes orbit fitting.  Remember that x and y are
+    flipped in that fitting approach due to how Thiele defined the coord
     system when deriving the equations used.
-    
+
     NOTE: this can also be used to calculate x and y used in Thiele-Innes
-          With East=RA=y and North=DEC=x.  
-    
+          With East=RA=y and North=DEC=x.
+
     :returns: (E, E_error, N, N_error)
     """
     verbose = False
     printForExcel = False
     N = SA*np.cos(np.radians(PA))
     E = SA*np.sin(np.radians(PA))
-    
+
     E_error=0
     N_error=0
     if (SA_error==0)or(PA_error==0):
@@ -1130,21 +1131,21 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
         tempA = (SA_error/SA)**2.0
         tempB = ((np.cos(np.radians(PA+PA_error))-np.cos(np.radians(PA))) / np.cos(np.radians(PA)))**2.0
         N_error = abs(N*np.sqrt(tempA+tempB))
-        
-        # Another way to calculate the error, but the one above is belived to be more correct 
+
+        # Another way to calculate the error, but the one above is belived to be more correct
         tempA2 = (SA_error*np.cos(np.radians(PA)))**2.0
         tempB2 = (SA*np.sin(np.radians(PA))*np.radians(PA_error))**2.0
         N_error2 = np.sqrt(tempA2+tempB2)
-        
+
         tempC = (SA_error/SA)**2.0
         tempD = ((np.sin(np.radians(PA+PA_error))-np.sin(np.radians(PA))) / np.sin(np.radians(PA)))**2.0
         E_error = abs(E*np.sqrt(tempC+tempD))
-        
-        # Another way to calculate the error, but the one above is belived to be more correct 
+
+        # Another way to calculate the error, but the one above is belived to be more correct
         tempC2 = (SA_error*np.sin(np.radians(PA)))**2.0
         tempD2 = (SA*np.cos(np.radians(PA))*np.radians(PA_error))**2.0
         E_error2 = np.sqrt(tempC2+tempD2)
-        
+
         if verbose:
             print('N_error2-N_error = '+str(N_error2-N_error))
             print('E_error2-E_error = '+str(E_error2-E_error))
@@ -1155,8 +1156,8 @@ def PASAtoEN(PA,PA_error,SA,SA_error):
         print('E error= '+str(E_error))
         print('N = '+str(N))
         print('N error = '+str(N_error))
-        
-        
+
+
     return (E, E_error, N, N_error)
 
 def m2siniCalc(K,p,m1,e):
@@ -1178,8 +1179,8 @@ def m2siniCalc(K,p,m1,e):
 
 def m2siniRangeCalc():
     """
-    A basic custom tool to find the ranges of m2sin(i) values from RV only 
-    runs.  Need to go into code below to update e, p, and K values along with 
+    A basic custom tool to find the ranges of m2sin(i) values from RV only
+    runs.  Need to go into code below to update e, p, and K values along with
     fixed m1.
     """
     m1 = 1.09 #Msun
@@ -1196,8 +1197,8 @@ def m2siniRangeCalc():
                     mx = m2sini
                 if m2sini<mn:
                     mn = m2sini
-    print('min = '+str(mn)+", max = "+str(mx))             
-    
+    print('min = '+str(mn)+", max = "+str(mx))
+
 def semiMajAmp(m1,m2,inc,ecc,p):
     """
     K = [(2*pi*G)/p]^(1/3) [m2*sin(i)/m2^(2/3)*sqrt(1-e^2)]
@@ -1215,7 +1216,3 @@ def semiMajAmp(m1,m2,inc,ecc,p):
     C = m1KG**(2.0/3.0)*np.sqrt(1.0-ecc**2.0)
     print('Resulting K is '+repr(A*(B/C)))
     #return A*(B/C)
-                    
-    
-    
-    

@@ -18,18 +18,18 @@
 
 # Is the data in the DIdata.dat in PA,SA format? else, it is in E,N (x,y) format [bool]
 'pasa'     : false
-              
+
 ################################
 # Operational flags & settings #
 ################################
 # The number of samples orbital parameters to try/draw [int]
 'nSamples' : 100000
 # Number of simulation chains to run in parallel, [null, or int]
-# null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use. 
+# null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use.
 'nCPUs': -1
 # Number of emcee walkers to run.  ONLY available in 'emcee' mode. [1,500] [int]
 'n_wlkrs' :  100
-# set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems. 
+# set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems.
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'IMPORTANTINFO'=25,'INFO'=20,'DEBUG'10,'ALL'=0)
 'logLevel' : 25
 # data mode, choices {'RV','DI','3D'} [string]
@@ -45,7 +45,7 @@
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
 'cMaxMCMC': 2.0
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC or emcee) [int]
-# Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.  
+# Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
 'saveInt' : 50
 
 #####################################################
@@ -60,8 +60,8 @@
 'startSigmas' : false
 # below is a set of good starting sigmas for the artificial Jupiter system used to verify ExoSOFT
 #[0.0398395,2.9006e-05,1.4531,2.63,0.012091373,23.4,0.6345,1.297,3.123484885,6.276]
-               
-                
+
+
 
 ############################
 #  Prior flags & settings  #
@@ -72,8 +72,9 @@
 ### For ALL: false indicates a flat prior. true indicates to use defaults.
 # ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. false indicates 'uniform'
 'ecc_prior'    : 'beta'
+# period prior options: 'power-law', 'jeffrey'.  Default is 'jeffrey'
 'p_prior'    : true
-# For the inclination prior, use strings or booleans to inducate the specific 
+# For the inclination prior, use strings or booleans to inducate the specific
 # function to use.  Options: 'sin', 'cos' or false (indicates to use uniform).  true indicates sin.
 'inc_prior'  : 'cos'
 # For m1 and m2: use strings to indicate specific prior function.
@@ -81,7 +82,7 @@
 # m1 default is 'PDMF', m2 default is 'CMF'.
 'm1_prior': true
 'm2_prior': true
-# For parallax prior, Options: true, false.  
+# For parallax prior, Options: true, false.
 'para_prior' : true
 #### estimate and uncertainties for previously measured values for parallax, m1 and m2
 # should both the est and err of these be non-zero, the previosly chosen priors will be combined with a Normal/Gaussian prior.
@@ -99,7 +100,7 @@
 # Ranges for acceptable random number inputs #
 ##############################################
 ## For Omega, e, T, inc and omega, null indicates to use default ranges.
-## For Omega and omega, values can vary outside ranges, but are shifted by 
+## For Omega and omega, values can vary outside ranges, but are shifted by
 ## +/-360 before being stored.
 # Minimum/Maximum allowed value for the mass of the primary body [double][Msun]
 # NOTE: For DI only cases, use mass1 values as total mass and set mass2 values to zero.
@@ -111,7 +112,7 @@
 'm2_min' : 0.00001
 'm2_max' : 0.005
 # Minimum/Maximum allowed value for the Parallax [double][mas]
-'para_min' : 30.0 
+'para_min' : 30.0
 'para_max' : 70.0
 # Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg] OR null
 # Default: [0,360] if 'dataMode' is '3D', else [0,180].
@@ -123,7 +124,7 @@
 'ecc_max' : null
 # Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD] OR null
 # Default: [earliestsEpoch-period,earliestEpoch]
-'t_min' : 2449000 
+'t_min' : 2449000
 't_max' : 2453500
 # Minimum/Maximum allowed value for the Period [double][yrs]
 'p_min' : 1.0
@@ -136,7 +137,7 @@
 # Default: [0,360]
 'arg_peri_min' : -50
 'arg_peri_max' : 90
-# Minimum/Maximum values of Radial Velocity Offsets.  
+# Minimum/Maximum values of Radial Velocity Offsets.
 # Must be one per set of RV data in same order as data comes in RVdata.dat, or the a single value to be used by all [comma separated list of doubles]
 'offset_mins' : [-30]
 'offset_maxs' : [30]
@@ -152,7 +153,7 @@
 'delChains' : true
 # Delete combined data files after simulation is complete? [bool]
 'delCombined' : true
-# Calculate the length of the burn in for each MCMC chain (must be more than 1 chain)? [bool] 
+# Calculate the length of the burn in for each MCMC chain (must be more than 1 chain)? [bool]
 'CalcBurn' : true
 # remove burn-in of output MCMC chains before combining (must be more than 1 chain) [bool]
 # If using SA/ST before MCMC, then the burn-in will be very short.
@@ -169,4 +170,3 @@
 'CalcGR' : true
 # emcee thinning rate (Does not apply to MC, SA, ST, or MCMC modes). [int]
 'thin_rate': 50
-
