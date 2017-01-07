@@ -31,12 +31,11 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     quiet = False
     #Computer Directory
     if outDir=='':
-        outDir='/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-Dec25-2016/'#'/mnt/HOME/MEGA/MEGA-ExoSOFT-outputCopies-ForV2'#$$$$$$$$$$$$$$$$$$$$ MAKE SURE THIS IS SET TO MACH YOUR COMPUTER!!!
-    #baseSaveDir = '/run/media/kmede/SharedData/Data/data_SMODT/'
+        outDir='/mnt/Data1/Todai_Work/Data/data_ExoSOFT/' #$$$$$$$$$$$$$$$$$$$$ MAKE SURE THIS IS SET TO MACH YOUR DESIRED OUTPUT DIRECTORY!!!
     NumDataPointsOutRV = 25 #must be much less than 10000.  values between 10-500 are suitable.
     NumDataPointsOutDI = 10 #must be much less than 10000.  values between 10-500 are suitable.
     storePrimaryRVs = True
-    percentError = 5 #error is set to a percentage of the median
+    percentError = 10 #error is set to a percentage of the median
     realizeErrors = True
     percentCoverage = 100.00 #percent of total orbit for data to span.  Over 100% is ok if you want overlapping data.
 
@@ -46,8 +45,8 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     M_primary = 1.0 # [Solar masses]
     distance = 20.0 # [parsecs]
     #Orbital Elements
-    TimeLastPeri =2450639.5  #JD  #2450817.5
-    e =0.3 #
+    TimeLastPeri =2450639.5  # [JD]
+    e =0.048 # Eccentricity [unitless]
     period = 11.9 # [years]
     Omega =100.6*np.pi/180# Longitude of ascending node [deg]
     omega = 14.8*np.pi/180 # Argument of periastron [deg]
