@@ -243,10 +243,10 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
 
     ##write files to disk
     if False:
-        #raw all in one format, NOT for ExoSOFT use.
+        # raw all-in-one format, NOT for ExoSOFT use.
         np.savetxt(os.path.join(outDir,outBaseName+'.dat'), data, fmt="%.10g")
     if True:
-        #2 files for ExoSOFT
+        # 2 files for ExoSOFT use
         np.savetxt(os.path.join(outDir,outBaseName+'RVdata.dat'), dataRV, fmt="%.10g")
         np.savetxt(os.path.join(outDir,outBaseName+'DIdata.dat'), dataDI3, fmt="%.10g")
     if quiet==False:

@@ -102,6 +102,12 @@ To fix this:
  
  $pip install matplotlib
  
+Additional Modules
+==================
+
+There are some additional modules available in the git repository that are not part of the base ExoSOFT package.
+These are included in the [post]() and [extra]
+
 
 Attribution
 ===========
