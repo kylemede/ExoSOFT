@@ -39,7 +39,6 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     percentError = 5 #error is set to a percentage of the median
     realizeErrors = True
     percentCoverage = 100.00 #percent of total orbit for data to span.  Over 100% is ok if you want overlapping data.
-    overlapEnds = False # will ensure some points near end overlap the beginning of the orbit.
 
     ## System settings
     ##################
