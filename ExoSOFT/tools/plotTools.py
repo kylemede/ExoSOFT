@@ -1059,8 +1059,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                     xLimsC=(DIlims[1][0][0],DIlims[1][0][1])
                     yLimsC=(DIlims[1][1][0],DIlims[1][1][1])
                 else:
-                    xLimsF = (np.min([xmin,np.min(real_rapa[:]*asConversion)]),np.max([xmax,np.max(real_rapa[:]*asConversion)]))
-                    yLimsF = (np.min([ymin,np.min(real_decsa[:]*asConversion)]),np.max([ymax,np.max(real_decsa[:]*asConversion)]))
+                    xLimsF = (np.min([xmin,np.min(fit_rapa_model[:]*asConversion)]),np.max([xmax,np.max(fit_rapa_model[:]*asConversion)]))
+                    yLimsF = (np.min([ymin,np.min(fit_decsa_model[:]*asConversion)]),np.max([ymax,np.max(fit_decsa_model[:]*asConversion)]))
                     #print('xLimsF = '+repr(xLimsF))
                     #print('yLimsF = '+repr(yLimsF))
                     xLimsC = (xmin,xmax)
