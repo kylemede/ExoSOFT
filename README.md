@@ -106,7 +106,10 @@ Additional Modules
 ==================
 
 There are some additional modules available in the git repository that are not part of the base ExoSOFT package.
-These are included in the [post]() and [extra]
+These can be found in the [extra]() directory and include:
+
+    - customPost.py
+    - artificialDataMaker.py
 
 
 Attribution
