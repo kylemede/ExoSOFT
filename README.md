@@ -106,11 +106,17 @@ Additional Modules
 ==================
 
 There are some additional modules available in the git repository that are not part of the base ExoSOFT package.
-These can be found in the [extra]() directory and include:
+These can be found in the [extra](https://github.com/kylemede/ExoSOFT/tree/master/extra) directory and include:
 
     - customPost.py
     - artificialDataMaker.py
 
+customPost.py is for re-performing the post analysis of ExoSOFT with the ability to customize the plotting settings.  
+This is in order to produce the exact versions of the plots and statistical calculations necessary for publication.
+
+artificialDataMaker.py is to produce simulated/artificial data with pre-determined orbital elements.
+
+For more details, please see the documentation in each module.
 
 Attribution
 ===========
