@@ -612,7 +612,6 @@ def modePrep(settings,sigmas):
     #check if startSigmas in settings file are useful
     gotSigmas = False
     if (type(startSigmas)==list)or(type(startSigmas)==np.ndarray):
-        print('a')
         if len(startSigmas)==num_params_direct:
             ## double check they are lists of doubles and not strings
             for i in range(len(startSigmas)):
