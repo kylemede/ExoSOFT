@@ -577,7 +577,7 @@ def modePrep(settings,sigmas):
 
     """
     startParams = settings['startParams']
-    startSigmas = settings['startSigmas']
+    startSigmas = settings['startSigmas']    
     paramInts = settings['paramInts']
     num_params_direct = len(settings['rangeMaxsRaw'])
     #print("len(settings['rangeMaxsRaw']) = "+repr())
@@ -593,6 +593,10 @@ def modePrep(settings,sigmas):
         if type(startParams)==list:
             startParams = np.array(startParams)
         if len(startParams)==num_params_stored:
+            ## double check they are lists of doubles and not strings
+            for i in range(len(startParams)):
+                if type(startParams[i])==str:
+                    startParams[i] = float(startParams[i])
             i=0
             gotParams = True
             while (i<len(startParams))and(gotParams==True):
@@ -608,7 +612,12 @@ def modePrep(settings,sigmas):
     #check if startSigmas in settings file are useful
     gotSigmas = False
     if (type(startSigmas)==list)or(type(startSigmas)==np.ndarray):
+        print('a')
         if len(startSigmas)==num_params_direct:
+            ## double check they are lists of doubles and not strings
+            for i in range(len(startSigmas)):
+                if type(startSigmas[i])==str:
+                    startSigmas[i] = float(startSigmas[i])
             i=0
             gotSigmas = True
             while (i<len(startSigmas))and(gotSigmas==True):

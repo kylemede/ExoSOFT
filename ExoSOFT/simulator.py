@@ -420,14 +420,17 @@ class Simulator(object):
                 if type(startParams)==list:
                     startParams = np.array(startParams)
                 #convert 'stored' to 'direct/raw' versions
-                paramsLast = copy.deepcopy(self.Model.Params.stored_to_direct(startParams))
-                self.log.debug('initial/latest pars have reduced chi sqr of '+str(startParams[11]/self.nu))
+                paramsInRaw = copy.deepcopy(self.Model.Params.stored_to_direct(startParams))
+                _ = tools.ln_posterior(paramsInRaw,self.Model)
+                paramsInRaw = copy.deepcopy(self.Model.Params.direct_pars)
+                params = copy.deepcopy(self.Model.Params.stored_pars)
+                self.log.debug('input pars have reduced chi sqr of '+str(params[11]/self.nu))
             else:
-                paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
+                paramsInRaw = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
         else:
-            paramsLast = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
+            paramsInRaw = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
         ## load up starting params as 'latest' and perform first increment from these to start loop with.
-        latestParsRaw = copy.deepcopy(paramsLast)
+        latestParsRaw = copy.deepcopy(paramsInRaw)
         proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
         ## convert from Raw form if in lowEcc mode
         ln_post = tools.ln_posterior(proposedParsRaw,self.Model)
