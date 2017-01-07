@@ -405,7 +405,8 @@ def addDIdataToPlot(subPlot,realData,asConversion,errMult=1.0,thkns=1.0,pasa=Fal
                 subPlot.plot([xCent,xCent],[btm-hfHgt,top+hfHgt],linewidth=thkns,color='k',alpha=1.0)
     return (subPlot,[xmin,xmax,ymin,ymax])
 
-def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],xLims=[],stage='MCMC',centersOnly=False,plotALLpars=False,trueVals=None,legendStrs=[]):
+def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],xLims=[],stage='MCMC',
+                             centersOnly=False,plotALLpars=False,trueVals=None,legendStrs=[],colors=[]):
     """
     This will plot a simple posterior distribution for each parameter in the data files
     stacked ontop of each other for comparison between different runs.
@@ -435,11 +436,11 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
     if type(outputDataFilenames)!=list:
         outputDataFilenames = [outputDataFilenames]
 
-    colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
-    colorsList = ['blue','magenta','sandybrown','lime']
-
-    #colorsList =['Blue','#ff751a']
-    #colorsList =['Green','Blue','Red']
+    colorsList = colors
+    if len(outputDataFilenames)>len(colors):
+        colorsList =['Blue','Red','Black','Chocolate','Purple','Fuchsia','Crimson','Aqua','Gold','OrangeRed','Plum','Chartreuse','Chocolate','Teal','Salmon','Brown']
+        #colorsList = ['blue','magenta','sandybrown','lime']
+        
     colorsList2 = []
     while len(outputDataFilenames)>len(colorsList2):
         for color in colorsList:
@@ -454,7 +455,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         (head,data) = loadFits(outputDataFilenames[0])
         ## get parameter lists and filter accordingly
         (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=plotALLpars)
-        (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=plotALLpars)
+        (_,paramStrs2,_) = getParStrs(head,latex=False,getALLpars=plotALLpars)
         # modify x labels to account for DI only situations where M1=Mtotal
         if (np.var(data[:,1])==0)and (0 in paramList):
             paramStrs2[0] = 'm total [Msun]'
@@ -465,7 +466,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
         if len(paramsToPlot)!=0:
             if plotALLpars==False:
                 (paramList,paramStrs,paramFileStrs) = getParStrs(head,latex=latex,getALLpars=True)
-                (paramList2,paramStrs2,paramFileStrs2) = getParStrs(head,latex=False,getALLpars=True)
+                (_,paramStrs2,_) = getParStrs(head,latex=False,getALLpars=True)
                 paramStrs2Use = []
                 paramStrsUse = []
                 paramFileStrsUse = []
@@ -548,7 +549,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
                         log.debug("plotting file:\n"+histDataBaseName)
                         lgndStr=''
                         #print repr(len(legendStrs))
-                        if len(legendStrs)>=colorInt:
+                        if (len(legendStrs)>0) and (len(legendStrs)>=colorInt):
                             lgndStr=legendStrs[colorInt]
                             #print lgndStr
                         if colorInt>len(colorsList):
@@ -557,17 +558,17 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
                     else:
                         log.debug("Not plotting hist for "+paramStrs2[i]+" as its hist file doesn't exist:\n"+histDataBaseName)
                     colorInt+=1
-                    if True:
-                        combinedLbl = 'combined'
-                        if (colorInt==4) and (paramStrs[i]=='$i{\\rm  [deg]}$'):
-                            histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/CombinedNormalized-IncHist'
-                            #histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/chiOne/incHist'
-                            #print 'about to try and add combined hist with file '+histDataBaseName
-                            subPlot = histLoadAndPlot_StackedPosteriors(subPlot,outFilename=histDataBaseName,xLabel=paramStrs[i],lineColor='black',xLims=xLim,latex=latex,showYlabel=showYlabel,parInt=par,centersOnly=centersOnly,trueVal=trueVal,lgndStr=combinedLbl)
-                            #print 'special combined posterior plotted it seems'
-                        elif colorInt==4:
-                            subPlot.plot([-100,-90],[-100,-90],color='k',lineWidth=2,label=combinedLbl)
-        subPlot.legend()
+                    #if True:
+                    #    combinedLbl = 'combined'
+                    #    if (colorInt==4) and (paramStrs[i]=='$i{\\rm  [deg]}$'):
+                    #        histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/CombinedNormalized-IncHist'
+                    #        #histDataBaseName = '/mnt/HOME/MEGA/ExoSOFT-outputCopies/after-June14-2016/ClusterRuns/chiOne/incHist'
+                    #        #print 'about to try and add combined hist with file '+histDataBaseName
+                    #        subPlot = histLoadAndPlot_StackedPosteriors(subPlot,outFilename=histDataBaseName,xLabel=paramStrs[i],lineColor='black',xLims=xLim,latex=latex,showYlabel=showYlabel,parInt=par,centersOnly=centersOnly,trueVal=trueVal,lgndStr=combinedLbl)
+                    #        #print 'special combined posterior plotted it seems'
+                    #    elif colorInt==4:
+                    #        subPlot.plot([-100,-90],[-100,-90],color='k',lineWidth=2,label=combinedLbl)
+        #subPlot.legend()
         #plt.tight_layout()
         ## Save file if requested.
         log.debug('\nStarting to save stacked param hist figure:')
