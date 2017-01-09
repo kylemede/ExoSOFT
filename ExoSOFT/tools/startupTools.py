@@ -146,7 +146,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             os.mkdir(pklDir)
 
         ## copy the settings used for this run to a subdirectory in the output directory
-        if True:
+        if rePlot==False:
             settDir = os.path.join(settings['finalFolder'],'settingsUsed')
             os.mkdir(settDir)
             fs = [settings_in['settings_in_path'],\

@@ -48,11 +48,11 @@ class ExoSOFTmodel(object):
         self.Priors = ExoSOFTpriors(ecc_prior=self.sd['ecc_prior'], 
              p_prior=self.sd['p_prior'], inc_prior=self.sd['inc_prior'], 
              m1_prior=self.sd['m1_prior'], m2_prior=self.sd['m2_prior'], 
-             para_prior=self.sd['para_prior'], inc_min=self.sd['inc_min'],
-             inc_max=self.sd['inc_max'], p_min=self.sd['p_min'], p_max=self.sd['p_max'],
-             para_est=self.sd['para_est'], para_err=self.sd['para_err'], 
-             m1_est=self.sd['m1_est'], m1_err=self.sd['m1_err'], m2_est=self.sd['m2_est'], 
-             m2_err=self.sd['m2_err'],ecc_min=self.sd['ecc_min'],ecc_max=self.sd['ecc_max'])
+             para_prior=self.sd['para_prior'],para_est=self.sd['para_est'],         
+             para_err=self.sd['para_err'], m1_est=self.sd['m1_est'], 
+             m1_err=self.sd['m1_err'], m2_est=self.sd['m2_est'], 
+             m2_err=self.sd['m2_err'],
+             mins_ary=self.sd['range_mins'],maxs_ary=self.sd['range_maxs'])
     
 class ExoSOFTparams(object):
     """
@@ -291,7 +291,7 @@ def ln_posterior(pars, Model):
             Model.chi_squared_rv = chi_sqr_rv
             
             ## Calculate priors
-            prior = Model.Priors.priors(Model.Params.model_in_pars)
+            prior = Model.Priors.priors(Model.Params.stored_pars)
             Model.prior = prior
             #print('np.log(prior)',np.log(prior))
             #print('prior ',prior)

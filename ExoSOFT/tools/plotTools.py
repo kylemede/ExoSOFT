@@ -183,7 +183,7 @@ def histLoadAndPlot_StackedPosteriors(plot,outFilename='',xLabel='X',lineColor='
 
     return plot
 
-def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel='X',xLims=False,bestVal=False,latex=False,showYlabel=False,parInt=0):
+def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel='X',xLims=False,bestVal=False,latex=False,showYlabel=False,parInt=0,nxloc=4):
     """
     Loads previously plotted histograms that were written to disk by histPlotAndDump, and plot them up
     in a way that is ready for publication.  This is the standard plotter used for plotting simple posteriors
@@ -309,7 +309,7 @@ def histLoadAndPlot_ShadedPosteriors(plot,outFilename='',confLevels=False,xLabel
             log.error("Tried to plot a line on the shaded histogram for the best val, but failed")
     if xLims!=False:
         plot.axes.set_xlim((xLims[0]-minSub,xLims[1]-minSub))
-    plot.locator_params(axis='x',nbins=3) # maximum number of x labels
+    plot.locator_params(axis='x',nbins=nxloc) # maximum number of x labels
     plot.locator_params(axis='y',nbins=5) # maximum number of y labels
     plot.tick_params(axis='x',which='major',width=0.5,length=3,pad=3,direction='in',labelsize=20)
     plot.tick_params(axis='y',which='major',width=0.5,length=3,pad=3,direction='in',labelsize=20)
@@ -586,7 +586,8 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
                 log.warning("Seems epstopdf failed.  Check if it is installed properly.")
 
 
-def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],bestVals=[],stage='MCMC',shadeConfLevels=True,forceRecalc=True,plotALLpars=False,nbins=None):
+def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],bestVals=[],stage='MCMC',
+                   shadeConfLevels=True,forceRecalc=True,plotALLpars=False,nbins=None,nxloc=5):
     """
     This advanced plotting function will plot all the data in a grid on a single figure.  The data will be plotted
     in histograms that will be normalized to a max of 1.0.  The
@@ -769,7 +770,7 @@ def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],best
                 except:
                     log.debug("Parameter "+str(i)+" not in paramList: \n"+repr(paramList))
                 #print 'about to make hist plot for file base '+histDataBaseName
-                subPlot = histLoadAndPlot_ShadedPosteriors(subPlot,outFilename=histDataBaseName,confLevels=CLevels,xLabel=paramStrs[i],xLims=xLim,bestVal=bestVal,latex=latex,showYlabel=showYlabel,parInt=par)
+                subPlot = histLoadAndPlot_ShadedPosteriors(subPlot,outFilename=histDataBaseName,confLevels=CLevels,xLabel=paramStrs[i],xLims=xLim,bestVal=bestVal,latex=latex,showYlabel=showYlabel,parInt=par,nxloc=nxloc)
                 log.debug('Done to plot shaded hist for '+paramStrs2[i])
             else:
                 log.debug("Not plotting shaded hist for "+paramStrs2[i]+" as its hist file doesn't exist:\n"+histDataBaseName)
@@ -1842,7 +1843,7 @@ def cornerPlotter(outputDataFilename,plotFilename,paramsToPlot=[],bestVals=[],sm
                 #,pad=10
                 axs[i].tick_params(axis='both',labelsize=other_kwargs['labelsize'])
 
-        #plt.tight_layout()
+        plt.tight_layout()
         ## Save file if requested.
         log.debug('\nStarting to save corner figure:')
         if plotFilename!='':

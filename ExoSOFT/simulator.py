@@ -141,7 +141,8 @@ class Simulator(object):
         self.settings['sigMins'] = sigMins
         ## check priors are ok with range mins
         ## will return the value if all good, or call for sys.exit() if not.
-        _ = self.Model.Priors.priors_ratio(rangeMins,rangeMins)
+        self.log.debug("About to test priors")
+        _ = self.Model.Priors.priors_ratio(rangeMins,rangeMins,ranges=True)
         self.log.debug("priors ratio function completed with no errors.")
 
         return (realData,rangeMaxsRaw,rangeMinsRaw,rangeMaxs,rangeMins,sigmas,paramInts,nu,nuDI,nuRV)

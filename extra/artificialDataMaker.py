@@ -35,7 +35,7 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     NumDataPointsOutRV = 25 #must be much less than 10000.  values between 10-500 are suitable.
     NumDataPointsOutDI = 10 #must be much less than 10000.  values between 10-500 are suitable.
     storePrimaryRVs = True
-    percentError = 0.1 #error is set to a percentage of the median
+    percentError = 0.5 #error is set to a percentage of the median
     realizeErrors = True
     percentCoverage = 100.00 #percent of total orbit for data to span.  Over 100% is ok if you want overlapping data.
 
