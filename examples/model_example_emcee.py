@@ -62,6 +62,8 @@ def main(settings_in,advanced_settings_in, priors_in):
     ## NOTE: starting_guesses array must be a numpy array with dtype=np.dtype('d').
     starting_guesses = tools.make_starting_params(start_params,nwalkers,scale=0.01)
     
+    log.importantinfo("\nObjects and inputs prepared, now calling emcee.")
+
     ## Call emcee to explore the parameter space
     sampler = emcee.EnsembleSampler(nwalkers, ndim, tools.ln_posterior, 
                                     args=[Model], threads=ncpu)
