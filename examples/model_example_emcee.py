@@ -53,7 +53,7 @@ def main(settings_in,advanced_settings_in, priors_in):
     ndim = len(sd['range_maxs']) # number of parameters in the model 
     if quick:
         nwalkers = 50 # number of MCMC walkers 
-        nburn = 50 # "burn-in" to stabilize chains 
+        nburn = 100 # "burn-in" to stabilize chains 
         nsteps = 1000 # number of MCMC steps to take 
     else:
         nwalkers = 500 
