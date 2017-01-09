@@ -23,10 +23,10 @@
 # Operational flags & settings #
 ################################
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : 100000
+'nSamples' : 200000
 # Number of simulation chains to run in parallel, [null, or int]
 # null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use.
-'nCPUs': -1
+'nCPUs': 2
 # Number of emcee walkers to run.  ONLY available in 'emcee' mode. [1,500] [int]
 'n_wlkrs' :  1000
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems.
@@ -159,7 +159,7 @@
 # If using SA/ST before MCMC, then the burn-in will be very short.
 'rmBurn' : true
 # number of burn-in samples to remove from beginning of emcee walker chains. [int]
-'n_emcee_burn' : 500
+'n_emcee_burn' : 50
 # Calculate the Correlation lengths and number of effective points of each chain (must be more than 1 chain)? [bool]
 # NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
 'calcCL' : true

@@ -270,7 +270,10 @@ class multiProcObj(object):
         for procNumber in range(self.numProcs):
             master[procNumber].join()  
         toc=timeit.default_timer()
-        s = "\nALL "+str(self.numProcs)+" chains of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
+        if self.stage=='emcee':
+            s = "\nALL "+str(self.settings['n_wlkrs'])+" walkers of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
+        else:
+            s = "\nALL "+str(self.numProcs)+" chains of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
         retStr =s+"\n"
         log.info(s)
         self._loadUpArys(master)
