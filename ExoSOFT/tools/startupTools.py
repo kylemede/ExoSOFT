@@ -173,6 +173,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         #push in important settings to comments dict needed for later fits file headers
         settings['commentsDict']['nSamples'] = 'number of samples'
         settings['commentsDict']['saveInt'] = 'rate pars saved'
+        settings['rePlot'] = rePlot
         #########################################################################################
         ## Check parameter range settings make sense for data provided and mode of operation.   #
         ## Then load up a list of the parameters to vary during simulation.                     #
@@ -541,7 +542,8 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                     settings[ks[i]] = num_setting_maxs_dict[ks[i]]
 
         ## use modePrep to make sure all is ready for the stages requested
-        settings = modePrep(settings,sigmas)
+        if rePlot==False:
+            settings = modePrep(settings,sigmas)
 
         # load up # of cpus to use
         ncpu = multiprocessing.cpu_count()

@@ -421,7 +421,6 @@ def load_settings(settings_in,advanced_settings_in=None,priors_in=None):
 
     #for key in settings:
     #    print(key+' = '+repr(settings[key]))
-    #sys.exit('shirt')
     return settings
 
 def loadFits(filename,noData=False):

@@ -4,9 +4,9 @@ from __future__ import print_function
 import numpy as np
 import os
 import matplotlib
-matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
+#matplotlib.use('Agg') # Force matplotlib to not use any Xwindows backend. to further avoid the Display issue.
 import matplotlib.pyplot as plt
-plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
+#plt.ioff() #turns off I/O for matplotlib so it doesn't need to plot to screen, which is impossible during ssh/screen sessions.
 Polygon =  matplotlib.patches.Polygon
 gridspec =  matplotlib.gridspec
 patches = matplotlib.patches
