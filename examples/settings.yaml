@@ -135,8 +135,8 @@
 'inc_max' : 90
 # Minimum/Maximum allowed value for the Argument of Perigee [double][deg] OR null
 # Default: [0,360]
-'arg_peri_min' : -170
-'arg_peri_max' : 180
+'arg_peri_min' : -30
+'arg_peri_max' : 90
 # Minimum/Maximum values of Radial Velocity Offsets.
 # Must be one per set of RV data in same order as data comes in RVdata.dat, or the a single value to be used by all [comma separated list of doubles]
 'offset_mins' : [-30]

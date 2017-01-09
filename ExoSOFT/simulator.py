@@ -514,24 +514,24 @@ class Simulator(object):
             ## discard burn-in points
             trace = sampler.chain
             lnprobs = sampler.lnprobability
-            self.log.importantinfo("Before burn-in strip")
+            self.log.importantinfo("Before burn-in stripping or thinning of emcee output:")
             self.log.importantinfo("trace.shape = "+repr(trace.shape))
-            self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
-            if self.settings['rmBurn']:
+            self.log.info("probs.shape = "+repr(lnprobs.shape))
+            if self.settings['rmBurn'] and (self.settings['n_emcee_burn']>0):
                 trace = trace[:, self.settings['n_emcee_burn']:, :]
                 lnprobs = lnprobs[:, self.settings['n_emcee_burn']:]
-            self.log.importantinfo("\nAfter burn-in strip")
-            self.log.importantinfo("trace.shape = "+repr(trace.shape))
-            self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
+                self.log.importantinfo("\nAfter burn-in strip:")
+                self.log.importantinfo("trace.shape = "+repr(trace.shape))
+                self.log.info("probs.shape = "+repr(lnprobs.shape))
 
             ## Thin the resulting chains to reduce disk space wasted
             ## storing highly correlated steps
             if self.settings['thin_rate']>1:
                 trace = trace[:, ::self.settings['thin_rate'], :]
                 lnprobs = lnprobs[:, ::self.settings['thin_rate']]
-            self.log.importantinfo("\nAfter burn-in strip AND thinning")
-            self.log.importantinfo("trace.shape = "+repr(trace.shape))
-            self.log.importantinfo("probs.shape = "+repr(lnprobs.shape))
+                self.log.importantinfo("\nAfter burn-in strip AND thinning:")
+                self.log.importantinfo("trace.shape = "+repr(trace.shape))
+                self.log.info("probs.shape = "+repr(lnprobs.shape))
 
             ## reshape to put all walkers together
             lnprobs = lnprobs.reshape(-1)

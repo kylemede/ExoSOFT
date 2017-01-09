@@ -391,7 +391,7 @@ def loadRealData(diFilename='',rvFilename='',dataMode='3D'):
         log.critical("An error occured while trying to load data!!")
     return realData
 
-def load_settings(settings_in,advanced_settings_in,priors_in):
+def load_settings(settings_in,advanced_settings_in=None,priors_in=None):
     """
     This is to load the settings file from the path provided, then load in the
     ExoSOFTpriors object.  It will first see if there is a priors.py in same

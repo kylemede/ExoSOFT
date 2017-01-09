@@ -587,7 +587,7 @@ def stackedPosteriorsPlotter(outputDataFilenames, plotFilename,paramsToPlot=[],x
 
 
 def summaryPlotter(outputDataFilename,plotFilename,paramsToPlot=[],xLims=[],bestVals=[],stage='MCMC',
-                   shadeConfLevels=True,forceRecalc=True,plotALLpars=False,nbins=None,nxloc=5):
+                   shadeConfLevels=True,forceRecalc=True,plotALLpars=False,nbins=None,nxloc=4):
     """
     This advanced plotting function will plot all the data in a grid on a single figure.  The data will be plotted
     in histograms that will be normalized to a max of 1.0.  The

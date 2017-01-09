@@ -32,9 +32,9 @@
 'nGRcalc' : 10
 
 # number of samples to draw for simulated annealing stage [int]
-'nSAsamp' : 50000
+'nSAsamp' : 20000
 # Simulated An5ealing starting temperature [double]
-'strtTemp' :  100.0
+'strtTemp' :  50.0
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : 50

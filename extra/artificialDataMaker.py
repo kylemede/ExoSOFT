@@ -34,7 +34,7 @@ def calcOrbit():
     # Computer Directory
     outDir='./' 
     # Base name for output files
-    outBaseName='mockdata_'
+    outBaseName='syntheticdata_'
     
     ## Basic sample settings
     ########################
