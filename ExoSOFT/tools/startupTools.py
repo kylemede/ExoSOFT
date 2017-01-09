@@ -149,12 +149,12 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         if rePlot==False:
             settDir = os.path.join(settings['finalFolder'],'settingsUsed')
             os.mkdir(settDir)
-            fs = [settings_in['settings_in_path'],\
-                advanced_settings_in['advanced_settings_in_path'],\
-                settings_in['priors_in_path'],
-                settings['rv_dataFile'],\
-                settings['di_dataFile']
-                ]
+            fs = []
+            ks = ['settings_in_path','advanced_settings_in_path',
+                  'priors_in_path','rv_dataFile','di_dataFile']
+            for k in ks:
+                if k in settings:
+                    fs.append(settings[k])
             for f in fs:
                 try:
                     n = os.path.basename(f)
@@ -471,9 +471,10 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         bool_setting_strs = ['pltDists','pltOrbit','delChains','delCombined','CalcBurn','rmBurn','calcCL','calcIAC','CalcGR','autoMode','strtMCMCatBest','pasa','vary_tc', 'tc_equal_to', 'Kdirect']
         bool_defaults = [True,      True,       True,       True,           True,       True,   True,   True,     True,   False,        False,            False,   False,      True,           False,]
         for i in range(len(bool_setting_strs)):
-            if settings[bool_setting_strs[i]] not in boolDict:
-                settings[bool_setting_strs[i]] = bool_defaults[i]
-            settings[bool_setting_strs[i]] = boolDict[settings[bool_setting_strs[i]]]
+            if bool_setting_strs[i] in settings:
+                if settings[bool_setting_strs[i]] not in boolDict:
+                    settings[bool_setting_strs[i]] = bool_defaults[i]
+                settings[bool_setting_strs[i]] = boolDict[settings[bool_setting_strs[i]]]
 
         ## Check all other number settings
         num_setting_mins_dict = {'nSamples':1,\
@@ -526,17 +527,18 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                                  'KMIN':1e7}
         ks = num_setting_maxs_dict.keys()
         for i in range(len(ks)):
-            s = "Setting '"+ks[i]+"' value was out of range.\n"
-            if settings[ks[i]]<num_setting_mins_dict[ks[i]]:
-                s+= "So, it was changed from "+str(settings[ks[i]])+" to "+\
-                str(num_setting_mins_dict[ks[i]])
-                log.debug(s)
-                settings[ks[i]] = num_setting_mins_dict[ks[i]]
-            if settings[ks[i]]>num_setting_maxs_dict[ks[i]]:
-                s+= "So, it was changed from "+str(settings[ks[i]])+" to "+\
-                str(num_setting_maxs_dict[ks[i]])
-                log.debug(s)
-                settings[ks[i]] = num_setting_maxs_dict[ks[i]]
+            s = "Check if setting '"+ks[i]+"' value was out of range.\n"
+            if ks[i] in settings:
+                if settings[ks[i]]<num_setting_mins_dict[ks[i]]:
+                    s+= "Too small, so it was changed from "+str(settings[ks[i]])+" to "+\
+                    str(num_setting_mins_dict[ks[i]])
+                    log.debug(s)
+                    settings[ks[i]] = num_setting_mins_dict[ks[i]]
+                elif settings[ks[i]]>num_setting_maxs_dict[ks[i]]:
+                    s+= "Too big, so it was changed from "+str(settings[ks[i]])+" to "+\
+                    str(num_setting_maxs_dict[ks[i]])
+                    log.debug(s)
+                    settings[ks[i]] = num_setting_maxs_dict[ks[i]]
 
         ## use modePrep to make sure all is ready for the stages requested
         settings = modePrep(settings,sigmas)

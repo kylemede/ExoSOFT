@@ -31,7 +31,7 @@
 # How many times do you want the Gelman-Rubin statistic calculated [int]
 'nGRcalc' : 10
 
-# number of samples to draw for simulated annealing stage [int] 
+# number of samples to draw for simulated annealing stage [int]
 'nSAsamp' : 50000
 # Simulated An5ealing starting temperature [double]
 'strtTemp' :  100.0
@@ -41,7 +41,7 @@
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
 'maxUstd': 0.1
 # number of samples to draw for sigma tuning stage [int].
-'nSTsamp' : 50000
+'nSTsamp' : 100000
 # Starting sigma size, ratio of parameter range, recommend [0.01,0.25].  [double]
 # After first trial of SA and ST, take ST output and use here.
 'strtSig' : 0.01
@@ -68,11 +68,3 @@
 ## Special settings DI model:
 # force adding a value in degrees to argument of periapsis used in DI orbit fit [double]
 'omega_offset_di' : 0.0
-
-## OLD settings for kdirect mode that is now invalid, but might bring back someday
-# Advanced settings
-'KMAX': 0
-'KMIN': 0
-# Draw values for K directly, do NOT calculate it [bool]. Kills varying of Inclination.  Only possible in RV only mode.
-'Kdirect'  : false
-

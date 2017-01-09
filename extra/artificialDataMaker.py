@@ -6,7 +6,7 @@ from astropy import constants as const
 days_per_year = 365.2422
 sec_per_year = 60*60*24*days_per_year
 
-def calcOrbit(outDir='',outBaseName='mockdata_'):
+def calcOrbit():
     """
     This is a tool to produce a Keplerian orbit in RA,Dec,RV to verify exosoft.
     It just computes Kepler orbit positions and velocities then rotates
@@ -29,9 +29,15 @@ def calcOrbit(outDir='',outBaseName='mockdata_'):
     #7. RV ERROR [m/s]
     """
     quiet = False
-    #Computer Directory
-    if outDir=='':
-        outDir='/mnt/Data1/Todai_Work/Data/data_ExoSOFT/' #$$$$$$$$$$$$$$$$$$$$ MAKE SURE THIS IS SET TO MACH YOUR DESIRED OUTPUT DIRECTORY!!!
+    ## Important output directory and filename settings 
+    ###################################################
+    # Computer Directory
+    outDir='./' 
+    # Base name for output files
+    outBaseName='mockdata_'
+    
+    ## Basic sample settings
+    ########################
     NumDataPointsOutRV = 25 #must be much less than 10000.  values between 10-500 are suitable.
     NumDataPointsOutDI = 10 #must be much less than 10000.  values between 10-500 are suitable.
     storePrimaryRVs = True

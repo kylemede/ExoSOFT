@@ -1,4 +1,4 @@
-#Fake data using artificialDataMaker.py for a Jupiter analogue with a 5% realization of errors.
+# Simulated data made using artificialDataMaker.py for a Jupiter analogue with a 5% realization of errors.
 #JD RV [m/s]    delta_RV [m/s]  Jitter
 2454738.524 -9.349445523 0.3562644929
 2452537.945 8.960274292 0.3562644929

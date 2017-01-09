@@ -11,10 +11,10 @@
 
 ## MUST CHANGE 'OUTDIR' SETTING TO MATCH YOUR SYSTEM, ELSE OUTPUTS ARE WRITTEN TO CURRENT WORKING DIRECTORY!!
 # Directory where you want the output data folder to go [string, at least 2 chars long]
-'outDir' : './'
+'outDir' : '/mnt/Data1/Todai_Work/Data/data_ExoSOFT' #'./'
 
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
-'outRoot' : "ExoSOFT-Synthetic-Jupiter"
+'outRoot' : "ExoSOFT-Synthetic-Jupiter-tst"
 
 # Is the data in the DIdata.dat in PA,SA format? else, it is in E,N (x,y) format [bool]
 'pasa'     : false
@@ -28,7 +28,7 @@
 # null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use.
 'nCPUs': -1
 # Number of emcee walkers to run.  ONLY available in 'emcee' mode. [1,500] [int]
-'n_wlkrs' :  100
+'n_wlkrs' :  1000
 # set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems.
 # choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'IMPORTANTINFO'=25,'INFO'=20,'DEBUG'10,'ALL'=0)
 'logLevel' : 25
@@ -37,7 +37,7 @@
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC','SAemcee','emcee'} [string] default is 'SASTMCMC'
 # NOTE: 'ST', 'MCMC','emcee' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'SAST'
+'stages' : 'SAemcee'
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
 'chiMAX' : 200.0
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
@@ -46,7 +46,7 @@
 'cMaxMCMC': 2.0
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC or emcee) [int]
 # Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
-'saveInt' : 50
+'saveInt' : 1
 
 #####################################################
 # Starting parameters and sigmas for MCMC or emcee  #
@@ -54,11 +54,11 @@
 #####################################################
 # if unknown, set to false!! else [comma separated list of doubles]
 'startParams' : false
-# below is a set of good starting parameters for the artificial Jupiter system used to verify ExoSOFT
+# below is a set of good starting parameters for the artificial Jupiter system used to verify ExoSOFT in ST, MCMC or emcee modes
 #[0.9892581,0.0009696,49.4824152,101.82462,0.05706358,2450656.61,2450656.61,12.012219,44.5819933,0.1945267,5.227630,46.908327,8.916892,-0.04136662]
 # if unknown, set to false!! else [comma separated list of doubles]
 'startSigmas' : false
-# below is a set of good starting sigmas for the artificial Jupiter system used to verify ExoSOFT
+# below is a set of good starting sigmas for the artificial Jupiter system used to verify ExoSOFT in MCMC mode
 #[0.0398395,2.9006e-05,1.4531,2.63,0.012091373,23.4,0.6345,1.297,3.123484885,6.276]
 
 
@@ -68,12 +68,12 @@
 ############################
 # Operate in low eccenctricity mode? [bool]
 # Then step through in sqrt(e)sin(omega) and sqrt(e)cos(omega) instead of e & omega directly
-'low_ecc'   : false
+'low_ecc'   : true
 ### For ALL: false indicates a flat prior. true indicates to use defaults.
 # ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. false indicates 'uniform'
-'ecc_prior'    : 'beta'
+'ecc_prior'    : 'uniform'
 # period prior options: 'power-law', 'jeffrey'.  Default is 'jeffrey'
-'p_prior'    : true
+'p_prior'    : 'jeffrey'
 # For the inclination prior, use strings or booleans to inducate the specific
 # function to use.  Options: 'sin', 'cos' or false (indicates to use uniform).  true indicates sin.
 'inc_prior'  : 'cos'
@@ -124,19 +124,19 @@
 'ecc_max' : null
 # Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD] OR null
 # Default: [earliestsEpoch-period,earliestEpoch]
-'t_min' : 2449000
-'t_max' : 2453500
+'t_min' : 2448100
+'t_max' : 2453000
 # Minimum/Maximum allowed value for the Period [double][yrs]
 'p_min' : 1.0
-'p_max' : 50.0
+'p_max' : 100.0
 # Minimum/Maximum allowed value for the Inclination [double][deg] OR null
 # Default: [0,180].  [0,90] is another popular choice.
-'inc_min' : 1
+'inc_min' : 0
 'inc_max' : 90
 # Minimum/Maximum allowed value for the Argument of Perigee [double][deg] OR null
 # Default: [0,360]
-'arg_peri_min' : -50
-'arg_peri_max' : 90
+'arg_peri_min' : -170
+'arg_peri_max' : 180
 # Minimum/Maximum values of Radial Velocity Offsets.
 # Must be one per set of RV data in same order as data comes in RVdata.dat, or the a single value to be used by all [comma separated list of doubles]
 'offset_mins' : [-30]
@@ -169,4 +169,4 @@
 # Calculate the Gelman-Rubin statistic? [bool]
 'CalcGR' : true
 # emcee thinning rate (Does not apply to MC, SA, ST, or MCMC modes). [int]
-'thin_rate': 50
+'thin_rate': 1

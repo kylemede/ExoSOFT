@@ -1,4 +1,4 @@
-#Fake data using artificialDataMaker.py for a Jupiter analogue with a 5% realization of errors.
+# Simulated data made using artificialDataMaker.py for a Jupiter analogue with a 5% realization of errors.
 # ObsDate[JD]   RA["]    RAerror["]  Dec["]   DecError["]
 2452511.427 -0.2728288668 0.01020893362 0.01904839453 0.01020893362
 2451187.254 0.06528875875 0.01020893362 -0.1760579168 0.01020893362
