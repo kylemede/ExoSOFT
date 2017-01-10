@@ -60,7 +60,9 @@ Then, from the directory containing the settings.yaml, simply start ExoSOFT with
 
  $ ExoSOFT
  
-Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/ExoSOFT/tools/priors.py) and edit accordingly.
+Should you wish to provide custom priors, a proper priors.py file must also be in the same directory.  To make one, copy the [default file](https://github.com/kylemede/ExoSOFT/blob/master/examples/priors.py) and edit accordingly.
+
+There are two working examples, one for that runs the stages Simulated Annealing then emcee (settings_SAemcee.py).  The other runs Simulated Annealing, Sigma Tuning, then MCMC (settings_SASTMCMC.py).  Either copy their settings file in the examples directory to a new file or rename them to settings.py and run it the same as above.
 
 
 Solutions to some install or runtime errors
