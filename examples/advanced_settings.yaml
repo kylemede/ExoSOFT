@@ -34,12 +34,12 @@
 # number of samples to draw for simulated annealing stage [int]
 'nSAsamp' : 20000
 # Simulated An5ealing starting temperature [double]
-'strtTemp' :  50.0
+'strtTemp' :  100.0
 # Number of samples till temperature drop. [int]
 # Allowed vals [1,nSAsamp), Ideal is ~50.
 'tempInt'  : 50
 # Maximum unitless bias-corrected standard deviation allowed between best reduced chi squareds of SA results. [double]
-'maxUstd': 0.1
+'maxUstd': 0.5
 # number of samples to draw for sigma tuning stage [int].
 'nSTsamp' : 100000
 # Starting sigma size, ratio of parameter range, recommend [0.01,0.25].  [double]
@@ -49,7 +49,7 @@
 # Allowed vals [1,nSTsamp), testing shows a value of ~200 works well.
 'sigInt': 200
 # Minimum step size allowed, as a ratio of each parameters range ie. 1.0=100% [double]
-'sigMin' : 0.001
+'sigMin' : 0.0001
 # Minimum and maximum allowed acceptance rates to tune parameter step sizes to meet. list of [double,double]
 'accRates' : [0.25,0.35]
 # Interval of saved values before write/dump the data to disk to avoid consuming too much RAM during long runs. They take 11MB/100000.

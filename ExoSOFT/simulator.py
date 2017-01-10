@@ -432,6 +432,8 @@ class Simulator(object):
             paramsInRaw = self.increment(self.rangeMinsRaw,sigmas,stage='MC')
         ## load up starting params as 'latest' and perform first increment from these to start loop with.
         latestParsRaw = copy.deepcopy(paramsInRaw)
+        _ = tools.ln_posterior(paramsInRaw,self.Model)
+        self.priors_last = self.Model.prior
         proposedParsRaw = self.increment(latestParsRaw,sigmas,stage)
         ## convert from Raw form if in lowEcc mode
         ln_post = tools.ln_posterior(proposedParsRaw,self.Model)

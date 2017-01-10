@@ -8,13 +8,10 @@
 #
 ######################################
 
-######################################
-#### This can only be ran if the name is changed to settings.py   !!!!!!!!!!!!!!!
-######################################
 
 ## MUST CHANGE 'OUTDIR' SETTING TO MATCH YOUR SYSTEM, ELSE OUTPUTS ARE WRITTEN TO CURRENT WORKING DIRECTORY!!
 # Directory where you want the output data folder to go [string, at least 2 chars long]
-'outDir' : '/mnt/Data1/Todai_Work/Data/data_ExoSOFT' #'./'
+'outDir' : './'
 
 # General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
 'outRoot' : "ExoSOFT-Synthetic-Jupiter-tst"
@@ -26,7 +23,7 @@
 # Operational flags & settings #
 ################################
 # The number of samples orbital parameters to try/draw [int]
-'nSamples' : 100000
+'nSamples' : 200000
 # Number of simulation chains to run in parallel, [null, or int]
 # null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use.
 'nCPUs': 2
@@ -40,13 +37,13 @@
 # mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC','SAemcee','emcee'} [string] default is 'SASTMCMC'
 # NOTE: 'ST', 'MCMC','emcee' modes need a full list of parameters for startParams, else they fail!
 #       'MCMC' also needs a full list of sigmas in startSigmas.
-'stages' : 'ST'
+'stages' : 'SAemcee'
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
-'chiMAX' : 500.0
+'chiMAX' : 200.0
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
-'chiMaxST': 10.0
+'chiMaxST': 10
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
-'cMaxMCMC': 5.0
+'cMaxMCMC': 2.0
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC or emcee) [int]
 # Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
 'saveInt' : 1
@@ -56,7 +53,7 @@
 # Can be found with prior run in SAST mode          #
 #####################################################
 # if unknown, set to false!! else [comma separated list of doubles]
-'startParams' : [0.960657265964,0.000979950156091,48.8967527724,101.340725807,0.0269071154789,2451139.53338,2451139.53338,12.4690165619,44.5279928107,60.6753986919,5.30787266204,57.8742972684,9.06413756357,-0.337627559922]
+'startParams' : false
 # below is a set of good starting parameters for the artificial Jupiter system used to verify ExoSOFT in ST, MCMC or emcee modes
 #[0.9892581,0.0009696,49.4824152,101.82462,0.05706358,2450656.61,2450656.61,12.012219,44.5819933,0.1945267,5.227630,46.908327,8.916892,-0.04136662]
 # if unknown, set to false!! else [comma separated list of doubles]
