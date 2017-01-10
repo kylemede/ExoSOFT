@@ -39,11 +39,11 @@
 #       'MCMC' also needs a full list of sigmas in startSigmas.
 'stages' : 'SAemcee'
 # This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
-'chiMAX' : 200.0
+'chiMAX' : 500.0
 # maximum allowed reduced chiSquared out of SA before entering ST [double]
 'chiMaxST': 10
 # maximum allowed reduced chiSquared out of ST before entering MCMC [double]
-'cMaxMCMC': 2.0
+'cMaxMCMC': 5.0
 # interval of accepted values between storing in output array (for SA,ST,MCMC, not MC or emcee) [int]
 # Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
 'saveInt' : 1
