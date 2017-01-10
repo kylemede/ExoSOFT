@@ -119,8 +119,8 @@
 'para_max' : 70.0
 # Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg] OR null
 # Default: [0,360] if 'dataMode' is '3D', else [0,180].
-'long_an_min' : null
-'long_an_max' : null
+'long_an_min' : 0
+'long_an_max' : 180
 # Minimum/Maximum allowed value for the Eccentricity [double] OR null
 # Default: [0,0.98]
 'ecc_min' : null
@@ -131,7 +131,7 @@
 't_max' : 2453000
 # Minimum/Maximum allowed value for the Period [double][yrs]
 'p_min' : 1.0
-'p_max' : 100.0
+'p_max' : 50.0
 # Minimum/Maximum allowed value for the Inclination [double][deg] OR null
 # Default: [0,180].  [0,90] is another popular choice.
 'inc_min' : 0
@@ -142,8 +142,8 @@
 'arg_peri_max' : 90
 # Minimum/Maximum values of Radial Velocity Offsets.
 # Must be one per set of RV data in same order as data comes in RVdata.dat, or the a single value to be used by all [comma separated list of doubles]
-'offset_mins' : [-30]
-'offset_maxs' : [30]
+'offset_mins' : [-10]
+'offset_maxs' : [10]
 
 #####################################
 ## Post processing flags & settings #
