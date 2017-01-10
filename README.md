@@ -65,6 +65,13 @@ Should you wish to provide custom priors, a proper priors.py file must also be i
 There are two working examples, one for that runs the stages Simulated Annealing then emcee (settings_SAemcee.py).  The other runs Simulated Annealing, Sigma Tuning, then MCMC (settings_SASTMCMC.py).  Either copy their settings file in the examples directory to a new file or rename them to settings.py and run it the same as above.
 
 
+Additionally, there are two basic examples of how to interact with the model more directly.  These examples are given in:
+
+ - model\_example\_basic.py
+ - model\_example\_emcee.py
+ 
+ These will show the user how to write their own scripts that use the ExoSOFT model instead of using ExoSOFT itself.
+
 Solutions to some install or runtime errors
 ===========================================
 
