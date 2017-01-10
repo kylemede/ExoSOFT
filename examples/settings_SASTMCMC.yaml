@@ -1,0 +1,175 @@
+#####################################
+## Note that in yaml format:
+# Python |  yaml
+#-----------------
+# None   | null
+# True   | true
+# False  | false
+#
+######################################
+
+######################################
+#### This can only be ran if the name is changed to settings.py   !!!!!!!!!!!!!!!
+######################################
+
+## MUST CHANGE 'OUTDIR' SETTING TO MATCH YOUR SYSTEM, ELSE OUTPUTS ARE WRITTEN TO CURRENT WORKING DIRECTORY!!
+# Directory where you want the output data folder to go [string, at least 2 chars long]
+'outDir' : './'
+
+# General filename for the simulation output folder to distinguish between simulation runs [string, at least 2 chars long]
+'outRoot' : "ExoSOFT-Synthetic-Jupiter-tst"
+
+# Is the data in the DIdata.dat in PA,SA format? else, it is in E,N (x,y) format [bool]
+'pasa'     : false
+
+################################
+# Operational flags & settings #
+################################
+# The number of samples orbital parameters to try/draw [int]
+'nSamples' : 100000
+# Number of simulation chains to run in parallel, [null, or int]
+# null= use all CPUs, negative integers indicates # CPUs -int, positive integers indicates # CPUs to use.
+'nCPUs': 2
+# Number of emcee walkers to run.  ONLY available in 'emcee' mode. [1,500] [int]
+'n_wlkrs' :  1000
+# set level of log messages to screen [int],recommend 50, ignoring critical msgs can cause problems.
+# choices: ('NONE'=100,'CRITICAL'=50,'ERROR'=40,'WARNING'=30,'IMPORTANTINFO'=25,'INFO'=20,'DEBUG'10,'ALL'=0)
+'logLevel' : 25
+# data mode, choices {'RV','DI','3D'} [string]
+'data_mode' : '3D'
+# mode to run simulation in, choices {'MC','SA','ST','SAST','SASTMCMC,'MCMC','SAemcee','emcee'} [string] default is 'SASTMCMC'
+# NOTE: 'ST', 'MCMC','emcee' modes need a full list of parameters for startParams, else they fail!
+#       'MCMC' also needs a full list of sigmas in startSigmas.
+'stages' : 'SASTMCMC'
+# This will set the maximum reduced ChiSquared value to accept and write to the output file during MC mode. [double]
+'chiMAX' : 500.0
+# maximum allowed reduced chiSquared out of SA before entering ST [double]
+'chiMaxST': 10.0
+# maximum allowed reduced chiSquared out of ST before entering MCMC [double]
+'cMaxMCMC': 5.0
+# interval of accepted values between storing in output array (for SA,ST,MCMC, not MC or emcee) [int]
+# Make sure to save enough that R~1.0 at max, posteriors look smooth, BUT not too much data is saved that you are just wasting disk space.
+'saveInt' : 1
+
+#####################################################
+# Starting parameters and sigmas for MCMC or emcee  #
+# Can be found with prior run in SAST mode          #
+#####################################################
+# if unknown, set to false!! else [comma separated list of doubles]
+'startParams' :
+# below is a set of good starting parameters for the artificial Jupiter system used to verify ExoSOFT in ST, MCMC or emcee modes
+#[0.96065,0.000979950,48.8967,101.3407,0.02690,2451139.533,2451139.533,12.4690,44.52799,60.67539,5.307872,57.87429,9.0641375,-0.3376275]
+# if unknown, set to false!! else [comma separated list of doubles]
+'startSigmas' : false
+# below is a set of good starting sigmas for the artificial Jupiter system used to verify ExoSOFT in MCMC mode
+#[0.030594,5.988e-05,0.48,3.96,0.02548,63.7,1.188,0.99,0.02744,0.9]
+
+
+
+############################
+#  Prior flags & settings  #
+############################
+# Operate in low eccenctricity mode? [bool]
+# Then step through in sqrt(e)sin(omega) and sqrt(e)cos(omega) instead of e & omega directly
+'low_ecc'   : true
+### For ALL: false indicates a flat prior. true indicates to use defaults.
+# ecc prior options: '2e', 'ST08','J08', 'RayExp', 'beta', 'uniform'. Default is 'beta'. false indicates 'uniform'
+'ecc_prior'    : 'uniform'
+# period prior options: 'power-law', 'jeffrey'.  Default is 'jeffrey'
+'p_prior'    : 'jeffrey'
+# For the inclination prior, use strings or booleans to inducate the specific
+# function to use.  Options: 'sin', 'cos' or false (indicates to use uniform).  true indicates sin.
+'inc_prior'  : 'cos'
+# For m1 and m2: use strings to indicate specific prior function.
+# Options: 'PDMF', 'IMF'.  For m2 'CMF' is also an option.
+# m1 default is 'PDMF', m2 default is 'CMF'.
+'m1_prior': true
+'m2_prior': true
+# For parallax prior, Options: true, false.
+'para_prior' : true
+#### estimate and uncertainties for previously measured values for parallax, m1 and m2
+# should both the est and err of these be non-zero, the previosly chosen priors will be combined with a Normal/Gaussian prior.
+#best estimate of primary's mass, and error [double][Msun]
+'m1_est' : 0.0
+'m1_err' : 0.0
+#best estimate of secondary's mass, and error [double][Msun]
+'m2_est' : 0.0
+'m2_err' : 0.0
+#best estimate of parallax, and error [double][mas]
+'para_est'  : 50
+'para_err'  : 2.5
+
+##############################################
+# Ranges for acceptable random number inputs #
+##############################################
+## For Omega, e, T, inc and omega, null indicates to use default ranges.
+## For Omega and omega, values can vary outside ranges, but are shifted by
+## +/-360 before being stored.
+# Minimum/Maximum allowed value for the mass of the primary body [double][Msun]
+# NOTE: For DI only cases, use mass1 values as total mass and set mass2 values to zero.
+#       This will be done during start up otherwise.
+'m1_min' : 0.0005
+'m1_max' : 2.55
+# Minimum/Maximum allowed value for the mass of the secondary body [double][Msun]
+# Note: 1Mj ~ 0.00095 Msun
+'m2_min' : 0.00001
+'m2_max' : 0.005
+# Minimum/Maximum allowed value for the Parallax [double][mas]
+'para_min' : 30.0
+'para_max' : 70.0
+# Minimum/Maximum allowed value for the Longitude of the Ascending Node [double][deg] OR null
+# Default: [0,360] if 'dataMode' is '3D', else [0,180].
+'long_an_min' : null
+'long_an_max' : null
+# Minimum/Maximum allowed value for the Eccentricity [double] OR null
+# Default: [0,0.98]
+'ecc_min' : null
+'ecc_max' : null
+# Minimum/Maximum value for the Time of Last Periapsis (or Time of Center Transit) [JD] OR null
+# Default: [earliestsEpoch-period,earliestEpoch]
+'t_min' : 2448100
+'t_max' : 2453000
+# Minimum/Maximum allowed value for the Period [double][yrs]
+'p_min' : 1.0
+'p_max' : 100.0
+# Minimum/Maximum allowed value for the Inclination [double][deg] OR null
+# Default: [0,180].  [0,90] is another popular choice.
+'inc_min' : 0
+'inc_max' : 90
+# Minimum/Maximum allowed value for the Argument of Perigee [double][deg] OR null
+# Default: [0,360]
+'arg_peri_min' : -30
+'arg_peri_max' : 90
+# Minimum/Maximum values of Radial Velocity Offsets.
+# Must be one per set of RV data in same order as data comes in RVdata.dat, or the a single value to be used by all [comma separated list of doubles]
+'offset_mins' : [-30]
+'offset_maxs' : [30]
+
+#####################################
+## Post processing flags & settings #
+#####################################
+# make plot of posterior distributions? [bool]
+'pltDists' : true
+# make plots of RV and DI/AM orbit fits [bool]
+'pltOrbit' : true
+# Delete chain files after simulation is complete? [bool]
+'delChains' : true
+# Delete combined data files after simulation is complete? [bool]
+'delCombined' : true
+# Calculate the length of the burn in for each MCMC chain (must be more than 1 chain)? [bool]
+'CalcBurn' : true
+# remove burn-in of output MCMC chains before combining (must be more than 1 chain) [bool]
+# If using SA/ST before MCMC, then the burn-in will be very short.
+'rmBurn' : true
+# number of burn-in samples to remove from beginning of emcee walker chains. [int]
+'n_emcee_burn' : 50
+# Calculate the Correlation lengths and number of effective points of each chain (must be more than 1 chain)? [bool]
+# NOTE: CAUTION, can take a long time for long runs.  Still needs to be sped up somehow.
+'calcCL' : true
+# Calculate the integrated autocorrelation time for each parameter?
+# Wraps the 'emcee.autocorr.integrated_time function. [bool]
+'calcIAC': true
+# Calculate the Gelman-Rubin statistic? [bool]
+'CalcGR' : true
+# emcee thinning rate (Does not apply to MC, SA, ST, or MCMC modes). [int]
+'thin_rate': 1
