@@ -611,8 +611,8 @@ class Simulator(object):
                 if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
                     #push predicted completion time log file
                     self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
-                if (stage=='ST') and ((self.sigmasInRangeCounter>10)and(self.nSaved>1)):
-                    self.log.debug("sigmasInRangeCounter>10 so breaking sample loop.")
+                if (stage=='ST') and ((self.sigmasInRangeCounter>5)and(self.nSaved>1)):
+                    self.log.debug("sigmasInRangeCounter>5 so breaking sample loop.")
                     break
             if self.settings['logLevel']<30:
                 end_str = ' Complete!'
