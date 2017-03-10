@@ -99,7 +99,7 @@ The commands in order are:
 **Solution to problems with matplotlib**
 
 Again, depending on your installation of matplotlib, some errors can arise.  
-These include 'missing __init__.py in one of the matplotlib directories (mpl_toolkits in particular).
+These include missing __init__.py in one of the matplotlib directories (mpl_toolkits in particular).
 Another is the inability to import matplotlib.pyplot.
 
 To fix this:
@@ -131,10 +131,21 @@ For more details, please see the documentation in each module.
 Attribution
 ===========
 
-Please cite our soon to be publish paper if you find this code useful in your
-research.  The Bibtex entry for this paper is::
+Please cite our [paper](http://iopscience.iop.org/article/10.3847/1538-3881/aa5e4a/meta;jsessionid=9AABE88A2AA6F5D49DFDEDA7E23B9824.c4.iopscience.cld.iop.org) if you find this code useful in your
+research.  
 
- ?? STILL UNDER SUBMISSION AND NOT ON ARXIV ??
+The Bibtex entry for this paper is::
+
+@article{1538-3881-153-3-135,
+  author={Kyle Mede and Timothy D. Brandt},
+  title={The Exoplanet Simple Orbit Fitting Toolbox (ExoSOFT): An Open-source Tool for Efficient Fitting of Astrometric and Radial Velocity Data},
+  journal={The Astronomical Journal},
+  volume={153},
+  number={3},
+  pages={135},
+  url={http://stacks.iop.org/1538-3881/153/i=3/a=135},
+  year={2017},
+}
 
 License
 =======
