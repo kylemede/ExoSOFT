@@ -313,7 +313,7 @@ def dateStrMaker(now,numberSecondsLater,militaryTime=False):
     s =""
     if laterDate.day!=now.day:
         d = {1:'st',2:"nd",3:"rd",21:'st',22:"nd",23:'rd',31:'st'}
-        for i in range(1,30):
+        for i in range(1,31):
             if i not in d:
                 d[i]='th'
         s+=" on the "+str(laterDate.day)+d[laterDate.day]+","
