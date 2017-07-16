@@ -40,6 +40,14 @@ Installation
 
  $ pip install ExoSOFT
  
+ An example of a full installation from scratch on a Mac, using conda:
+ 
+ $ conda create --name ExoSOFTcondaEnv python Cython gcc
+ 
+ $ source activate ExoSOFTcondaEnv
+ 
+ $ pip install ExoSOFT
+ 
 **Option 2:**
 
  -clone this repository
