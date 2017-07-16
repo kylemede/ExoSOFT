@@ -22,7 +22,7 @@ automated set of post-processing and plotting routines to summarize the results
 an independent Keplerian model for a variety of systems ranging the entire 
 parameter space.  
 
-The release paper reviewing ExoSOFT and its verification is currently under review.
+The release paper reviewing ExoSOFT and its verification are available [here](http://iopscience.iop.org/article/10.3847/1538-3881/aa5e4a/meta;jsessionid=9AABE88A2AA6F5D49DFDEDA7E23B9824.c4.iopscience.cld.iop.org).
 
 Examples of its use on real data include:
 
