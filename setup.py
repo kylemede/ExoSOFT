@@ -10,7 +10,7 @@ try:
 except ImportError:
     from distutils.core import setup
     setup
-    
+
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
@@ -33,9 +33,9 @@ else:
         f.close()
         return r
 
-setup(    
-    name='ExoSOFT', 
-    version="0.2.5", 
+setup(
+    name='ExoSOFT',
+    version="0.2.6", 
     author='Kyle Mede',
     author_email = 'kylemede@gmail.com',
     url = 'https://github.com/kylemede/ExoSOFT',
