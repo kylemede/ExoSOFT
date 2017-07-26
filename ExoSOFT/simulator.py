@@ -409,6 +409,7 @@ class Simulator(object):
         strtTemp = temp
         endDatetime = ''
         sigmas = copy.deepcopy(self.starterSigmas)
+        #print("startParams passed into simulatorFunc: "+repr(startParams))# Debugging $$$$$$
         ## if valid startSigmas provided, start with them, else use defaults.
         if (type(startSigmas)==list)or(type(startSigmas)==np.ndarray):
             if len(startSigmas)>0:
@@ -422,9 +423,12 @@ class Simulator(object):
                     startParams = np.array(startParams)
                 #convert 'stored' to 'direct/raw' versions
                 paramsInRaw = copy.deepcopy(self.Model.Params.stored_to_direct(startParams))
+                #print("paramsInRaw 1: "+repr(paramsInRaw))
                 _ = tools.ln_posterior(paramsInRaw,self.Model)
                 paramsInRaw = copy.deepcopy(self.Model.Params.direct_pars)
+                #print("paramsInRaw 2: "+repr(paramsInRaw))
                 params = copy.deepcopy(self.Model.Params.stored_pars)
+                #print("params : "+repr(params))
                 self.log.debug('input pars have reduced chi sqr of '+str(params[11]/self.nu))
             else:
                 paramsInRaw = self.increment(self.rangeMinsRaw,sigmas,stage='MC')

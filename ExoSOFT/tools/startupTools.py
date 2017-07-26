@@ -228,7 +228,7 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
         ## ExoSOFT assumes the RV data was measured from the primary's spectra, and
         ## the orbit of the companion is being fit, NOT the orbit of the primary.
         ## Thus, there is a 180deg shift forced to account for this.
-        omegaFrv=180.0
+        omegaFrv = 180.0
         #now update due to fixed argPeriPlus values
         omegaFdi+=settings['omega_offset_di']
         omegaFrv+=settings['omega_offset_rv']
@@ -314,10 +314,11 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
                 rangeMaxs[i]=rangeMaxs_check[i]
                 log.debug(s)
             if rangeMins[i]<rangeMins_check[i]:
-                s = "Min parameter value was out of range.\n So, it was"
-                s+= "changed from "+str(rangeMins[i])+" to "+str(rangeMins_check[i])
-                rangeMins[i]=rangeMins_check[i]
-                log.debug(s)
+                if i!=1:
+                    s = "Min parameter value was out of range.\n So, it was"
+                    s+= "changed from "+str(rangeMins[i])+" to "+str(rangeMins_check[i])
+                    rangeMins[i]=rangeMins_check[i]
+                    log.debug(s)
         ## load in RV instrument offsets and check their values are suitable
         if len(settings['offset_mins'])!=len(settings['offset_maxs']):
             log.critical("THE NUMBER OF offset_mins NOT EQUAL TO NUMBER OF offset_maxs!!!")
@@ -355,7 +356,6 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             rangeMaxsRaw[4] = rangeMaxs[4]
             rangeMinsRaw[8] = (-1.0*rangeMaxs[4])
             rangeMinsRaw[4] = (-1.0*rangeMaxs[4])
-            #print(repr(rangeMinsRaw))
             ## Cutting out this loop below as it is running very slow on pip installed version...
             if False:
                 ## run through the possible numbers for e and omega to find min/max for RAW versions
@@ -581,7 +581,7 @@ def modePrep(settings,sigmas):
 
     """
     startParams = settings['startParams']
-    startSigmas = settings['startSigmas']    
+    startSigmas = settings['startSigmas']
     paramInts = settings['paramInts']
     num_params_direct = len(settings['rangeMaxsRaw'])
     #print("len(settings['rangeMaxsRaw']) = "+repr())
@@ -685,6 +685,12 @@ def modePrep(settings,sigmas):
             startSigmas[i] = 0
     if type(startSigmas)!=np.ndarray:
         startSigmas = np.array(startSigmas)
+
+    ## zero m2 if running DI mode
+    if (type(startParams)==np.ndarray) and (settings['data_mode']=='DI'):
+        startParams[0] = startParams[0]+startParams[1]
+        startParams[1] = 0.0
+
 
     ##make list of stages to run
     stgLstDict = {'MC':['MC'],'SA':['SA'],'SAST':['SA','ST'],'ST':['ST'],\

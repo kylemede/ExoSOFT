@@ -81,6 +81,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
             _ = list(range(0,settings['nMCMCcns']))
             for _ in range(0,settings['nMCMCcns']):
                 startParams.append(settings['startParams'])
+                #print("appending startParams to nested list: "+repr(startParams))#  Debugging  $$$$$$$
                 startSigmas.append(settings['startSigmas'])
         elif STmpo!=None:
             try:
@@ -93,6 +94,7 @@ def exoSOFT(settings_in, advanced_settings_in, priors_in):
             log.critical("No ST results available to start the MCMC chains with.")
         if len(startParams)>0:
             MCMCmpo = tools.multiProcObj(settings,Sim,'MCMC')
+            #print("startParams being apssed into MCMC: "+repr(startParams))#  Debugging  $$$$$$$
             MCMCmpo.run(params=startParams,sigmas=startSigmas)
             stgsPassed = MCMCmpo.writeBest()
             if stgsPassed:

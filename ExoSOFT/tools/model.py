@@ -16,11 +16,11 @@ class ExoSOFTmodel(object):
     """
     """
     def __init__(self,sd):
-        
+
         ####################
         ## member variables
-        ####################    
-        #resulting fit values   
+        ####################
+        #resulting fit values
         self.chi_squared_3d = 0
         self.chi_squared_di = 0
         self.chi_squared_rv = 0
@@ -31,32 +31,32 @@ class ExoSOFTmodel(object):
         ## load in the RV and Astrometry (DI) data
         (epochs_di, rapa, rapa_err, decsa, decsa_err) = load_di_data(self.sd['di_dataFile'])
         (epochs_rv, rv, rv_err, rv_inst_num) = load_rv_data(self.sd['rv_dataFile'])
-        
+
         ## prior functions??
-        self.Params = ExoSOFTparams(self.sd['omega_offset_di'], 
-             self.sd['omega_offset_rv'], self.sd['vary_tc'], self.sd['tc_equal_to'], 
-             self.sd['data_mode'], self.sd['low_ecc'], self.sd['range_maxs'], self.sd['range_mins'], 
+        self.Params = ExoSOFTparams(self.sd['omega_offset_di'],
+             self.sd['omega_offset_rv'], self.sd['vary_tc'], self.sd['tc_equal_to'],
+             self.sd['data_mode'], self.sd['low_ecc'], self.sd['range_maxs'], self.sd['range_mins'],
              self.sd['num_offsets'])
-    
+
         self.Data = ExoSOFTdata(epochs_di, epochs_rv, rapa, rapa_err, decsa, decsa_err,
                  rv, rv_err, rv_inst_num,self.sd['data_mode'], self.sd['pasa'])
-        
+
         ExoSOFTpriors = self.sd['ExoSOFTpriors']
-        
-        self.Priors = ExoSOFTpriors(ecc_prior=self.sd['ecc_prior'], 
-             p_prior=self.sd['p_prior'], inc_prior=self.sd['inc_prior'], 
-             m1_prior=self.sd['m1_prior'], m2_prior=self.sd['m2_prior'], 
-             para_prior=self.sd['para_prior'],para_est=self.sd['para_est'],         
-             para_err=self.sd['para_err'], m1_est=self.sd['m1_est'], 
-             m1_err=self.sd['m1_err'], m2_est=self.sd['m2_est'], 
+
+        self.Priors = ExoSOFTpriors(ecc_prior=self.sd['ecc_prior'],
+             p_prior=self.sd['p_prior'], inc_prior=self.sd['inc_prior'],
+             m1_prior=self.sd['m1_prior'], m2_prior=self.sd['m2_prior'],
+             para_prior=self.sd['para_prior'],para_est=self.sd['para_est'],
+             para_err=self.sd['para_err'], m1_est=self.sd['m1_est'],
+             m1_err=self.sd['m1_err'], m2_est=self.sd['m2_est'],
              m2_err=self.sd['m2_err'],
              mins_ary=self.sd['range_mins'],maxs_ary=self.sd['range_maxs'])
-    
+
 class ExoSOFTparams(object):
     """
-    
-    
-    
+
+
+
     +---+--------------------+---------------+-------------------+-------+
     |   |  Directly Varried  | Model Inputs  | Stored Parameters |       |
     +---+--------------------+---------------+-------------------+-------+
@@ -69,9 +69,9 @@ class ExoSOFTparams(object):
     .
     .
     .$$ FILL THIS OUT!!!!
-    
+
     """
-    def __init__(self, omega_offset_di, omega_offset_rv, vary_tc, tc_equal_to, 
+    def __init__(self, omega_offset_di, omega_offset_rv, vary_tc, tc_equal_to,
                  di_only, low_ecc, range_maxs, range_mins, num_offsets):
         # params that effect calculating the full list of params from the directly varied one
         self.omega_offset_di = omega_offset_di
@@ -81,7 +81,7 @@ class ExoSOFTparams(object):
         self.di_only = di_only
         self.low_ecc = low_ecc
         ## max/min ranges
-        self.maxs = range_maxs 
+        self.maxs = range_maxs
         self.mins = range_mins
         ## prep versions of all param arrays
         self.num_offsets = num_offsets
@@ -94,16 +94,16 @@ class ExoSOFTparams(object):
         self.offsets = np.zeros((num_offsets),dtype=np.dtype('d'))
         #check_pars: [m1, m2, parallax, long_an, e, to/tc, p, inc, arg_peri]
         self.check_pars = np.zeros((9+num_offsets),dtype=np.dtype('d'))
-        
+
     def make_model_in(self):
         """
         Convert directly varied parameters into a comprehensive list
         of those used ans inputs to during model calculations.
-        
+
         model_in_params: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,arg_peri_di,arg_peri_rv,a_tot_au,K]
-        """        
-        model_input_pars(self.direct_pars, self.low_ecc, self.tc_equal_to, 
-                   self.vary_tc, self.di_only, self.omega_offset_di, 
+        """
+        model_input_pars(self.direct_pars, self.low_ecc, self.tc_equal_to,
+                   self.vary_tc, self.di_only, self.omega_offset_di,
                    self.omega_offset_rv, self.model_in_pars)
         self.offsets = self.direct_pars[9:]
         #print('self.offsets = '+repr(self.offsets))
@@ -120,9 +120,9 @@ class ExoSOFTparams(object):
                 self.model_in_pars[m_par_ints[i]]-=360.0
                 #print('now '+str(model_input_pars[m_par_ints[i]]))
         #print(repr(self.model_in_pars))
-    
+
     def stored_to_direct(self,pars):
-        """ take a set of parameters matching 'stored_pars' and make the 
+        """ take a set of parameters matching 'stored_pars' and make the
         directly varied versions matching 'direct_pars'.
         Note:
         direct_pars: [m1,m2,parallax,long_an,e OR sqrt(e)*sin(arg_peri),to/tc,p,inc,arg_peri OR sqrt(e)*cos(arg_peri),v1,v2...]
@@ -143,11 +143,11 @@ class ExoSOFTparams(object):
         direct_ary[6:8] = pars[7:9]
         direct_ary[9:] = pars[13:]
         return direct_ary
-    
+
     def direct_to_stored(self,pars):
-        """ Take a single set of parameters in 'direct' format and return 
+        """ Take a single set of parameters in 'direct' format and return
         the matching set in 'stored' format.
-        
+
         direct_pars: [m1,m2,parallax,long_an,e OR sqrt(e)*sin(arg_peri),to/tc,p,inc,arg_peri OR sqrt(e)*cos(arg_peri),v1,v2...]
         stored_pars: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,a_tot_au,chi_sqr,K,v1,v2...]
         """
@@ -155,11 +155,11 @@ class ExoSOFTparams(object):
         self.make_model_in()
         self.make_stored(1.0e6)
         return copy.deepcopy(self.stored_pars)
-        
+
     def make_stored(self,chi_squared):
-        """ 
-        Push values in model_in_params, offsets and the resulting 
-        chi_squared_3d into an array to be stored on disk during ExoSOFT.  
+        """
+        Push values in model_in_params, offsets and the resulting
+        chi_squared_3d into an array to be stored on disk during ExoSOFT.
         Not sure how to make this work with emcee or other tools...
         """
         # model_in_params: [m1,m2,parallax,long_an,e,to,tc,p,inc,arg_peri,arg_peri_di,arg_peri_rv,a_tot_au,K]
@@ -169,13 +169,13 @@ class ExoSOFTparams(object):
         self.stored_pars[11] = chi_squared
         self.stored_pars[12] = self.model_in_pars[13] #K
         self.stored_pars[13:] = self.offsets[:]
-         
+
     def check_range(self):
-        """Determine if all parameters in the full list are within their 
+        """Determine if all parameters in the full list are within their
         allowed ranges.
         Range arrays corrispond to parameters in:
         [m1, m2, parallax, long_an, e, to/tc, p, inc, arg_peri, v1,v2,...]
-        """        
+        """
         debugging = False
         self.check_pars[0:5] = self.model_in_pars[0:5]
         if self.vary_tc:
@@ -184,7 +184,7 @@ class ExoSOFTparams(object):
             self.check_pars[5] = self.model_in_pars[5]
         self.check_pars[6:9] = self.model_in_pars[7:10]
         self.check_pars[9:] = self.offsets[:]
-        
+
         if len(self.check_pars)!=len(self.maxs)!=len(self.mins):
             print("LENGTH OF CHECK_PARAMS IS NOT EQUAL TO LENGTH OF MINS OR MAXS!!!")
         in_range = True
@@ -198,23 +198,23 @@ class ExoSOFTparams(object):
 
 class ExoSOFTdata(object):
     """
-    An object to contain all the necessary data arrays and parameters to 
-    calculate matching predicted data with the model.  All member variables 
+    An object to contain all the necessary data arrays and parameters to
+    calculate matching predicted data with the model.  All member variables
     will remain constant throughout.
-    
+
     Notes:
-    -Except for rv_inst_num array, all other arrays must be ndarrays of double 
+    -Except for rv_inst_num array, all other arrays must be ndarrays of double
      precision floating point numbers (dtype=np.dtype('d')).
     -Arrays, epochs_di, rapa, rapa_err, decsa, and decsa_err must all have same length.
     -Arrays, epochs_rv, rv, rv_err and rv_inst_num must all have same length.
-    
+
     Inputs:
     rv_inst_num = ndarray of positive signed or unsigned integers, of same length
                   as epochs_rv, rv, and rv_err.
     """
     def __init__(self, epochs_di, epochs_rv, rapa, rapa_err, decsa, decsa_err,
                  rv, rv_err, rv_inst_num, data_mode, pasa=False):
-        
+
         self.epochs_di = epochs_di
         self.epochs_rv = epochs_rv
         # x/RA/PA
@@ -238,34 +238,34 @@ def ln_posterior(pars, Model):
     """
     Calculates the likelihood for a given set of inputs.
     Then calculate the natural logarithm of the posterior probability.
-    
+
     -Model is of type ExoSOFTmodel.  Currently just holds resulting fit values.
-    -Data is of type ExoSOFTdata, containing all input data and params to 
+    -Data is of type ExoSOFTdata, containing all input data and params to
     produce predicted values of matching units, and arrays for predicted values.
-    -Params is of type ExoSOFTparams, an class containing functions for 
-    calculating versions of the 'pars' used as model inputs, and a version 
+    -Params is of type ExoSOFTparams, an class containing functions for
+    calculating versions of the 'pars' used as model inputs, and a version
     that would be for storing to disk when ran in ExoSOFT.
     -Priors is of type ExoSOFTpriors, containing funtions for each parameter's
-    prior, a function calculate combined prior given list of params, and any 
+    prior, a function calculate combined prior given list of params, and any
     variables necessary for those calculations.
-    
-    """    
+
+    """
     speed_test = False#$$$$$$$$$$$$$$$$$$$$
     ## convert params from raw values
     Model.Params.direct_pars = pars
     Model.Params.make_model_in()
-        
+
     ## Range check on proposed params, set ln_post=zero if outside ranges.
     ln_post = -np.inf
     if speed_test: #$$$$$$$$$$$$$$$$$$$$
         in_range=True#$$$$$$$$$$$$$$$$$$$$
     else:#$$$$$$$$$$$$$$$$$$$$
         in_range = Model.Params.check_range()
-    if in_range:         
+    if in_range:
         ## Call Cython func to calculate orbit. ie. -> predicted x,y,rv values.
-        orbit(Model.Params.model_in_pars, Model.Params.offsets, Model.Data.pasa, 
-              Model.Data.data_mode, Model.Data.epochs_di, Model.Data.epochs_rv, 
-              Model.Data.rv_inst_num, Model.Data.rapa_model, 
+        orbit(Model.Params.model_in_pars, Model.Params.offsets, Model.Data.pasa,
+              Model.Data.data_mode, Model.Data.epochs_di, Model.Data.epochs_rv,
+              Model.Data.rv_inst_num, Model.Data.rapa_model,
               Model.Data.decsa_model, Model.Data.rv_model)
         if speed_test==False:#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
             chi_sqr_rv, chi_sqr_rapa, chi_sqr_decsa = 0, 0, 0
@@ -287,7 +287,7 @@ def ln_posterior(pars, Model):
             Model.chi_squared_3d = chi_sqr_3d
             Model.chi_squared_di = chi_sqr_rapa + chi_sqr_decsa
             Model.chi_squared_rv = chi_sqr_rv
-            
+
             ## Calculate priors
             prior = Model.Priors.priors(Model.Params.stored_pars)
             Model.prior = prior
@@ -296,7 +296,7 @@ def ln_posterior(pars, Model):
             ## calculate lnpost
             ln_post = np.log(prior) + ln_lik
             #print('ln_post ',ln_post)
-        
+
     return ln_post
 
 #EOF
