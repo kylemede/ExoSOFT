@@ -281,7 +281,7 @@ def ln_posterior(pars, Model):
             #print('ln_lik',ln_lik)
             ## Make version of params with chi_sqr_3d for storing during ExoSOFT
             Model.Params.make_stored(chi_sqr_3d)
-            #print('stored_pars',Model.stored_pars)
+            #print('stored_pars',Model.Params.stored_pars)
             ## store the chi sqr values in model object for printing in ExoSOFT.
             #print('chi_sqr_3d',chi_sqr_3d)
             Model.chi_squared_3d = chi_sqr_3d

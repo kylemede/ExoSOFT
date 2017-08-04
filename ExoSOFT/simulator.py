@@ -602,19 +602,21 @@ class Simulator(object):
                     self.nSavedPeriodic = 0
                     self.log.debug('about to collect the garbage')
                     gc.collect()
-                if sample%(self.settings[self.stgNsampDict[stage]]//100)==0:
-                    #update predicted completion time every 1%
-                    timesAry.append(timeit.default_timer()-lastTic)
-                    lastTic = timeit.default_timer()
-                    timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.settings[self.stgNsampDict[stage]]))
-                    #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
-                    endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
-                    if self.settings['logLevel']<30:
-                        perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
-                        bar.render(perc, suffix=stage+str(chainNum)+' '+endDatetime)#timeStr)
-                if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
-                    #push predicted completion time log file
-                    self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
+                if self.settings[self.stgNsampDict[stage]]>100:
+                    if sample%(self.settings[self.stgNsampDict[stage]]//100)==0:
+                        #update predicted completion time every 1%
+                        timesAry.append(timeit.default_timer()-lastTic)
+                        lastTic = timeit.default_timer()
+                        timeRemSec = np.mean(timesAry)*(100.0-(float(sample)*100.0)/float(self.settings[self.stgNsampDict[stage]]))
+                        #timeStr = ' about '+tools.timeStrMaker(timeRemSec)+' remaining.'
+                        endDatetime = " Will be done"+tools.dateStrMaker(datetime.datetime.now(),timeRemSec)
+                        if self.settings['logLevel']<30:
+                            perc = int(sample*100//self.settings[self.stgNsampDict[stage]])
+                            bar.render(perc, suffix=stage+str(chainNum)+' '+endDatetime)#timeStr)
+                if self.settings[self.stgNsampDict[stage]]>10:
+                    if sample%(self.settings[self.stgNsampDict[stage]]//10)==0:
+                        #push predicted completion time log file
+                        self.log.fileonly(stage+str(chainNum)+' '+endDatetime)
                 if (stage=='ST') and ((self.sigmasInRangeCounter>5)and(self.nSaved>1)):
                     self.log.debug("sigmasInRangeCounter>5 so breaking sample loop.")
                     break

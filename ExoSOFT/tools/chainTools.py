@@ -10,19 +10,19 @@ import os
 import numpy as np
 from six.moves import range
 
-log = KMlogger.getLogger('main.chainTools',lvl=100,addFH=False) 
+log = KMlogger.getLogger('main.chainTools',lvl=100,addFH=False)
 
 class singleProc(Process):
     """
-    This is the Manager object that controls the a single processes for a 
-    ExoSOFT simulation run.  It is called by the multiProcessStarter once for 
-    each chain/process requested by the user through the simulation settings 
+    This is the Manager object that controls the a single processes for a
+    ExoSOFT simulation run.  It is called by the multiProcessStarter once for
+    each chain/process requested by the user through the simulation settings
     file.
-    
+
     :param str settings: settings Dictionary
-    :param str fNameBase: File name, including the full path, for the output 
+    :param str fNameBase: File name, including the full path, for the output
         data files.
-    :param list stageList: List of stages to run ex.['MC','SA','ST','MCMC'] 
+    :param list stageList: List of stages to run ex.['MC','SA','ST','MCMC']
         lives.
     :param int chainNum: number of this chain
     """
@@ -30,21 +30,21 @@ class singleProc(Process):
         Process.__init__(self)
         self.chainNum = chainNum
         self.log = log
-        self.settings = settings 
+        self.settings = settings
         self.stage = stage
         self.params = params
         self.sigmas = sigmas
         self.strtTemp = strtTemp
         self.Sim = SimObj
         self.pklFilename = pklFilename
-        
-    def run(self):        
+
+    def run(self):
         ## run the requested stage and [ickle its return values
         self.log.debug('Starting to run process #'+str(self.chainNum))
         (outFname,params,sigmas,bestRedChiSqr,avgAcceptRate,acceptStr) = self.Sim.simulatorFunc(self.stage,self.chainNum,self.params,self.sigmas,self.strtTemp)
         self.log.debug('chain #'+str(self.chainNum)+" of "+self.stage+' stage  OUTFILE :\n'+outFname)
         pickle.dump([outFname,params,sigmas,bestRedChiSqr,avgAcceptRate,acceptStr], open(self.pklFilename,'wb'))
-        
+
     def loadResult(self):
         return pickle.load(open(self.pklFilename,'rb'))
 
@@ -56,7 +56,7 @@ class multiProcObjResults(object):
         self.stage = stage
         self.retStr = retStr
         self.latestRetStr = latestRetStr
-        
+
 class multiProcObj(object):
     def __init__(self,settings,Sim,stage):
         self.outFnames = []
@@ -66,6 +66,7 @@ class multiProcObj(object):
         self.avgAcceptRates = []
         self.acceptStrs = []
         self.settings = settings
+        self.stgNsampDict = {'SA':'nSAsamp','ST':'nSTsamp','MC':'nSamples','MCMC':'nSamples','emcee':'nSamples'}
         self.Sim = Sim
         self.stage = stage
         if stage=="emcee":
@@ -76,7 +77,7 @@ class multiProcObj(object):
             self.numProcs = settings['nChains']
         self.retStr = ''
         self.latestRetStr = ''
-        
+
     def _loadUpArys(self,master):
         for procNumber in range(len(master)):
             ret = master[procNumber].loadResult()
@@ -91,17 +92,17 @@ class multiProcObj(object):
                 log.error("Resulting file from MPO.run does not exist:\n"+\
                           ret[0]+'\nit had a reduced chi of '+str(ret[3])+'\n')
         self.sortResults()
-        
+
     def resultsOnly(self):
         accRts = self.avgAcceptRates
         stg = self.stage
         chis = self.bestRedChiSqrs
         accStrs = self.acceptStrs
         retStr = self.retStr
-        latRetStr = self.latestRetStr 
+        latRetStr = self.latestRetStr
         resObj = multiProcObjResults(chis,accRts,accStrs,stg,retStr,latRetStr)
         return resObj
-        
+
     def sortResults(self):
         """
         Sort all result arrays by ascending reduced chi squared values.
@@ -138,12 +139,12 @@ class multiProcObj(object):
             self.bestRedChiSqrs = bestRedChiSqrs
             self.avgAcceptRates = avgAcceptRates
             self.acceptStrs = acceptStrs
-    
+
     def getTopProcs(self,maxRedChiSqr,fillToNumProc=False,nProcs=None,allBest=False):
         if nProcs==None:
             nProcs = self.numProcs
-        (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)=self.findGoodBadOnes(maxRedChiSqr) 
-        if chis!=None:        
+        (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)=self.findGoodBadOnes(maxRedChiSqr)
+        if chis!=None:
             if allBest:
                 params = [params[0]]
                 sigmas = [sigmas[0]]
@@ -166,8 +167,8 @@ class multiProcObj(object):
                 sigmas = sigmas[:nProcs]
                 chis = chis[:nProcs]
                 outFnames = outFnames[:nProcs]
-        return (params,sigmas,chis,outFnames)      
-    
+        return (params,sigmas,chis,outFnames)
+
     def findGoodBadOnes(self,maxRedChiSqr,findGoodOnes=True):
         self.sortResults()
         outFnames = []
@@ -181,7 +182,7 @@ class multiProcObj(object):
             goodBads = np.where(chis2<maxRedChiSqr)[0].tolist()
         else:
             goodBads = np.where(chis2>maxRedChiSqr)[0].tolist()
-        if len(goodBads)>0:            
+        if len(goodBads)>0:
             for gb in goodBads:
                 outFnames.append(self.outFnames[gb])
                 params.append(self.params[gb])
@@ -192,13 +193,13 @@ class multiProcObj(object):
         else:
             params=sigmas=chis=outFnames=avgAcceptRates=acceptStrs=None
         return (params,sigmas,chis,outFnames,avgAcceptRates,acceptStrs)
-    
+
     def killBadOnes(self,maxRedChiSqr,limitToNumProcs=True,nProcs=None):
         if nProcs==None:
             nProcs = self.numProcs
-        (paramsA,sigmasA,chisA,outFnamesA,avgAcceptRatesA,acceptStrsA)=self.findGoodBadOnes(maxRedChiSqr) 
+        (paramsA,sigmasA,chisA,outFnamesA,avgAcceptRatesA,acceptStrsA)=self.findGoodBadOnes(maxRedChiSqr)
         (paramsB,sigmasB,chisB,outFnamesB,avgAcceptRatesB,acceptStrsB)=self.findGoodBadOnes(maxRedChiSqr,findGoodOnes=False)
-        rwTools.rmFiles(outFnamesB) 
+        rwTools.rmFiles(outFnamesB)
         if paramsA!=None:
             if limitToNumProcs and (len(paramsA)>nProcs):
                 self.outFnames = outFnamesA[:nProcs]
@@ -221,7 +222,7 @@ class multiProcObj(object):
             self.bestRedChiSqrs = []
             self.avgAcceptRates = []
             self.acceptStrs = []
-            
+
     def writeBest(self):
         try:
             (bstChi,bstInt) = self._best()
@@ -230,7 +231,7 @@ class multiProcObj(object):
         except:
             log.critical("No parameters were accepted!!!")
             return False
-        
+
     def _best(self):
         if len(self.acceptStrs)>0:
             bstChi = 1e9
@@ -245,10 +246,10 @@ class multiProcObj(object):
     def getBest(self):
         (bstChi,bstInt) = self._best()
         return (self.outFnames[bstInt],self.params[bstInt],self.sigmas[bstInt],bstChi,self.avgAcceptRates[bstInt],self.acceptStrs[bstInt])
-            
+
     def run(self,params=[],sigmas=[],strtTemp=1.0):
         """
-        The function to run multiple processes of the simulator and absorb the 
+        The function to run multiple processes of the simulator and absorb the
         results into the object.
         """
         if self.stage != 'MC':
@@ -262,13 +263,13 @@ class multiProcObj(object):
         extra = ''
         if self.stage=='SA':
             extra+=" with a starting temperature of "+str(strtTemp)
-        log.info("Going to start "+str(self.numProcs)+" chains for the "+self.stage+" stage"+extra)
+        log.info("Going to start "+str(self.numProcs)+" chains of length "+str(self.settings[self.stgNsampDict[self.stage]])+" for the "+self.stage+" stage"+extra)
         for procNumber in range(self.numProcs):
             pklFilename = os.path.join(self.settings['finalFolder'],'pklTemp'+"-"+self.stage+'-'+str(procNumber)+".p")
             master.append(singleProc(self.settings,self.Sim,self.stage,procNumber,pklFilename=pklFilename,params=params[procNumber],sigmas=sigmas[procNumber],strtTemp=strtTemp))
             master[procNumber].start()
         for procNumber in range(self.numProcs):
-            master[procNumber].join()  
+            master[procNumber].join()
         toc=timeit.default_timer()
         if self.stage=='emcee':
             s = "\nALL "+str(self.settings['n_wlkrs'])+" walkers of the "+self.stage+" stage took a total of "+genTools.timeStrMaker(int(toc-tic))
@@ -284,7 +285,7 @@ class multiProcObj(object):
         ## great for devel and debugging.
         ############################################################
         #import code; code.interact(local=locals())
-        ############################################################   
+        ############################################################
 
 def iterativeSA(settings,Sim,internalTemp=None):
     """
@@ -320,23 +321,23 @@ def iterativeSA(settings,Sim,internalTemp=None):
             s = "iterativeSA took more than "+str(max_nSAiters)+", so process was terminated!!!"
             log.raisemsg(s)
             raise  RuntimeError('\n\n'+s)
-            
+
         log.info("\nIteration #"+str(iter_int+1))
         SAmultiProc.retStr +="Iteration #"+str(iter_int+1)+"\n"
-        ## run multiProc for this temperature, kill bad chains 
+        ## run multiProc for this temperature, kill bad chains
         ## and get best as start positions of next iteration.
         SAmultiProc.run(params=strtPars,sigmas=strtsigmas,strtTemp=temp)
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
         SAmultiProc.killBadOnes(settings['chiMaxST'])
-        (pars,_,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST']) 
-        #print 'so far top chis are: '+repr(chisForCalc) 
-        
+        (pars,_,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
+        #print 'so far top chis are: '+repr(chisForCalc)
+
         if pars==None:
             strtPars = list(range(numProcs))
         else:
-            ## shift through the names of the top procs and rename 
+            ## shift through the names of the top procs and rename
             ## their files to new temp names.
-            # NOTE: This code is a bit of overkill and can trim down after it 
+            # NOTE: This code is a bit of overkill and can trim down after it
             #       proves working for a month or so (dated:April 20 2016).
             for i in range(len(outFnms)):
                 worked=False
@@ -357,7 +358,7 @@ def iterativeSA(settings,Sim,internalTemp=None):
                             SAmultiProc.outFnames[j] = outNm
             (pars,_,_,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'],fillToNumProc=True)
             strtPars = pars
-            ## Calc 'uniform' STD and make final msgs for this iteration          
+            ## Calc 'uniform' STD and make final msgs for this iteration
             log.debug(str(len(strtPars))+' sets of starting parameters being passed to next iteration.')
             if len(chisForCalc)==numProcs:
                 uSTD = genTools.unitlessSTD(chisForCalc)
@@ -366,7 +367,7 @@ def iterativeSA(settings,Sim,internalTemp=None):
     #############
     ## wrap up ##
     #############
-    (pars,_,_,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])   
+    (pars,_,_,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
     #rename final data files to standard SA convention
     if len(outFnms)>1:
         for i in range(len(outFnms)):
@@ -375,11 +376,11 @@ def iterativeSA(settings,Sim,internalTemp=None):
             rwTools.renameFits(curNm,outNm)
             for j in range(len(SAmultiProc.outFnames)):
                 if SAmultiProc.outFnames[j]==curNm:
-                    SAmultiProc.outFnames[j] = outNm    
-        
+                    SAmultiProc.outFnames[j] = outNm
+
     SAmultiProc.writeBest()
     toc=timeit.default_timer()
     s = "ALL "+str(iter_int+1)+" iterations of SA took a total of "+genTools.timeStrMaker(int(toc-tic))
     SAmultiProc.retStr +=s+"\n"
     log.warning(s)
-    return SAmultiProc            
+    return SAmultiProc
