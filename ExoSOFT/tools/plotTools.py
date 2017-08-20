@@ -899,6 +899,8 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
         for settInt in range(0,len(settings)):
             #print('plotting for settings file # '+str(settInt))
             settingsDI = settings[settInt]
+            # Force pasa to false to make plots in RA/DEC
+            settingsDI['pasa'] = False
             orbParamsDI = orbParams[settInt]
 
             ## instantiate Model class for this set of settings
@@ -919,7 +921,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
 
                 # ExoSOFTmodel will calculate predicted/ExoSOFTmodel data for each epoch in Model.Data.epochs_di
                 ## calculate the fit locations for the DI epochs to calculate 0-C
-                _ = ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model, no_range_check=True)
                 predicted_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 predicted_rapa_model = copy.deepcopy(Model.Data.rapa_model)
 
@@ -936,7 +938,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                     fakeEpochs[i] = paramsDI[5]+(days_per_year*paramsDI[7]*(i/float(nPts)))
                 fakeEpochs[nPts-1]  = fakeEpochs[0]+days_per_year*paramsDI[7]
                 Model.Data.epochs_di = fakeEpochs
-                _ = ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model, no_range_check=True)
                 fit_epochs = copy.deepcopy(Model.Data.epochs_di)
                 fit_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 fit_rapa_model = copy.deepcopy(Model.Data.rapa_model)
@@ -954,7 +956,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                     fakeQuarterEpochs[i] = paramsDI[5]+(days_per_year*paramsDI[7]*(i/4.0))
                 # Calculate orbit for quarter epochs
                 Model.Data.epochs_di = fakeQuarterEpochs
-                _ = ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model, no_range_check=True)
                 quarter_epochs = copy.deepcopy(Model.Data.epochs_di)
                 quarter_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 quarter_rapa_model = copy.deepcopy(Model.Data.rapa_model)
@@ -976,7 +978,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                 Model.Data.decsa_err = np.ones((2),dtype=np.dtype('d'))
                 Model.Data.rapa_model = np.ones((2),dtype=np.dtype('d'))
                 Model.Data.decsa_model = np.ones((2),dtype=np.dtype('d'))
-                _ = ln_posterior(paramsDIraw, Model)
+                _ = ln_posterior(paramsDIraw, Model, no_range_check=True)
                 lon_decsa_model = copy.deepcopy(Model.Data.decsa_model)
                 lon_rapa_model = copy.deepcopy(Model.Data.rapa_model)
                 lonXYs = np.array([[lon_rapa_model[0],lon_decsa_model[0]],[lon_rapa_model[1],lon_decsa_model[1]]])
@@ -1028,7 +1030,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                     lgndStr = legendStrs[settInt]
                 except:
                     log.debug('legendStrs param passed in was not cool')
-                diMain.plot(fit_rapa_model[:]*asConversion,fit_decsa_model[:]*asConversion,linewidth=diLnThk,color=clr,label=lgndStr)
+                diMain.plot(fit_rapa_model[:]*asConversion,fit_decsa_model[:]*asConversion,linewidth=diLnThk,color=clr,label=lgndStr) 
                 if len(orbParamsDI)==1:
                     ## Draw line-of-nodes
                     diMain.plot(lonXYs[:,0]*asConversion,lonXYs[:,1]*asConversion,'-.',linewidth=diLnThk,color='Green')
@@ -1039,7 +1041,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                 atot = asConversion*np.sqrt((semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2 + (semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2)
                 #print('5*paramsDI[10] = '+str(5*paramsDI[10]))
                 #print('atot/15.0 = '+str(atot/15.0))
-                starWidth = 2  #atot/15.0
+                starWidth = atot/15.0
                 #old width was 5*paramsDI[10]
                 starPolygon = star(starWidth,0,0,color='yellow',N=6,thin=0.5)
                 if parSetInt<1:
