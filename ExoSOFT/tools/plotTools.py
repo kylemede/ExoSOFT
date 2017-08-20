@@ -1039,7 +1039,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
                 atot = asConversion*np.sqrt((semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2 + (semiMajorLocs[:,0][0]-semiMajorLocs[:,1][0])**2)
                 #print('5*paramsDI[10] = '+str(5*paramsDI[10]))
                 #print('atot/15.0 = '+str(atot/15.0))
-                starWidth = atot/15.0
+                starWidth = 2  #atot/15.0
                 #old width was 5*paramsDI[10]
                 starPolygon = star(starWidth,0,0,color='yellow',N=6,thin=0.5)
                 if parSetInt<1:
@@ -1219,6 +1219,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
     for par in orbParams[0][0]:
         params.append(par)
     params=np.array(params,dtype=np.dtype('d'),order='C')
+    
     if settingsRV['data_mode']!='DI':
         realDataRV = copy.deepcopy(realData)
         realDataRV = realDataRV[np.where(realDataRV[:,6]<1e6)[0],:]
@@ -1249,7 +1250,9 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
             fakeEpochs[i] = last_epoch
         fakeEpochs[-1] = fakeEpochs[-2]#paramsRV[6]+(days_per_year*paramsRV[7]/2.0)
         Model.Data.epochs_rv = fakeEpochs
-        _ = ln_posterior(paramsRVraw, Model)
+        paramsRVrawZeroed = copy.deepcopy(paramsRVraw)
+        paramsRVrawZeroed[9:]=0
+        _ = ln_posterior(paramsRVrawZeroed, Model, no_range_check=True)
         fit_epochs = copy.deepcopy(Model.Data.epochs_rv)
         fit_rv_model = copy.deepcopy(Model.Data.rv_model)
 
@@ -1315,7 +1318,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
             ## add real data to plots
             residualsPlot = addRVdataToPlot(residualsPlot,phasesReal,residualData[:,5]*kmConversion,residualData[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.1,markersize=15,plotErrorBars=True)
             fitPlot = addRVdataToPlot(fitPlot,phasesReal,zeroedRealDataRV[:,5]*kmConversion,zeroedRealDataRV[:,6]*kmConversion,datasetInts=residualData[:,7],alf=0.2,markersize=9,plotErrorBars=True)
-
+            
             ## Find and set limits
             xLims = (np.min([np.min(phasesFit),np.min(phasesReal)]),np.max([np.max(phasesFit),np.max(phasesReal)]))
             xLims = (xLims[0]-(xLims[1]-xLims[0])*.05,xLims[1]+(xLims[1]-xLims[0])*.05)

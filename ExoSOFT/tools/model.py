@@ -234,7 +234,7 @@ class ExoSOFTdata(object):
         self.data_mode = data_mode
         self.pasa = pasa
 
-def ln_posterior(pars, Model):
+def ln_posterior(pars, Model, no_range_check=False):
     """
     Calculates the likelihood for a given set of inputs.
     Then calculate the natural logarithm of the posterior probability.
@@ -250,16 +250,18 @@ def ln_posterior(pars, Model):
     variables necessary for those calculations.
 
     """
-    speed_test = False#$$$$$$$$$$$$$$$$$$$$
+    speed_test = False
+    if no_range_check:
+        speed_test = True
     ## convert params from raw values
     Model.Params.direct_pars = pars
     Model.Params.make_model_in()
 
     ## Range check on proposed params, set ln_post=zero if outside ranges.
     ln_post = -np.inf
-    if speed_test: #$$$$$$$$$$$$$$$$$$$$
-        in_range=True#$$$$$$$$$$$$$$$$$$$$
-    else:#$$$$$$$$$$$$$$$$$$$$
+    if speed_test: 
+        in_range=True
+    else:
         in_range = Model.Params.check_range()
     if in_range:
         ## Call Cython func to calculate orbit. ie. -> predicted x,y,rv values.

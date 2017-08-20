@@ -99,13 +99,13 @@ The commands in order are:
 
  $ pip uninstall -y scipy
 
- <!-$pip uninstall -y scikit-learn-->
+ <!--$pip uninstall -y scikit-learn-->
 
  $ pip install numpy --ignore-installed --no-cache-dir --no-binary :all:
 
  $ pip install scipy --ignore-installed --no-cache-dir --no-binary :all:
 
- <!-$pip install scikit-learn --ignore-installed --no-cache-dir --no-binary :all:-->
+ <!--$pip install scikit-learn --ignore-installed --no-cache-dir --no-binary :all:-->
 
 **Solution to problems with matplotlib**
 
