@@ -330,7 +330,7 @@ def iterativeSA(settings,Sim,internalTemp=None):
         SAmultiProc.retStr +=SAmultiProc.latestRetStr
         SAmultiProc.killBadOnes(settings['chiMaxST'])
         (pars,_,chisForCalc,outFnms) = SAmultiProc.getTopProcs(settings['chiMaxST'])
-        #print 'so far top chis are: '+repr(chisForCalc)
+        log.info('Top Chi Squareds: '+repr(chisForCalc))
 
         if pars==None:
             strtPars = list(range(numProcs))

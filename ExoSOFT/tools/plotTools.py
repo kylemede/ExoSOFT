@@ -898,7 +898,7 @@ def orbitPlotter(orbParams,settings,plotFnameBase="",fl_format='png',DIlims=[],R
         diMain = diFig.add_subplot(111)
         for settInt in range(0,len(settings)):
             #print('plotting for settings file # '+str(settInt))
-            settingsDI = settings[settInt]
+            settingsDI = copy.deepcopy(settings[settInt])
             # Force pasa to false to make plots in RA/DEC
             settingsDI['pasa'] = False
             orbParamsDI = orbParams[settInt]
