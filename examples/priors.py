@@ -230,13 +230,18 @@ class ExoSOFTpriors(object):
             ret = self.uniform_fn(inc,7)
         else:
             if inc not in [0.0,90.0,180.0]:
-                mn = np.radians(self.mins_ary[7])
-                mx = np.radians(self.maxs_ary[7])
+                mn = self.mins_ary[7]
+                mx = self.maxs_ary[7]
+                # Account for case where min = -(max), as it causes error in denominator
+                if mn == -1*mx:
+                    mn = mn-0.1
+                mn_rad = np.radians(mn)
+                mx_rad = np.radians(mx)
                 inc_rad = np.radians(inc)
                 if (self.inc_prior == True) or (self.inc_prior == 'sin'):
-                    ret = np.abs(np.sin(inc_rad)) / np.abs(np.cos(mn)-np.cos(mx))
+                    ret = np.abs(np.sin(inc_rad)) / np.abs(np.cos(mn_rad)-np.cos(mx_rad))
                 elif self.inc_prior == 'cos':
-                    ret =  np.abs(np.cos(inc_rad)) / np.abs(np.cos(mn)-np.cos(mx))
+                    ret =  np.abs(np.cos(inc_rad)) / np.abs(np.cos(mn_rad)-np.cos(mx_rad))
         #if ret==0: ret=-np.inf
         return ret
 
