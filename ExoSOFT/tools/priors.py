@@ -207,7 +207,7 @@ class ExoSOFTpriors(object):
                     A = self.ecc_Rexp_a*self.ecc_exp.pdf(ecc, scale=1.0/self.ecc_Rexp_lamda)
                     B = (1.0-self.ecc_Rexp_a)*self.ecc_R.pdf(ecc,scale=self.ecc_Rexp_sig)/self.ecc_Rexp_sig
                     ret = A+B
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def p_prior_fn(self, p):
@@ -221,7 +221,7 @@ class ExoSOFTpriors(object):
                     ret = 1.0 / ( p * np.log( self.maxs_ary[6] / self.mins_ary[6] ) )
                 elif self.p_prior == 'power-law':
                     ret = p **(self.p_gamma)
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def inc_prior_fn(self, inc):
@@ -234,10 +234,10 @@ class ExoSOFTpriors(object):
                 mx = np.radians(self.maxs_ary[7])
                 inc_rad = np.radians(inc)
                 if (self.inc_prior == True) or (self.inc_prior == 'sin'):
-                    ret = np.sin(inc_rad) / np.abs(np.cos(mn)-np.cos(mx))
+                    ret = np.abs(np.sin(inc_rad)) / np.abs(np.cos(mn)-np.cos(mx))
                 elif self.inc_prior == 'cos':
-                    ret =  np.cos(inc_rad) / np.abs(np.cos(mn)-np.cos(mx))
-        if ret==0: ret=-np.inf
+                    ret =  np.abs(np.cos(inc_rad)) / np.abs(np.cos(mn)-np.cos(mx))
+        #if ret==0: ret=-np.inf
         return ret
 
     def m1_prior_fn(self, mass):
@@ -254,7 +254,7 @@ class ExoSOFTpriors(object):
                     ret*=self.pdmf_prior(mass)
                 elif self.m1_prior == "IMF":
                     ret*=self.imf_prior(mass)
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def m2_prior_fn(self, m2, m1):
@@ -273,7 +273,7 @@ class ExoSOFTpriors(object):
                     ret*=self.pdmf_prior(m2)
                 elif self.m2_prior == "IMF":
                     ret*=self.imf_prior(m2)
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def para_prior_fn(self, para):
@@ -290,7 +290,7 @@ class ExoSOFTpriors(object):
                     #  hipparcos estimated error
                     ret*=self.gaussian(para, self.para_est, self.para_err)
                     ##print('para gauss ',self.gaussian(para, self.para_est, self.para_err))
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def imf_prior(self, m):
@@ -303,7 +303,7 @@ class ExoSOFTpriors(object):
             ret = (a/m) * np.exp( (-(np.log10(m)+b)**2) / c )
         else:
             ret = 0.019239245548314052*(m**(-2.3))
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def pdmf_prior(self, m):
@@ -320,14 +320,14 @@ class ExoSOFTpriors(object):
             ret = 0.0065144172285487769*(m**(-4.53))
         else:
             ret = 0.00010857362047581295*(m**(-3.11))
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def cmf_prior(self, m2, m1):
         """from equation 8 of Metchev & Hillenbrand 2009"""
         beta = -0.39
         ret = (m2**(beta)) * (m1**(-1.0*beta-1.0))
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 
     def gaussian(self,x,mu,sig):
@@ -346,6 +346,6 @@ class ExoSOFTpriors(object):
                         mx = mx-mn
                     ret = stats.uniform.pdf(val,loc=mn, scale=mx)
                     #return 1.0 / (self.maxs_ary[i] - self.mins_ary[i])
-        if ret==0: ret=-np.inf
+        #if ret==0: ret=-np.inf
         return ret
 #END OF FILE
