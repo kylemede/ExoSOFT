@@ -244,10 +244,11 @@ def startup(settings_in,advanced_settings_in,priors_in,rePlot=False):
             settings['m1_max']=settings['m1_max']+settings['m2_max']
             settings['m2_min']=0
             settings['m2_max']=0
-            settings['m1_est'] += settings['m2_est']
-            settings['m1_err'] += settings['m2_err']
-            settings['m2_est'] = 0
-            settings['m2_err'] = 0
+            if (settings['m2_est'] != None) and (settings['m2_err'] != None):
+                settings['m1_est'] += settings['m2_est']
+                settings['m1_err'] += settings['m2_err']
+                settings['m2_est'] = 0
+                settings['m2_err'] = 0
             log.debug("DI dataMode, so pushed all mass range vals into M1 and set ones for M2 to zero")
         if settings['long_an_min']==None:
             settings['long_an_min'] = 0.0
