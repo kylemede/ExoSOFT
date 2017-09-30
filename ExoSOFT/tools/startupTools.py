@@ -745,10 +745,14 @@ def modePrep(settings,sigmas):
     if settings['n_emcee_burn']>=settings['nSamples']/settings['n_wlkrs']:
         n_emcee_burn_new = 0
         if 'emcee' in stageList:
-            n_emcee_burn_new = 0.5*(settings['nSamples']/settings['n_wlkrs'])
+            walker_length = (settings['nSamples']/settings['n_wlkrs'])
+            if walker_length < 200:
+                n_emcee_burn_new = 0.5*walker_length
+            else:
+                n_emcee_burn_new = 0.1*walker_length
             log.critical("n_emcee_burn ("+str(settings['n_emcee_burn'])+") was greater than nSamples/n_wlkers ("+\
-                         str(settings['nSamples']/settings['n_wlkrs'])+").  "+\
-                         "\nTo resolve, change n_emcee_burn to < "+str(settings['nSamples']/settings['n_wlkrs'])+\
+                         str(walker_length)+").  "+\
+                         "\nTo resolve, change n_emcee_burn to < "+str(walker_length)+", or reduce n_wlkers."+\
                              "\nFor this run, n_emcee_burn was set to "+str(n_emcee_burn_new)+".")
         settings['n_emcee_burn'] = n_emcee_burn_new
 
