@@ -241,7 +241,7 @@ class ExoSOFTpriors(object):
                 if (self.inc_prior == True) or (self.inc_prior == 'sin'):
                     ret = np.abs(np.sin(inc_rad)) / np.abs(np.cos(mn_rad)-np.cos(mx_rad))
                 elif self.inc_prior == 'cos':
-                    ret =  np.abs(np.cos(inc_rad)) / np.abs(np.cos(mn_rad)-np.cos(mx_rad)))
+                    ret =  np.abs(np.cos(inc_rad)) / np.abs(np.cos(mn_rad)-np.cos(mx_rad))
         #if ret==0: ret=-np.inf
         return ret
 
