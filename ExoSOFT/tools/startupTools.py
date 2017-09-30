@@ -743,12 +743,14 @@ def modePrep(settings,sigmas):
     if settings['n_emcee_burn']==None:
         settings['n_emcee_burn'] = 0
     if settings['n_emcee_burn']>=settings['nSamples']/settings['n_wlkrs']:
+        n_emcee_burn_new = 0
         if 'emcee' in stageList:
+            n_emcee_burn_new = 0.5*(settings['nSamples']/settings['n_wlkrs'])
             log.critical("n_emcee_burn ("+str(settings['n_emcee_burn'])+") was greater than nSamples/n_wlkers ("+\
                          str(settings['nSamples']/settings['n_wlkrs'])+").  "+\
-                         " To resolve, change n_emcee_burn to < "+str(settings['nSamples']/settings['n_wlkrs'])+\
-                             "For this run, n_emcee_burn was set to 0.")
-        settings['n_emcee_burn'] = 0
+                         "\nTo resolve, change n_emcee_burn to < "+str(settings['nSamples']/settings['n_wlkrs'])+\
+                             "\nFor this run, n_emcee_burn was set to "+str(n_emcee_burn_new)+".")
+        settings['n_emcee_burn'] = n_emcee_burn_new
 
     settings['startParams'] = startParams
     settings['startSigmas'] = startSigmas
