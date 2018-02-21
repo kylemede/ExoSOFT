@@ -9,7 +9,7 @@ ExoSOFT
 
 *(Build tests on Travis CI currently being done for Python versions 2.7, 3.3 and 3.4.)*
 
-ExoSOFT is an Open Source project.  Contributions are very welcome.  Create a branch off 'master', make your changes and submit a pull request.
+**ExoSOFT is an Open Source project.  Contributions are very welcome.  Create a branch off 'master', make your changes and submit a pull request.**
 
 Documentation of the code can be found [HERE](http://exosoft.readthedocs.io/en/latest/index.html) *(Note: Documentation is still a work in progress)*
 
