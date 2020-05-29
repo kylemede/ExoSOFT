@@ -842,7 +842,7 @@ def confLevelFinder(filename, colNum=False, returnData=False, returnChiSquareds=
     outStr=''
     if os.path.exists(filename):
         (dataAry,chiSquareds,[bestDataVal,dataMedian,dataValueStart,dataValueMid,dataValueEnd]) = dataReader(filename, colNum)
-        if len(dataAry>0) or (dataValueStart!=dataValueMid!=dataValueEnd):
+        if (len(dataAry)>0) and (dataValueStart!=dataValueMid!=dataValueEnd):
             #print 'ln688:confLevelFinder'
             histAry = histMakeAndDump(chiSquareds,dataAry,weight=False,retHist=True)
             #print 'ln690:confLevelFinder'
